@@ -15,7 +15,7 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     visitorraytracingincrementbutfirst.h \
     visitorraytracingadddistancebutfirst.h \
     mymaths.h \
-    step/stepcomputedensityonly.h \
+#    step/stepcomputedensityonly.h \
 #    step/steploadlvoxinputfiles.h \
 #    step/stepcomputedensityonlymultiscan.h \
     step/stepcomputedensityanddistances.h
@@ -40,7 +40,7 @@ SOURCES += \
     visitorraytracingadddistancebutfirst.cpp \  
     mymaths.cpp \
 #    step/steploadlvoxinputfiles.cpp \
-    step/stepcomputedensityonly.cpp \
+#    step/stepcomputedensityonly.cpp \
 #    step/stepcomputedensityonlymultiscan.cpp \
     step/stepcomputedensityanddistances.cpp
 #    step/stepcomputedensityanddistancesmultiscan.cpp \

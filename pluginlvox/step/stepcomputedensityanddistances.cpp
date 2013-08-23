@@ -309,7 +309,7 @@ void StepComputeDensityAndDistances::compute()
     CT_ResultGroup *inResult = getInputResults().first();
     CT_InAbstractItemDrawableModel *inSceneModel = (CT_InAbstractItemDrawableModel*) getInModelForResearch(inResult, DEF_SearchInScene);
     inResult->recursiveBeginIterateItems(*inSceneModel);
-    const CT_Scene* scene = (CT_Scene*) inResult->recursiveNextItem()->findFirstItem(inSceneModel);
+    const CT_Scene* scene = (CT_Scene*) inResult->recursiveNextItem();
 
     if (scene==NULL) {return;}
 
@@ -424,66 +424,66 @@ void StepComputeDensityAndDistances::compute()
     CT_OutAbstractStandardGroupModel *model;
     CT_OutAbstractItemDrawableModel *itemModel;
 
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreate(outResultScanner, DEF_CT_ResultScannerGroup);
-    group = new CT_StandardItemGroup(*model, 0, outResultScanner);
+    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultScanner, DEF_CT_ResultScannerGroup);
+    group = new CT_StandardItemGroup(model, 0, outResultScanner);
     outResultScanner->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreate(outResultScanner, DEF_CT_ResultScanner);
+    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultScanner, DEF_CT_ResultScanner);
     scanner->setModel(itemModel);
     group->addItemDrawable(scanner);
 
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreate(outResultDensity, DEF_CT_ResultRegularGridDensityGroup);
-    group = new CT_StandardItemGroup(*model, 0, outResultDensity);
+    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultDensity, DEF_CT_ResultRegularGridDensityGroup);
+    group = new CT_StandardItemGroup(model, 0, outResultDensity);
     outResultDensity->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreate(outResultDensity, DEF_CT_ResultRegularGridDensity);
+    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultDensity, DEF_CT_ResultRegularGridDensity);
     densityGrid->setModel(itemModel);
     group->addItemDrawable(densityGrid);
 
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreate(outResultHit, DEF_CT_ResultRegularGridHitsGroup);
-    group = new CT_StandardItemGroup(*model, 0, outResultHit);
+    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultHit, DEF_CT_ResultRegularGridHitsGroup);
+    group = new CT_StandardItemGroup(model, 0, outResultHit);
     outResultHit->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreate(outResultHit, DEF_CT_ResultRegularGridHits);
+    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultHit, DEF_CT_ResultRegularGridHits);
     hitGrid->setModel(itemModel);
     group->addItemDrawable(hitGrid);
 
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreate(outResultTheoritical, DEF_CT_ResultRegularGridTheoriticalGroup);
-    group = new CT_StandardItemGroup(*model, 0, outResultTheoritical);
+    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultTheoritical, DEF_CT_ResultRegularGridTheoriticalGroup);
+    group = new CT_StandardItemGroup(model, 0, outResultTheoritical);
     outResultTheoritical->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreate(outResultTheoritical, DEF_CT_ResultRegularGridTheoritical);
+    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultTheoritical, DEF_CT_ResultRegularGridTheoritical);
     theoriticalGrid->setModel(itemModel);
     group->addItemDrawable(theoriticalGrid);
 
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreate(outResultBefore, DEF_CT_ResultRegularGridBeforeGroup);
-    group = new CT_StandardItemGroup(*model, 0, outResultBefore);
+    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultBefore, DEF_CT_ResultRegularGridBeforeGroup);
+    group = new CT_StandardItemGroup(model, 0, outResultBefore);
     outResultBefore->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreate(outResultBefore, DEF_CT_ResultRegularGridBefore);
+    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultBefore, DEF_CT_ResultRegularGridBefore);
     beforeGrid->setModel(itemModel);
     group->addItemDrawable(beforeGrid);
 
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreate(outResultDeltaTheoritical, DEF_DeltaTheoriticalGroup);
-    group = new CT_StandardItemGroup(*model, 0, outResultDeltaTheoritical);
+    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultDeltaTheoritical, DEF_DeltaTheoriticalGroup);
+    group = new CT_StandardItemGroup(model, 0, outResultDeltaTheoritical);
     outResultDeltaTheoritical->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreate(outResultDeltaTheoritical, DEF_DeltaTheoritical);
+    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultDeltaTheoritical, DEF_DeltaTheoritical);
     deltaTheoritical->setModel(itemModel);
     group->addItemDrawable(deltaTheoritical);
 
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreate(outResultDeltaBefore, DEF_DeltaBeforeGroup);
-    group = new CT_StandardItemGroup(*model, 0, outResultDeltaBefore);
+    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultDeltaBefore, DEF_DeltaBeforeGroup);
+    group = new CT_StandardItemGroup(model, 0, outResultDeltaBefore);
     outResultDeltaBefore->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreate(outResultDeltaBefore, DEF_DeltaBefore);
+    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultDeltaBefore, DEF_DeltaBefore);
     deltaBefore->setModel(itemModel);
     group->addItemDrawable(deltaBefore);
 
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreate(outResultDeltaIn, DEF_DeltaInGridGroup);
-    group = new CT_StandardItemGroup(*model, 0, outResultDeltaIn);
+    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultDeltaIn, DEF_DeltaInGridGroup);
+    group = new CT_StandardItemGroup(model, 0, outResultDeltaIn);
     outResultDeltaIn->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreate(outResultDeltaIn, DEF_DeltaInGrid);
+    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultDeltaIn, DEF_DeltaInGrid);
     deltaInGrid->setModel(itemModel);
     group->addItemDrawable(deltaInGrid);
 
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreate(outResultDeltaOut, DEF_DeltaOutGridGroup);
-    group = new CT_StandardItemGroup(*model, 0, outResultDeltaOut);
+    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultDeltaOut, DEF_DeltaOutGridGroup);
+    group = new CT_StandardItemGroup(model, 0, outResultDeltaOut);
     outResultDeltaOut->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreate(outResultDeltaOut, DEF_DeltaOutGrid);
+    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultDeltaOut, DEF_DeltaOutGrid);
     deltaOutGrid->setModel(itemModel);
     group->addItemDrawable(deltaOutGrid);
 
@@ -492,24 +492,24 @@ void StepComputeDensityAndDistances::compute()
     {
         for ( int i = 0 ; i < _nCategories ; i++ )
         {
-            model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreate(outResultList.at(3*i), QString("g%1A").arg(i));
-            group = new CT_StandardItemGroup(*model, 0, outResultList.at(3*i));
+            model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultList.at(3*i), QString("g%1A").arg(i));
+            group = new CT_StandardItemGroup(model, 0, outResultList.at(3*i));
             outResultList.at(3*i)->addGroup(group);
-            itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreate(outResultList.at(3*i), QString("i%1A").arg(i));
+            itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultList.at(3*i), QString("i%1A").arg(i));
             categoryDeltaOutGridList[i]->setModel(itemModel);
             group->addItemDrawable(categoryDeltaOutGridList[i]);
 
-            model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreate(outResultList.at((3*i)+1), QString("g%1B").arg(i));
-            group = new CT_StandardItemGroup(*model, 0, outResultList.at((3*i)+1));
+            model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultList.at((3*i)+1), QString("g%1B").arg(i));
+            group = new CT_StandardItemGroup(model, 0, outResultList.at((3*i)+1));
             outResultList.at((3*i)+1)->addGroup(group);
-            itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreate(outResultList.at((3*i)+1), QString("i%1B").arg(i));
+            itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultList.at((3*i)+1), QString("i%1B").arg(i));
             categoryDeltaInGridList[i]->setModel(itemModel);
             group->addItemDrawable(categoryDeltaInGridList[i]);
 
-            model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreate(outResultList.at((3*i)+2), QString("g%1C").arg(i));
-            group = new CT_StandardItemGroup(*model, 0, outResultList.at((3*i)+2));
+            model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultList.at((3*i)+2), QString("g%1C").arg(i));
+            group = new CT_StandardItemGroup(model, 0, outResultList.at((3*i)+2));
             outResultList.at((3*i)+2)->addGroup(group);
-            itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreate(outResultList.at((3*i)+1), QString("i%1C").arg(i));
+            itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultList.at((3*i)+1), QString("i%1C").arg(i));
             categoryHitsGridList[i]->setModel(itemModel);
             group->addItemDrawable(categoryHitsGridList[i]);
         }
