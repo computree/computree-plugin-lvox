@@ -29,24 +29,30 @@
 #include "stepcomputedensityanddistances.h"
 
 #include "ct_itemdrawable/model/inModel/ct_inoneormoregroupmodel.h"
-#include "ct_itemdrawable/model/outModel/ct_outstandardgroupmodel.h"
 #include "ct_itemdrawable/model/inModel/ct_instandarditemdrawablemodel.h"
-#include "ct_itemdrawable/model/outModel/ct_outstandarditemdrawablemodel.h"
-
 #include "ct_result/model/inModel/ct_inresultmodelgroup.h"
+
+// Inclusion of out models
+#include "ct_itemdrawable/model/outModel/ct_outstandardgroupmodel.h"
+#include "ct_itemdrawable/model/outModel/ct_outstandardgroupmodel.h"
+#include "ct_itemdrawable/model/outModel/ct_outstandarditemdrawablemodel.h"
 #include "ct_result/model/outModel/ct_outresultmodelgroup.h"
 
-#include "ct_step/abstract/ct_abstractsteploadfile.h"
-
+// Inclusion of standard result class
 #include "ct_result/ct_resultgroup.h"
-#include "ct_itemdrawable/ct_scene.h"
 
+// Inclusion of used ItemDrawable classes
+#include "ct_itemdrawable/ct_regulargriddouble.h"
+#include "ct_itemdrawable/ct_regulargridint.h"
+#include "ct_itemdrawable/ct_scanner.h"
+
+#include "ct_step/abstract/ct_abstractsteploadfile.h"
 #include "ct_view/ct_stepconfigurabledialog.h"          // Parameter window
 
 #include "ct_itemdrawable/ct_scene.h"                   // This step takes a scene as input parameter
 
-#include "algorithmewoo.h"                   // Using Woo algorithm for raytrace
-#include "visitorraytracingincrement.h"      // Visitor of the raytracing algorithm
+#include "algorithmewoo.h"                              // Using Woo algorithm for raytrace
+#include "visitorraytracingincrement.h"                 // Visitor of the raytracing algorithm
 
 #include <QFileInfo>
 #include <QDebug>                                       // Some printing output in debug mode
@@ -55,31 +61,27 @@
 #define DEF_SearchInResult "r"
 #define DEF_SearchInScene   "sc"
 
-#define DEF_DeltaOutGridGroup "gg1"
-#define DEF_DeltaInGridGroup "gg2"
-#define DEF_DeltaBeforeGroup "gg3"
-#define DEF_DeltaTheoriticalGroup "gg4"
-#define DEF_CT_ResultRegularGridBeforeGroup "gg5"
-#define DEF_CT_ResultRegularGridTheoriticalGroup "gg6"
-#define DEF_CT_ResultRegularGridHitsGroup "gg7"
-#define DEF_CT_ResultRegularGridDensityGroup "gg8"
-#define DEF_CT_ResultScannerGroup "gg9"
-
-#define DEF_DeltaOutGrid "ii1"
-#define DEF_DeltaInGrid "ii2"
-#define DEF_DeltaBefore "ii3"
-#define DEF_DeltaTheoritical "ii4"
-#define DEF_CT_ResultRegularGridBefore "ii5"
-#define DEF_CT_ResultRegularGridTheoritical "ii6"
-#define DEF_CT_ResultRegularGridHits "ii7"
-#define DEF_CT_ResultRegularGridDensity "ii8"
-#define DEF_CT_ResultScanner "ii9"
+// Alias for indexing out models
+#define DEF_resultOut_grid "grid"
+#define DEF_groupOut_base "base"
+#define DEF_itemOut_h "h"
+#define DEF_itemOut_dout "dout"
+#define DEF_itemOut_din "din"
+#define DEF_itemOut_deltaout "deltaout"
+#define DEF_itemOut_deltain "deltain"
+#define DEF_itemOut_deltabef "deltabef"
+#define DEF_itemOut_deltatheo "deltatheo"
+#define DEF_itemOut_bef "bef"
+#define DEF_itemOut_theo "theo"
+#define DEF_itemOut_hits "hits"
+#define DEF_itemOut_density "density"
+#define DEF_itemOut_scan "scan"
 
 StepComputeDensityAndDistances::StepComputeDensityAndDistances(CT_StepInitializeData &dataInit) : CT_AbstractStep(dataInit)
 {
-//********************************************//
-//              Attributes of LVox            //
-//********************************************//
+    //********************************************//
+    //              Attributes of LVox            //
+    //********************************************//
     _res = 0.5;
     _intensityThresh = 10;
     _greaterThanThresh = true;
@@ -90,18 +92,18 @@ StepComputeDensityAndDistances::StepComputeDensityAndDistances(CT_StepInitialize
     _categoriesMarks.resize( 4, -1 );
     _saveGrid = true;
 
-//********************************************//
-//           Attributes of the scanner        //
-//********************************************//
+    //********************************************//
+    //           Attributes of the scanner        //
+    //********************************************//
     _scanPosX = 0;
     _scanPosY = 0;
     _scanPosZ = 0;
-    _scanHFov = 40;
-    _scanVFov = 40;
+    _scanHFov = 360;
+    _scanVFov = 150;
     _scanInitTheta = 0;
-    _scanInitPhi = 90;
-    _scanHRes = 0.2;
-    _scanVRes = 0.2;
+    _scanInitPhi = -60;
+    _scanHRes = 0.036;
+    _scanVRes = 0.036;
     _scanClockWise = false;
 }
 
@@ -122,139 +124,64 @@ void StepComputeDensityAndDistances::createInResultModelListProtected()
     // results with Scenes
     CT_InOneOrMoreGroupModel *group = new CT_InOneOrMoreGroupModel();
 
-    CT_InStandardItemDrawableModel *item = new CT_InStandardItemDrawableModel(DEF_SearchInScene,
-                                                                              CT_Scene::staticGetType(),
-                                                                              tr("Scène"));
-
+    CT_InStandardItemDrawableModel *item = new CT_InStandardItemDrawableModel(DEF_SearchInScene, CT_Scene::staticGetType(), tr("Scène"));
     group->addItem(item);
 
     CT_InResultModelGroup *resultModel = new CT_InResultModelGroup(DEF_SearchInResult, group, tr("Scène(s)"));
-
     addInResultModel(resultModel);
 }
 
 void StepComputeDensityAndDistances::createOutResultModelListProtected()
 {
-    CT_OutStandardGroupModel *group;
-    CT_OutStandardItemDrawableModel *item;
-
     _nCategories = computeGridTools::getNCategories( _categoriesMarks );
-    if ( _nCategories > 1 )
+
+    CT_OutStandardGroupModel *groupOutModel_base = new CT_OutStandardGroupModel(DEF_groupOut_base, new CT_StandardItemGroup(), tr("base"));
+
+    CT_OutStandardItemDrawableModel *itemOutModel_h;
+    CT_OutStandardItemDrawableModel *itemOutModel_dout;
+    CT_OutStandardItemDrawableModel *itemOutModel_din;
+    for (unsigned int i = 0 ; i < _nCategories ; i++ )
     {
-        for ( int i = 0 ; i < _nCategories ; i++ )
-        {
+        itemOutModel_h = new CT_OutStandardItemDrawableModel(QString(DEF_itemOut_h).append(QString::number(i)), new CT_RegularGridInt(), tr("HitsCat").append(QString::number(i)));
+        itemOutModel_dout = new CT_OutStandardItemDrawableModel(QString(DEF_itemOut_dout).append(QString::number(i)), new CT_RegularGridDouble(), tr("DistOutCat").append(QString::number(i)));
+        itemOutModel_din = new CT_OutStandardItemDrawableModel(QString(DEF_itemOut_din).append(QString::number(i)), new CT_RegularGridDouble(), tr("DistInCat").append(QString::number(i)));
 
-            //___________________________________________________________________
-            group = new CT_OutStandardGroupModel(QString("g%1A").arg(i));
-            item = new CT_OutStandardItemDrawableModel(QString("i%1A").arg(i),
-                                                       new CT_RegularGridDouble(),
-                                                       QString("CT_RegularGridDistOutCat%1").arg(i));
-            group->addItem(item);
-            addOutResultModel(new CT_OutResultModelGroup(QString("r%1A").arg(i), group,  QString("CT_RegularGridDistOutCat%1").arg(i)));
-
-            //___________________________________________________________________
-            group = new CT_OutStandardGroupModel(QString("g%1B").arg(i));
-            item = new CT_OutStandardItemDrawableModel(QString("i%1B").arg(i),
-                                                       new CT_RegularGridDouble(),
-                                                       QString("CT_RegularGridDistInCat%1").arg(i));
-            group->addItem(item);
-            addOutResultModel(new CT_OutResultModelGroup(QString("r%1B").arg(i), group, QString("CT_RegularGridDistInCat%1").arg(i)));
-
-            //___________________________________________________________________
-            group = new CT_OutStandardGroupModel(QString("g%1C").arg(i));
-            item = new CT_OutStandardItemDrawableModel(QString("i%1C").arg(i),
-                                                       new CT_RegularGridInt(),
-                                                       QString("CT_RegularGridHitsCat%1").arg(i));
-            group->addItem(item);
-            addOutResultModel(new CT_OutResultModelGroup(QString("r%1C").arg(i), group,  QString("CT_RegularGridHitsCat%1").arg(i)));
-        }
+        groupOutModel_base->addItem(itemOutModel_h);
+        groupOutModel_base->addItem(itemOutModel_dout);
+        groupOutModel_base->addItem(itemOutModel_din);
     }
 
-    // The results of this step are some single regular grids and a scanner
+    CT_OutStandardItemDrawableModel *itemOutModel_deltaout = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltaout, new CT_RegularGridInt(), tr("DeltaOut"));
+    CT_OutStandardItemDrawableModel *itemOutModel_deltain = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltain, new CT_RegularGridInt(), tr("DeltaIn"));
+    CT_OutStandardItemDrawableModel *itemOutModel_deltabef = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltabef, new CT_RegularGridInt(), tr("DeltaBefore"));
+    CT_OutStandardItemDrawableModel *itemOutModel_deltatheo = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltatheo, new CT_RegularGridInt(), tr("DeltaTheorical"));
+    CT_OutStandardItemDrawableModel *itemOutModel_bef = new CT_OutStandardItemDrawableModel(DEF_itemOut_bef, new CT_RegularGridInt(), tr("Before"));
+    CT_OutStandardItemDrawableModel *itemOutModel_theo = new CT_OutStandardItemDrawableModel(DEF_itemOut_theo, new CT_RegularGridInt(), tr("Theorical"));
+    CT_OutStandardItemDrawableModel *itemOutModel_hits = new CT_OutStandardItemDrawableModel(DEF_itemOut_hits, new CT_RegularGridInt(), tr("Hits"));
+    CT_OutStandardItemDrawableModel *itemOutModel_density = new CT_OutStandardItemDrawableModel(DEF_itemOut_density, new CT_RegularGridDouble(), tr("Density"));
+    CT_OutStandardItemDrawableModel *itemOutModel_scan = new CT_OutStandardItemDrawableModel(DEF_itemOut_scan, new CT_Scanner(), tr("Scanner"));
 
-    //___________________________________________________________________
-    group = new CT_OutStandardGroupModel(DEF_DeltaOutGridGroup);
-    item = new CT_OutStandardItemDrawableModel(DEF_DeltaOutGrid,
-                                               new CT_RegularGridInt(),
-                                               "DeltaOutGrid");
-    group->addItem(item);
-    addOutResultModel(new CT_OutResultModelGroup("rr1", group,  "DeltaOutGrid"));
+    groupOutModel_base->addItem(itemOutModel_deltaout);
+    groupOutModel_base->addItem(itemOutModel_deltain);
+    groupOutModel_base->addItem(itemOutModel_deltabef);
+    groupOutModel_base->addItem(itemOutModel_deltatheo);
+    groupOutModel_base->addItem(itemOutModel_bef);
+    groupOutModel_base->addItem(itemOutModel_theo);
+    groupOutModel_base->addItem(itemOutModel_hits);
+    groupOutModel_base->addItem(itemOutModel_density);
+    groupOutModel_base->addItem(itemOutModel_scan);
 
-    //___________________________________________________________________
-    group = new CT_OutStandardGroupModel(DEF_DeltaInGridGroup);
-    item = new CT_OutStandardItemDrawableModel(DEF_DeltaInGrid,
-                                               new CT_RegularGridInt(),
-                                               "DeltaOutGrid");
-    group->addItem(item);
-    addOutResultModel(new CT_OutResultModelGroup("rr2", group,  "DeltaInGrid"));
-
-    //___________________________________________________________________
-    group = new CT_OutStandardGroupModel(DEF_DeltaBeforeGroup);
-    item = new CT_OutStandardItemDrawableModel(DEF_DeltaBefore,
-                                               new CT_RegularGridInt(),
-                                               "DeltaBefore");
-    group->addItem(item);
-    addOutResultModel(new CT_OutResultModelGroup("rr3", group,  "DeltaBefore"));
-
-    //___________________________________________________________________
-    group = new CT_OutStandardGroupModel(DEF_DeltaTheoriticalGroup);
-    item = new CT_OutStandardItemDrawableModel(DEF_DeltaTheoritical,
-                                               new CT_RegularGridInt(),
-                                               "DeltaTheoritical");
-    group->addItem(item);
-    addOutResultModel(new CT_OutResultModelGroup("rr4", group,  "DeltaTheoritical"));
-
-    //___________________________________________________________________
-    group = new CT_OutStandardGroupModel(DEF_CT_ResultRegularGridBeforeGroup);
-    item = new CT_OutStandardItemDrawableModel(DEF_CT_ResultRegularGridBefore,
-                                               new CT_RegularGridInt(),
-                                               "CT_ResultRegularGridBefore");
-    group->addItem(item);
-    addOutResultModel(new CT_OutResultModelGroup("rr5", group,  "CT_ResultRegularGridBefore"));
-
-    //___________________________________________________________________
-    group = new CT_OutStandardGroupModel(DEF_CT_ResultRegularGridTheoriticalGroup);
-    item = new CT_OutStandardItemDrawableModel(DEF_CT_ResultRegularGridTheoritical,
-                                               new CT_RegularGridInt(),
-                                               "CT_ResultRegularGridTheoritical");
-    group->addItem(item);
-    addOutResultModel(new CT_OutResultModelGroup("rr6", group,  "CT_ResultRegularGridTheoritical"));
-
-    //___________________________________________________________________
-    group = new CT_OutStandardGroupModel(DEF_CT_ResultRegularGridHitsGroup);
-    item = new CT_OutStandardItemDrawableModel(DEF_CT_ResultRegularGridHits,
-                                               new CT_RegularGridInt(),
-                                               "CT_ResultRegularGridHits");
-    group->addItem(item);
-    addOutResultModel(new CT_OutResultModelGroup("rr7", group,  "CT_ResultRegularGridHits"));
-
-    //___________________________________________________________________
-    group = new CT_OutStandardGroupModel(DEF_CT_ResultRegularGridDensityGroup);
-    item = new CT_OutStandardItemDrawableModel(DEF_CT_ResultRegularGridDensity,
-                                               new CT_RegularGridDouble(),
-                                               "CT_ResultRegularGridDensity");
-    group->addItem(item);
-    addOutResultModel(new CT_OutResultModelGroup("rr8", group,  "CT_ResultRegularGridDensity"));
-
-    //___________________________________________________________________
-    group = new CT_OutStandardGroupModel(DEF_CT_ResultScannerGroup);
-    item = new CT_OutStandardItemDrawableModel(DEF_CT_ResultScanner,
-                                               new CT_Scanner(),
-                                               "CT_ResultScanner");
-    group->addItem(item);
-    addOutResultModel(new CT_OutResultModelGroup("rr9", group,  "CT_ResultScanner"));
-
+    CT_OutResultModelGroup *resultOutModel_grid = new CT_OutResultModelGroup(DEF_resultOut_grid, groupOutModel_base, tr("grids"), tr("Computed grids"));
+    addOutResultModel(resultOutModel_grid);
 }
 
-void StepComputeDensityAndDistances::createConfigurationDialog()
+void StepComputeDensityAndDistances::createPostConfigurationDialog()
 {
     CT_StepConfigurableDialog *configDialog = newStandardPostConfigurationDialog();
 
-    configDialog->setStep(*this);
-
-//********************************************//
-//              Attributes of LVox            //
-//********************************************//
+    //********************************************//
+    //              Attributes of LVox            //
+    //********************************************//
     configDialog->addDouble(tr("Size of a voxel"),tr("meters"),0.0001,10000,2, _res );
     configDialog->addDouble(tr("Minimum intensity taken in account"),tr(""),-100000,100000,2, _intensityThresh );
     configDialog->addBool("Consider the threshold as a minimum value","","",_greaterThanThresh);
@@ -267,9 +194,9 @@ void StepComputeDensityAndDistances::createConfigurationDialog()
 
     configDialog->addBool("Save in LVox file in \"LVox Density File\" format (.ldf)","","",_saveGrid);
 
-//********************************************//
-//           Attributes of the scanner        //
-//********************************************//
+    //********************************************//
+    //           Attributes of the scanner        //
+    //********************************************//
     configDialog->addDouble(tr("Position du scanner x"),tr("metres"),-10000,10000,2, _scanPosX );
     configDialog->addDouble(tr("Position du scanner y"),tr("metres"),-10000,10000,2, _scanPosY );
     configDialog->addDouble(tr("Position du scanner z"),tr("metres"),-10000,10000,2, _scanPosZ );
@@ -313,49 +240,28 @@ void StepComputeDensityAndDistances::compute()
 
     if (scene==NULL) {return;}
 
-    // Get the future results
-    CT_ResultGroup* outResultDeltaOut;
-    CT_ResultGroup* outResultDeltaIn;
-    CT_ResultGroup* outResultDeltaBefore;
-    CT_ResultGroup* outResultDeltaTheoritical;
-    CT_ResultGroup* outResultBefore;
-    CT_ResultGroup* outResultTheoritical;
-    CT_ResultGroup* outResultHit;
-    CT_ResultGroup* outResultDensity;
-    CT_ResultGroup* outResultScanner;
+    // Gets the out result
+    CT_ResultGroup* outResult = getOutResultList().first();
 
-    QList<CT_ResultGroup*> outResultList = getOutResultList();
+    // Get the base group model and create base group
+    CT_OutStandardGroupModel* groupOutModel_base = (CT_OutStandardGroupModel*)getOutModelForCreation(outResult, DEF_groupOut_base);
+    CT_StandardItemGroup* baseGroup = new CT_StandardItemGroup(groupOutModel_base,0, outResult);
 
-    if ( _nCategories > 1 )
-    {
-        outResultDeltaOut = outResultList.at(3*_nCategories);
-        outResultDeltaIn = outResultList.at(3*_nCategories+1);
-        outResultDeltaBefore = outResultList.at(3*_nCategories+2);
-        outResultDeltaTheoritical = outResultList.at(3*_nCategories+3);
-        outResultBefore = outResultList.at(3*_nCategories+4);
-        outResultTheoritical = outResultList.at(3*_nCategories+5);
-        outResultHit = outResultList.at(3*_nCategories+6);
-        outResultDensity = outResultList.at(3*_nCategories+7);
-        outResultScanner = outResultList.at(3*_nCategories+8);
-    }
-
-    else
-    {
-        outResultDeltaOut = outResultList.at(0);
-        outResultDeltaIn = outResultList.at(1);
-        outResultDeltaBefore = outResultList.at(2);
-        outResultDeltaTheoritical = outResultList.at(3);
-        outResultBefore = outResultList.at(4);
-        outResultTheoritical = outResultList.at(5);
-        outResultHit = outResultList.at(6);
-        outResultDensity = outResultList.at(7);
-        outResultScanner = outResultList.at(8);
-    }
+    // Get the items models
+    CT_OutStandardItemDrawableModel* itemOutModel_deltaout = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, DEF_itemOut_deltaout);
+    CT_OutStandardItemDrawableModel* itemOutModel_deltain = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, DEF_itemOut_deltain);
+    CT_OutStandardItemDrawableModel* itemOutModel_deltabef = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, DEF_itemOut_deltabef);
+    CT_OutStandardItemDrawableModel* itemOutModel_deltatheo = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, DEF_itemOut_deltatheo);
+    CT_OutStandardItemDrawableModel* itemOutModel_bef = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, DEF_itemOut_bef);
+    CT_OutStandardItemDrawableModel* itemOutModel_theo = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, DEF_itemOut_theo);
+    CT_OutStandardItemDrawableModel* itemOutModel_hits = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, DEF_itemOut_hits);
+    CT_OutStandardItemDrawableModel* itemOutModel_density = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, DEF_itemOut_density);
+    CT_OutStandardItemDrawableModel* itemOutModel_scan = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, DEF_itemOut_scan);
 
     // Creating a new scanner from the input parameters
-    CT_Scanner* scanner = new CT_Scanner(NULL,
+    CT_Scanner* scanner = new CT_Scanner(itemOutModel_scan,
                                          0,
-                                         outResultScanner,
+                                         outResult,
                                          0,
                                          QVector3D(_scanPosX, _scanPosY, _scanPosZ),
                                          QVector3D(0,0,1),
@@ -373,14 +279,14 @@ void StepComputeDensityAndDistances::compute()
     ctMax.x = scene->xMax(); ctMax.y = scene->yMax(); ctMax.z = scene->zMax();
 
     // Declaring the output grids
-    CT_RegularGridDouble*   deltaOutGrid = NULL;
-    CT_RegularGridDouble*   deltaInGrid = NULL;
-    CT_RegularGridDouble*   deltaBefore = NULL;
-    CT_RegularGridDouble*   deltaTheoritical = NULL;
-    CT_RegularGridInt*      beforeGrid = NULL;
-    CT_RegularGridInt*      theoriticalGrid = NULL;
-    CT_RegularGridInt*      hitGrid = NULL;
-    CT_RegularGridDouble*   densityGrid = NULL;
+    CT_RegularGridDouble*   deltaOutGrid = new CT_RegularGridDouble(itemOutModel_deltaout, _nCategories, outResult, ctMax, ctMin, _res, 0);
+    CT_RegularGridDouble*   deltaInGrid = new CT_RegularGridDouble(itemOutModel_deltain, _nCategories + 1, outResult, ctMax, ctMin, _res, 0);
+    CT_RegularGridDouble*   deltaBefore = new CT_RegularGridDouble(itemOutModel_deltabef, _nCategories + 2, outResult, ctMax, ctMin, _res, 0);
+    CT_RegularGridDouble*   deltaTheoritical = new CT_RegularGridDouble(itemOutModel_deltatheo, _nCategories + 3, outResult, ctMax, ctMin, _res, 0);
+    CT_RegularGridInt*      beforeGrid = new CT_RegularGridInt(itemOutModel_bef, _nCategories + 6, outResult, ctMax, ctMin, _res, 0);;
+    CT_RegularGridInt*      theoriticalGrid = new CT_RegularGridInt(itemOutModel_theo, _nCategories + 6, outResult, ctMax, ctMin, _res, 0);;
+    CT_RegularGridInt*      hitGrid = new CT_RegularGridInt(itemOutModel_hits, _nCategories + 6, outResult, ctMax, ctMin, _res, 0);
+    CT_RegularGridDouble*   densityGrid = new CT_RegularGridDouble(itemOutModel_density, _nCategories + 7, outResult, ctMax, ctMin, _res, 0);
 
     QList< CT_RegularGridInt* > categoryHitsGridList;
     QList< CT_RegularGridDouble* > categoryDeltaInGridList;
@@ -389,130 +295,66 @@ void StepComputeDensityAndDistances::compute()
     if ( _nCategories > 1 )
     {
         // Filling the lists
-        for ( int i = 0 ; i < _nCategories ; i++ )
+        for (unsigned int i = 0 ; i < _nCategories ; i++ )
         {
-            categoryHitsGridList.push_back(NULL);
-            categoryDeltaInGridList.push_back(NULL);
-            categoryDeltaOutGridList.push_back(NULL);
+            CT_OutStandardItemDrawableModel* itemOutModel_h = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, QString(DEF_itemOut_h).append(QString::number(i)));
+            CT_OutStandardItemDrawableModel* itemOutModel_dout = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, QString(DEF_itemOut_dout).append(QString::number(i)));
+            CT_OutStandardItemDrawableModel* itemOutModel_din = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, QString(DEF_itemOut_din).append(QString::number(i)));
+
+
+            categoryHitsGridList.push_back(new CT_RegularGridInt(itemOutModel_h, 3*i, outResult, ctMax, ctMin, _res, 0));
+            categoryDeltaOutGridList.push_back(new CT_RegularGridDouble(itemOutModel_dout, 3*i+1, outResult, ctMax, ctMin, _res, 0));
+            categoryDeltaInGridList.push_back(new CT_RegularGridDouble(itemOutModel_din, 3*i+2, outResult, ctMax, ctMin, _res, 0));
         }
     }
 
+    // ATTENTION
+    // ATTENTION
+    // ATTENTION
+    // ATTENTION
+    // ATTENTION
+    // ATTENTION
+    // ATTENTION
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Modifier les fonctions ci-dessous pour qu'elles ne créent plus les grilles !!!
+
+
     // Computing the different grids
-    computeGridTools::computeTheoriticalGridAndDistances( ctMin, ctMax, _res, *scanner, 0, outResultTheoritical, theoriticalGrid, 1, outResultDeltaTheoritical, deltaTheoritical );
-    computeGridTools::computeBeforeGridAndDistances( ctMin, ctMax, _res, scene->getPointCloud(), *scanner, 2, outResultBefore, beforeGrid, 3, outResultDeltaBefore, deltaBefore );
+    computeGridTools::computeTheoriticalGridAndDistances( ctMin, ctMax, _res, *scanner, 0, outResult, theoriticalGrid, 1, outResult, deltaTheoritical );
+    computeGridTools::computeBeforeGridAndDistances( ctMin, ctMax, _res, scene->getPointCloud(), *scanner, 2, outResult, beforeGrid, 3, outResult, deltaBefore );
 
     if ( _nCategories > 1 )
-        computeGridTools::computeHitGridAndDistancesAndCategories( ctMin, ctMax, _res, scene->getPointCloud(), *scanner, _intensityThresh, _greaterThanThresh, 4, outResultHit, hitGrid, 5, outResultDeltaIn, deltaInGrid, 6, outResultDeltaOut, deltaOutGrid, categoryHitsGridList, categoryDeltaInGridList, categoryDeltaOutGridList, _nCategories, _categoriesMarks );
+        computeGridTools::computeHitGridAndDistancesAndCategories( ctMin, ctMax, _res, scene->getPointCloud(), *scanner, _intensityThresh, _greaterThanThresh, 4, outResult, hitGrid, 5, outResult, deltaInGrid, 6, outResult, deltaOutGrid, categoryHitsGridList, categoryDeltaInGridList, categoryDeltaOutGridList, _nCategories, _categoriesMarks );
     else
-        computeGridTools::computeHitGridAndDistances( ctMin, ctMax, _res, scene->getPointCloud(), *scanner, _intensityThresh, _greaterThanThresh, 4, outResultHit, hitGrid, 5, outResultDeltaIn, deltaInGrid, 6, outResultDeltaOut, deltaOutGrid );
+        computeGridTools::computeHitGridAndDistances( ctMin, ctMax, _res, scene->getPointCloud(), *scanner, _intensityThresh, _greaterThanThresh, 4, outResult, hitGrid, 5, outResult, deltaInGrid, 6, outResult, deltaOutGrid );
 
-    densityGrid = computeGridTools::computeDensityGrid(7, outResultDensity, hitGrid, theoriticalGrid, beforeGrid, _effectiveRayThresh );
+    densityGrid = computeGridTools::computeDensityGrid(7, outResult, hitGrid, theoriticalGrid, beforeGrid, _effectiveRayThresh );
 
     if ( _nCategories > 1 )
     {
         // Setting the category grids result
-        for ( int i = 0 ; i < _nCategories ; i++ )
+        for (unsigned int i = 0 ; i < _nCategories ; i++ )
         {
-            categoryDeltaOutGridList[i]->changeResult(outResultList.at((3*i))); // 3 = deltaOut, deltaIn Hit
-            categoryDeltaInGridList[i]->changeResult(outResultList.at((3*i)+1));
-            categoryHitsGridList[i]->changeResult(outResultList.at((3*i)+2));
+            categoryDeltaOutGridList[i]->changeResult(outResult); // 3 = deltaOut, deltaIn Hit
+            categoryDeltaInGridList[i]->changeResult(outResult);
+            categoryHitsGridList[i]->changeResult(outResult);
         }
     }
 
-    // Setting the output grids
-    CT_StandardItemGroup *group;
-    CT_OutAbstractStandardGroupModel *model;
-    CT_OutAbstractItemDrawableModel *itemModel;
+    baseGroup->addItemDrawable(deltaOutGrid);
+    baseGroup->addItemDrawable(deltaInGrid);
+    baseGroup->addItemDrawable(deltaBefore);
+    baseGroup->addItemDrawable(deltaTheoritical);
+    baseGroup->addItemDrawable(beforeGrid);
+    baseGroup->addItemDrawable(theoriticalGrid);
+    baseGroup->addItemDrawable(hitGrid);
+    baseGroup->addItemDrawable(densityGrid);
 
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultScanner, DEF_CT_ResultScannerGroup);
-    group = new CT_StandardItemGroup(model, 0, outResultScanner);
-    outResultScanner->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultScanner, DEF_CT_ResultScanner);
-    scanner->setModel(itemModel);
-    group->addItemDrawable(scanner);
-
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultDensity, DEF_CT_ResultRegularGridDensityGroup);
-    group = new CT_StandardItemGroup(model, 0, outResultDensity);
-    outResultDensity->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultDensity, DEF_CT_ResultRegularGridDensity);
-    densityGrid->setModel(itemModel);
-    group->addItemDrawable(densityGrid);
-
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultHit, DEF_CT_ResultRegularGridHitsGroup);
-    group = new CT_StandardItemGroup(model, 0, outResultHit);
-    outResultHit->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultHit, DEF_CT_ResultRegularGridHits);
-    hitGrid->setModel(itemModel);
-    group->addItemDrawable(hitGrid);
-
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultTheoritical, DEF_CT_ResultRegularGridTheoriticalGroup);
-    group = new CT_StandardItemGroup(model, 0, outResultTheoritical);
-    outResultTheoritical->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultTheoritical, DEF_CT_ResultRegularGridTheoritical);
-    theoriticalGrid->setModel(itemModel);
-    group->addItemDrawable(theoriticalGrid);
-
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultBefore, DEF_CT_ResultRegularGridBeforeGroup);
-    group = new CT_StandardItemGroup(model, 0, outResultBefore);
-    outResultBefore->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultBefore, DEF_CT_ResultRegularGridBefore);
-    beforeGrid->setModel(itemModel);
-    group->addItemDrawable(beforeGrid);
-
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultDeltaTheoritical, DEF_DeltaTheoriticalGroup);
-    group = new CT_StandardItemGroup(model, 0, outResultDeltaTheoritical);
-    outResultDeltaTheoritical->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultDeltaTheoritical, DEF_DeltaTheoritical);
-    deltaTheoritical->setModel(itemModel);
-    group->addItemDrawable(deltaTheoritical);
-
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultDeltaBefore, DEF_DeltaBeforeGroup);
-    group = new CT_StandardItemGroup(model, 0, outResultDeltaBefore);
-    outResultDeltaBefore->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultDeltaBefore, DEF_DeltaBefore);
-    deltaBefore->setModel(itemModel);
-    group->addItemDrawable(deltaBefore);
-
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultDeltaIn, DEF_DeltaInGridGroup);
-    group = new CT_StandardItemGroup(model, 0, outResultDeltaIn);
-    outResultDeltaIn->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultDeltaIn, DEF_DeltaInGrid);
-    deltaInGrid->setModel(itemModel);
-    group->addItemDrawable(deltaInGrid);
-
-    model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultDeltaOut, DEF_DeltaOutGridGroup);
-    group = new CT_StandardItemGroup(model, 0, outResultDeltaOut);
-    outResultDeltaOut->addGroup(group);
-    itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultDeltaOut, DEF_DeltaOutGrid);
-    deltaOutGrid->setModel(itemModel);
-    group->addItemDrawable(deltaOutGrid);
-
-
-    if ( _nCategories > 1 )
+    for (unsigned int i = 0 ; i < _nCategories ; i++ )
     {
-        for ( int i = 0 ; i < _nCategories ; i++ )
-        {
-            model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultList.at(3*i), QString("g%1A").arg(i));
-            group = new CT_StandardItemGroup(model, 0, outResultList.at(3*i));
-            outResultList.at(3*i)->addGroup(group);
-            itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultList.at(3*i), QString("i%1A").arg(i));
-            categoryDeltaOutGridList[i]->setModel(itemModel);
-            group->addItemDrawable(categoryDeltaOutGridList[i]);
-
-            model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultList.at((3*i)+1), QString("g%1B").arg(i));
-            group = new CT_StandardItemGroup(model, 0, outResultList.at((3*i)+1));
-            outResultList.at((3*i)+1)->addGroup(group);
-            itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultList.at((3*i)+1), QString("i%1B").arg(i));
-            categoryDeltaInGridList[i]->setModel(itemModel);
-            group->addItemDrawable(categoryDeltaInGridList[i]);
-
-            model = (CT_OutAbstractStandardGroupModel*)getOutModelForCreation(outResultList.at((3*i)+2), QString("g%1C").arg(i));
-            group = new CT_StandardItemGroup(model, 0, outResultList.at((3*i)+2));
-            outResultList.at((3*i)+2)->addGroup(group);
-            itemModel = (CT_OutAbstractItemDrawableModel*)getOutModelForCreation(outResultList.at((3*i)+1), QString("i%1C").arg(i));
-            categoryHitsGridList[i]->setModel(itemModel);
-            group->addItemDrawable(categoryHitsGridList[i]);
-        }
+        baseGroup->addItemDrawable(categoryHitsGridList[i]);
+        baseGroup->addItemDrawable(categoryDeltaOutGridList[i]);
+        baseGroup->addItemDrawable(categoryDeltaInGridList[i]);
     }
 
     // Save results in a file if demanded

@@ -35,8 +35,7 @@
 */
 
 #include "ct_step/abstract/ct_abstractstep.h"                    // The step inherits from ct_abstractstep
-
-#include "computegridtools.h"                // Tools to compute the different grids
+#include "computegridtools.h"                                    // Tools to compute the different grids
 
 /** \class  StepComputeDensityAndDistances
     \brief
@@ -101,7 +100,7 @@ protected:
     *
     *  \warning Inherited from CT_AbstractStep, this method is not pure virtual (could be not defined here).
     */
-    virtual void createConfigurationDialog();
+    virtual void createPostConfigurationDialog();
 
     /*!
     *  \brief Runs the step process

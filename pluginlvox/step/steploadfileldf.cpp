@@ -28,6 +28,16 @@
 
 #include "steploadfileldf.h"
 
+// Inclusion of out models
+#include "ct_itemdrawable/model/outModel/ct_outstandardgroupmodel.h"
+#include "ct_itemdrawable/model/outModel/ct_outstandardgroupmodel.h"
+#include "ct_itemdrawable/model/outModel/ct_outstandarditemdrawablemodel.h"
+#include "ct_result/model/outModel/ct_outresultmodelgroup.h"
+
+// Inclusion of standard result class
+#include "ct_result/ct_resultgroup.h"
+
+// Inclusion of used ItemDrawable classes
 #include "ct_itemdrawable/ct_regulargridint.h"
 #include "ct_itemdrawable/ct_regulargriddouble.h"
 
@@ -39,6 +49,20 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QDebug>
+
+// Alias for indexing out models
+#define DEF_resultOut_rbg "rbg"
+#define DEF_groupOut_gbg "gbg"
+#define DEF_itemOut_ibg "ibg"
+#define DEF_resultOut_rtg "rtg"
+#define DEF_groupOut_gtg "gtg"
+#define DEF_itemOut_itg "itg"
+#define DEF_resultOut_rhg "rhg"
+#define DEF_groupOut_ghg "ghg"
+#define DEF_itemOut_ihg "ihg"
+#define DEF_resultOut_rdg "rdg"
+#define DEF_groupOut_gdg "gdg"
+#define DEF_itemOut_idg "idg"
 
 StepLoadFileLDF::StepLoadFileLDF(CT_StepInitializeData &data) : CT_AbstractStepLoadFileInScene(data)
 {
@@ -92,14 +116,47 @@ void StepLoadFileLDF::createOutResultModelListProtected()
 	{
 		for ( int i = 0 ; i < _nCategories ; i++ )
 		{
-            addOutResultModel(new CT_ResultModelDefinedType(new CT_ResultGroup(), QList<CT_AbstractItemDrawable*>() << new CT_RegularGridInt(), QString("HitGridCategory").append(QString().number(i)) ) );
-		}
+            CT_OutStandardGroupModel *groupOutModel_cati = new CT_OutStandardGroupModel(QString("g%1").arg(i), new CT_StandardItemGroup());
+            CT_OutStandardItemDrawableModel *itemOutModel_cati = new CT_OutStandardItemDrawableModel(QString("i%1").arg(i), new CT_RegularGridInt(), QString("%1%2").arg(tr("HitCategory")).arg(i), QString("%1%2").arg(tr("HitCategory")).arg(i));
+            groupOutModel_cati->addItem(itemOutModel_cati);
+
+            CT_OutResultModelGroup *resultOutModel_cati = new CT_OutResultModelGroup(QString("r%1").arg(i), groupOutModel_cati, QString("%1%2").arg(tr("HitGridCategory")).arg(i), QString("%1%2").arg(tr("HitGridCategory")).arg(i));
+            addOutResultModel(resultOutModel_cati);
+
+        }
 	}
 
-    addOutResultModel(new CT_ResultModelDefinedType(new CT_ResultGroup(), QList<CT_AbstractItemDrawable*>() << new CT_RegularGridInt(), "BeforeGrid"));
-    addOutResultModel(new CT_ResultModelDefinedType(new CT_ResultGroup(), QList<CT_AbstractItemDrawable*>() << new CT_RegularGridInt(), "TheoriticalGrid"));
-    addOutResultModel(new CT_ResultModelDefinedType(new CT_ResultGroup(), QList<CT_AbstractItemDrawable*>() << new CT_RegularGridInt(), "HitsGrid"));
-    addOutResultModel(new CT_ResultModelDefinedType(new CT_ResultGroup(), QList<CT_AbstractItemDrawable*>() << new CT_RegularGridDouble(), "DensityGrid"));
+
+    CT_OutStandardGroupModel *groupOutModel_gbg = new CT_OutStandardGroupModel(DEF_groupOut_gbg, new CT_StandardItemGroup(), tr("gbg"));
+    CT_OutStandardItemDrawableModel *itemOutModel_ibg = new CT_OutStandardItemDrawableModel(DEF_itemOut_ibg, new CT_RegularGridInt(), tr("ibg"), tr("BeforeGrid"));
+    groupOutModel_gbg->addItem(itemOutModel_ibg);
+
+    CT_OutResultModelGroup *resultOutModel_rbg = new CT_OutResultModelGroup(DEF_resultOut_rbg, groupOutModel_gbg, tr("BeforeGrid"), tr("BeforeGrid"));
+    addOutResultModel(resultOutModel_rbg);
+
+
+    CT_OutStandardGroupModel *groupOutModel_gtg = new CT_OutStandardGroupModel(DEF_groupOut_gtg, new CT_StandardItemGroup(), tr("gtg"));
+    CT_OutStandardItemDrawableModel *itemOutModel_itg = new CT_OutStandardItemDrawableModel(DEF_itemOut_itg, new CT_RegularGridInt(), tr("itg"), tr("TheoriticalGrid"));
+    groupOutModel_gtg->addItem(itemOutModel_itg);
+
+    CT_OutResultModelGroup *resultOutModel_rtg = new CT_OutResultModelGroup(DEF_resultOut_rtg, groupOutModel_gtg, tr("TheoriticalGrid"), tr("TheoriticalGrid"));
+    addOutResultModel(resultOutModel_rtg);
+
+
+    CT_OutStandardGroupModel *groupOutModel_ghg = new CT_OutStandardGroupModel(DEF_groupOut_ghg, new CT_StandardItemGroup(), tr("ghg"));
+    CT_OutStandardItemDrawableModel *itemOutModel_ihg = new CT_OutStandardItemDrawableModel(DEF_itemOut_ihg, new CT_RegularGridInt(), tr("ihg"), tr("HitsGrid"));
+    groupOutModel_ghg->addItem(itemOutModel_ihg);
+
+    CT_OutResultModelGroup *resultOutModel_rhg = new CT_OutResultModelGroup(DEF_resultOut_rhg, groupOutModel_ghg, tr("HitsGrid"), tr("HitsGrid"));
+    addOutResultModel(resultOutModel_rhg);
+
+
+    CT_OutStandardGroupModel *groupOutModel_gdg = new CT_OutStandardGroupModel(DEF_groupOut_gdg, new CT_StandardItemGroup(), tr("gdg"));
+    CT_OutStandardItemDrawableModel *itemOutModel_idg = new CT_OutStandardItemDrawableModel(DEF_itemOut_idg, new CT_RegularGridDouble(), tr("idg"), tr("DensityGrid"));
+    groupOutModel_gdg->addItem(itemOutModel_idg);
+
+    CT_OutResultModelGroup *resultOutModel_rdg = new CT_OutResultModelGroup(DEF_resultOut_rdg, groupOutModel_gdg, tr("DensityGrid"), tr("DensityGrid"));
+    addOutResultModel(resultOutModel_rdg);
 }
 
 int StepLoadFileLDF::readHeaderFile(QFile &f)
@@ -250,40 +307,51 @@ void StepLoadFileLDF::readDataFile(QFile &f, int offset, bool little_endian)
 {
     // Taking the offset into account
     f.seek(offset);
-	
-    // Get the future results
-    CT_ResultGroup* outResultDensity;
-    CT_ResultGroup* outResultHit;
-    CT_ResultGroup* outResultTheoritical;
-    CT_ResultGroup* outResultBefore;
 
-    if ( _nCategories > 1 )
-    {
-        outResultBefore = dynamic_cast<CT_ResultGroup*>(getOutResultList().at(_nCategories));
-        outResultTheoritical = dynamic_cast<CT_ResultGroup*>(getOutResultList().at(_nCategories+1));
-        outResultHit = dynamic_cast<CT_ResultGroup*>(getOutResultList().at(_nCategories+2));
-        outResultDensity = dynamic_cast<CT_ResultGroup*>(getOutResultList().at(_nCategories+3));
-    }
+    // Get OUT results
+    QList<CT_ResultGroup*> outResultList = getOutResultList();
 
-    else
-    {
-        outResultBefore = dynamic_cast<CT_ResultGroup*>(getOutResultList().at(0));
-        outResultTheoritical = dynamic_cast<CT_ResultGroup*>(getOutResultList().at(1));
-        outResultHit = dynamic_cast<CT_ResultGroup*>(getOutResultList().at(2));
-        outResultDensity = dynamic_cast<CT_ResultGroup*>(getOutResultList().at(3));
-    }
+    CT_ResultGroup* outResultBefore = outResultList.at(_nCategories);
+    CT_ResultGroup* outResultTheoritical = outResultList.at(1 + _nCategories);
+    CT_ResultGroup* outResultHit = outResultList.at(2 + _nCategories);
+    CT_ResultGroup* outResultDensity = outResultList.at(3 + _nCategories);
 
-    // Declaration des differentes grilles
-    CT_RegularGridDouble*	densityGrid = new CT_RegularGridDouble(1, outResultDensity, _top, _bot, _res );
-    CT_RegularGridInt*      hitGrid = new CT_RegularGridInt(2, outResultHit, _top, _bot, _res );
-    CT_RegularGridInt*      theoriticalGrid = new CT_RegularGridInt(3, outResultTheoritical, _top, _bot, _res );
-    CT_RegularGridInt*      beforeGrid = new CT_RegularGridInt(4, outResultBefore, _top, _bot, _res );
+    // Get the group model corresponding to DEF_groupOut_gbg
+    CT_OutStandardGroupModel* groupOutModel_gbg = (CT_OutStandardGroupModel*)getOutModelForCreation(outResultBefore, DEF_groupOut_gbg);
+    // Get the item model corresponding to DEF_itemOut_ibg
+    CT_OutStandardItemDrawableModel* itemOutModel_ibg = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResultBefore, DEF_itemOut_ibg);
+
+    // Get the group model corresponding to DEF_groupOut_gtg
+    CT_OutStandardGroupModel* groupOutModel_gtg = (CT_OutStandardGroupModel*)getOutModelForCreation(outResultTheoritical, DEF_groupOut_gtg);
+    // Get the item model corresponding to DEF_itemOut_itg
+    CT_OutStandardItemDrawableModel* itemOutModel_itg = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResultTheoritical, DEF_itemOut_itg);
+
+    // Get the group model corresponding to DEF_groupOut_ghg
+    CT_OutStandardGroupModel* groupOutModel_ghg = (CT_OutStandardGroupModel*)getOutModelForCreation(outResultHit, DEF_groupOut_ghg);
+    // Get the item model corresponding to DEF_itemOut_ihg
+    CT_OutStandardItemDrawableModel* itemOutModel_ihg = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResultHit, DEF_itemOut_ihg);
+
+    // Get the group model corresponding to DEF_groupOut_gdg
+    CT_OutStandardGroupModel* groupOutModel_gdg = (CT_OutStandardGroupModel*)getOutModelForCreation(outResultDensity, DEF_groupOut_gdg);
+    // Get the item model corresponding to DEF_itemOut_idg
+    CT_OutStandardItemDrawableModel* itemOutModel_idg = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResultDensity, DEF_itemOut_idg);
+
+
+     // Creation of different grids
+    CT_RegularGridDouble*	densityGrid = new CT_RegularGridDouble(itemOutModel_idg, 1 + _nCategories, outResultDensity, _top, _bot, _res );
+    CT_RegularGridInt*      hitGrid = new CT_RegularGridInt(itemOutModel_ihg, 2 + _nCategories, outResultHit, _top, _bot, _res );
+    CT_RegularGridInt*      theoriticalGrid = new CT_RegularGridInt(itemOutModel_itg, 3 + _nCategories, outResultTheoritical, _top, _bot, _res );
+    CT_RegularGridInt*      beforeGrid = new CT_RegularGridInt(itemOutModel_ibg, 4 + _nCategories, outResultBefore, _top, _bot, _res );
 	
     QList< CT_RegularGridInt* > categoryHitGridList;
 	if ( _nCategories > 1 )
 	{
-		for ( int j = 0 ; j < _nCategories ; j++ )
-            categoryHitGridList.push_back( new CT_RegularGridInt(0, dynamic_cast<CT_ResultGroup*>(getOutResultList().at(j)), _top, _bot, _res ) );
+        for ( int i = 0 ; i < _nCategories ; i++ )
+        {
+            CT_ResultGroup* result = outResultList.at(i);
+            CT_OutStandardItemDrawableModel* itemModel = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(result, QString("i%1").arg(i));
+            categoryHitGridList.push_back( new CT_RegularGridInt(itemModel, i+1, result, _top, _bot, _res ) );
+        }
 	}
 
     // The position of the stream is now the begening of the grids description
@@ -292,7 +360,7 @@ void StepLoadFileLDF::readDataFile(QFile &f, int offset, bool little_endian)
     QStringList wordsOfLine;
 
     // For each voxel
-    for ( int i = 0 ; i < _nVoxels ; i++ )
+    for ( unsigned int i = 0 ; i < _nVoxels ; i++ )
     {
         if ( stream.atEnd() )
         {
@@ -349,31 +417,34 @@ void StepLoadFileLDF::readDataFile(QFile &f, int offset, bool little_endian)
         }
     }
 
-    // Setting the outputs result
-    densityGrid->changeResult( outResultDensity );
-    hitGrid->changeResult( outResultHit );
-    theoriticalGrid->changeResult( outResultTheoritical );
-    beforeGrid->changeResult( outResultBefore );
+    CT_StandardItemGroup* groupOut_gbg = new CT_StandardItemGroup(groupOutModel_gbg, 0, outResultBefore);
+    groupOut_gbg->addItemDrawable(beforeGrid);
+    outResultBefore->addGroup(groupOut_gbg);
+
+    CT_StandardItemGroup* groupOut_gtg = new CT_StandardItemGroup(groupOutModel_gtg, 0, outResultTheoritical);
+    groupOut_gtg->addItemDrawable(theoriticalGrid);
+    outResultTheoritical->addGroup(groupOut_gtg);
+
+    CT_StandardItemGroup* groupOut_ghg = new CT_StandardItemGroup(groupOutModel_ghg, 0, outResultHit);
+    groupOut_ghg->addItemDrawable(hitGrid);
+    outResultHit->addGroup(groupOut_ghg);
+
+    CT_StandardItemGroup* groupOut_gdg = new CT_StandardItemGroup(groupOutModel_gdg, 0, outResultDensity);
+    groupOut_gdg->addItemDrawable(densityGrid);
+    outResultDensity->addGroup(groupOut_gdg);
 
     if ( _nCategories > 1 )
     {
         for ( int i = 0 ; i < _nCategories ; i++ )
         {
-            categoryHitGridList[i]->changeResult( dynamic_cast<CT_ResultGroup*>(getOutResultList().at(i)) );
-        }
-    }
+            CT_ResultGroup* result = outResultList.at(i);
+            CT_OutStandardGroupModel* groupModel = (CT_OutStandardGroupModel*)getOutModelForCreation(result, QString("g%1").arg(i));
 
-    outResultDensity->setItemDrawable( densityGrid );
-    outResultHit->setItemDrawable( hitGrid );
-    outResultTheoritical->setItemDrawable( theoriticalGrid );
-    outResultBefore->setItemDrawable( beforeGrid );
+            CT_StandardItemGroup* group = new CT_StandardItemGroup(groupModel, 0, result);
+            group->addItemDrawable(categoryHitGridList[i]);
+            result->addGroup(group);
 
-    if ( _nCategories > 1 )
-    {
-        for ( int i = 0 ; i < _nCategories ; i++ )
-        {
-            dynamic_cast<CT_ResultGroup*>(getOutResultList().at(i))->setItemDrawable( categoryHitGridList[i] );
-			categoryHitGridList[i]->calculateMinMax();
+            categoryHitGridList[i]->calculateMinMax();
         }
     }
 	
