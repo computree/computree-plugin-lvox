@@ -168,22 +168,16 @@ namespace computeGridTools
     *  \param outputOutGrid : output deltaIn grid
     *
     */
-    void computeHitGridAndDistances( const CT_Point &bot,
+    void computeHitGridAndDistances(const CT_Point &bot,
                                      const CT_Point& top,
                                      float res,
                                      const CT_AbstractPointCloud *inputCloud,
-                                     const CT_Scanner &scanner,
+                                     const CT_Scanner *scanner,
                                      double intensityThresh,
                                      bool greaterThan,
-                                     qint64 idHit,
-                                     Result *resultHit,
-                                     CT_RegularGridInt *&outputHitGrid,
-                                     qint64 idDeltaIn,
-                                     Result *resultDeltaIn,
-                                     CT_RegularGridDouble *&outputDeltaInGrid,
-                                     qint64 idDeltaOut,
-                                     Result *resultDeltaOut,
-                                     CT_RegularGridDouble *&outputDeltaOutGrid );
+                                     CT_RegularGridInt *outputHitGrid,
+                                     CT_RegularGridDouble *outputDeltaInGrid,
+                                     CT_RegularGridDouble *outputDeltaOutGrid );
 
     /*!
     *  \brief Computes the "hit" grid of a point cloud and the grids of distance associated to it (deltaIn and deltaOut) in a global manner and for each category
@@ -207,26 +201,20 @@ namespace computeGridTools
     *
     */
     void computeHitGridAndDistancesAndCategories( const CT_Point &bot,
-                                                  const CT_Point& top,
+                                                  const CT_Point &top,
                                                   float res,
                                                   const CT_AbstractPointCloud *inputCloud,
-                                                  const CT_Scanner &scanner,
+                                                  const CT_Scanner* scanner,
                                                   double intensityThresh,
                                                   bool greaterThan,
-                                                  qint64 idHit,
-                                                  Result *resultHit,
-                                                  CT_RegularGridInt *&outputHitGrid,
-                                                  qint64 idDeltaIn,
-                                                  Result *resultDeltaIn,
-                                                  CT_RegularGridDouble *&outputDeltaInGrid,
-                                                  qint64 idDeltaOut,
-                                                  Result *resultDeltaOut,
-                                                  CT_RegularGridDouble *&outputDeltaOutGrid,
+                                                  CT_RegularGridInt *outputHitGrid,
+                                                  CT_RegularGridDouble *outputDeltaInGrid,
+                                                  CT_RegularGridDouble *outputDeltaOutGrid,
                                                   QList<CT_RegularGridInt *> &categoryHitGridsList,
                                                   QList<CT_RegularGridDouble *> &categoryDeltaInGridsList,
                                                   QList<CT_RegularGridDouble *> &categoryDeltaOutGridsList,
                                                   int nCategories,
-                                                  const vector<int>& categoriesBenchmarks );
+                                                  const vector<int> &categoriesBenchmarks );
 
     /*!
     *  \brief Computes the "theoritical" grid of a point cloud
@@ -270,16 +258,12 @@ namespace computeGridTools
     *  \param outputDeltaTheoriticalGrid : output deltaTheoritical grid
     *
     */
-    void computeTheoriticalGridAndDistances( const CT_Point& bot,
+    void computeTheoriticalGridAndDistances(const CT_Point& bot,
                                              const CT_Point& top,
                                              float res,
-                                             const CT_Scanner& scanner,
-                                             qint64 idTheoritical,
-                                             Result* resultTheoritical,
-                                             CT_RegularGridInt*& outputTheoriticalGrid,
-                                             qint64 idDeltaTheoritical,
-                                             Result* resultDeltaTheoritical,
-                                             CT_RegularGridDouble*& outputDeltaTheoriticalGrid );
+                                             CT_Scanner *scanner,
+                                             CT_RegularGridInt *outputTheoriticalGrid,
+                                             CT_RegularGridDouble *outputDeltaTheoriticalGrid );
 
     /*!
     *  \brief Computes the "before" grid of a point cloud
@@ -325,17 +309,13 @@ namespace computeGridTools
     *  \param outputDeltaBeforeGrid : output deltaBefore grid
     *
     */
-    void computeBeforeGridAndDistances( const CT_Point& bot,
-                                        const CT_Point& top,
+    void computeBeforeGridAndDistances( const CT_Point &bot,
+                                        const CT_Point &top,
                                         float res,
-                                        const CT_AbstractPointCloud* inputCloud,
-                                        const CT_Scanner& scanner,
-                                        qint64 idBefore,
-                                        Result* resultBefore,
-                                        CT_RegularGridInt*& outputBeforeGrid,
-                                        qint64 idDeltaBefore,
-                                        Result* resultDeltaBefore,
-                                        CT_RegularGridDouble*& outputDeltaBeforeGrid );
+                                        const CT_AbstractPointCloud *inputCloud,
+                                        CT_Scanner* scanner,
+                                        CT_RegularGridInt *outputBeforeGrid,
+                                        CT_RegularGridDouble *outputDeltaBeforeGrid);
 
     /*!
     *  \brief Computes density grid
@@ -348,20 +328,19 @@ namespace computeGridTools
     *  \param theoriticalGrid : "theoritical" grid previously computed
     *  \param beforeGrid : "before" grid previously computed
     *  \param effectiveRayThresh : minimum number of effective rays (Nt-Nb) needed to compute a density index
+    *  \param densityGrid : Returns the "density" grid storing the density index computed by LVox inside each voxel
     *
     *  \warning Values stored in each voxel may be negative :
     *           => -3 means there was not enough information to compute a density index (accordingly to the threshold on the number of effective rays)
     *           => -2 means there was an error (Nb > Nt)
     *           => -1 means Nt = Nb, and so the density index can not be calculated (division by 0)
     *
-    *  \return Returns the "density" grid storing the density index computed by LVox inside each voxel
     */
-    CT_RegularGridDouble* computeDensityGrid( qint64 id,
-                                              Result* result,
-                                              CT_RegularGridInt* hitsGrid,
-                                              CT_RegularGridInt* theoriticalGrid,
-                                              CT_RegularGridInt* beforeGrid,
-                                              int effectiveRayThresh );
+    void computeDensityGrid(  CT_RegularGridDouble *densityGrid,
+                              CT_RegularGridInt* hitsGrid,
+                              CT_RegularGridInt* theoriticalGrid,
+                              CT_RegularGridInt* beforeGrid,
+                              int effectiveRayThresh );
 
     /*!
     *  \brief Computes the "best point of view" grid of a given set of "theoritical" and "before" grids

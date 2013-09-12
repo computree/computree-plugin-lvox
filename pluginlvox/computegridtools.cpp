@@ -159,26 +159,13 @@ void computeGridTools::computeHitGridAndDistances(const CT_Point &bot,
                                                   const CT_Point& top,
                                                   float res,
                                                   const CT_AbstractPointCloud *inputCloud,
-                                                  const CT_Scanner &scanner,
+                                                  const CT_Scanner* scanner,
                                                   double intensityThresh,
                                                   bool greaterThan,
-                                                  qint64 idHit,
-                                                  Result* resultHit,
-                                                  CT_RegularGridInt *&outputHitGrid,
-                                                  qint64 idDeltaIn,
-                                                  Result* resultDeltaIn,
-                                                  CT_RegularGridDouble *&outputDeltaInGrid,
-                                                  qint64 idDeltaOut,
-                                                  Result* resultDeltaOut,
-                                                  CT_RegularGridDouble *&outputDeltaOutGrid)
+                                                  CT_RegularGridInt *outputHitGrid,
+                                                  CT_RegularGridDouble *outputDeltaInGrid,
+                                                  CT_RegularGridDouble *outputDeltaOutGrid)
 {
-    // Make sure parameters are good
-    assert ( outputHitGrid == NULL && outputDeltaInGrid == NULL && outputDeltaOutGrid == NULL );
-
-    // Allocate results
-    outputHitGrid = new CT_RegularGridInt(NULL, idHit, resultHit, top, bot, res, 0);
-    outputDeltaInGrid = new CT_RegularGridDouble (NULL, idDeltaIn, resultDeltaIn, top, bot, res, 0 );
-    outputDeltaOutGrid = new CT_RegularGridDouble (NULL, idDeltaOut, resultDeltaOut, top, bot, res, 0 );
 
     // Declaring as many as possible variables outside the loop
     float cloudSize = inputCloud->cloudSize();
@@ -211,10 +198,10 @@ void computeGridTools::computeHitGridAndDistances(const CT_Point &bot,
 
             // Getting the direction of the ray and creating it
             CT_Point direction;
-            direction.x = currentHitPoint.x - scanner.getPosition().x();
-            direction.y = currentHitPoint.y - scanner.getPosition().y();
-            direction.z = currentHitPoint.z - scanner.getPosition().z();
-            CT_Ray currentRay(NULL, 0, NULL, scanner.getPosition(), direction );
+            direction.x = currentHitPoint.x - scanner->getPosition().x();
+            direction.y = currentHitPoint.y - scanner->getPosition().y();
+            direction.z = currentHitPoint.z - scanner->getPosition().z();
+            CT_Ray currentRay(NULL, 0, NULL, scanner->getPosition(), direction );
 
             // Getting the in and out points in the voxel and updating the distances grids
             outputHitGrid->getBBox( currentVoxelID, voxelBot, voxelTop );
@@ -252,18 +239,12 @@ void computeGridTools::computeHitGridAndDistancesAndCategories(const CT_Point &b
                                                                const CT_Point &top,
                                                                float res,
                                                                const CT_AbstractPointCloud *inputCloud,
-                                                               const CT_Scanner &scanner,
+                                                               const CT_Scanner* scanner,
                                                                double intensityThresh,
                                                                bool greaterThan,
-                                                               qint64 idHit,
-                                                               Result *resultHit,
-                                                               CT_RegularGridInt *&outputHitGrid,
-                                                               qint64 idDeltaIn,
-                                                               Result *resultDeltaIn,
-                                                               CT_RegularGridDouble *&outputDeltaInGrid,
-                                                               qint64 idDeltaOut,
-                                                               Result *resultDeltaOut,
-                                                               CT_RegularGridDouble *&outputDeltaOutGrid,
+                                                               CT_RegularGridInt *outputHitGrid,
+                                                               CT_RegularGridDouble *outputDeltaInGrid,
+                                                               CT_RegularGridDouble *outputDeltaOutGrid,
                                                                QList<CT_RegularGridInt *> &categoryHitGridsList,
                                                                QList<CT_RegularGridDouble *> &categoryDeltaInGridsList,
                                                                QList<CT_RegularGridDouble *> &categoryDeltaOutGridsList,
@@ -271,25 +252,7 @@ void computeGridTools::computeHitGridAndDistancesAndCategories(const CT_Point &b
                                                                const vector<int> &categoriesBenchmarks)
 {
     // Make sure parameters are good
-    assert ( outputHitGrid == NULL && outputDeltaInGrid == NULL && outputDeltaOutGrid == NULL );
     assert ( categoryHitGridsList.size() == nCategories && categoryHitGridsList.size() == categoryDeltaInGridsList.size() && categoryHitGridsList.size() == categoryDeltaOutGridsList.size() );
-
-    for ( int i = 0 ; i < nCategories ; i++ )
-    {
-        assert( categoryHitGridsList[i] == NULL && categoryDeltaInGridsList[i] == NULL && categoryDeltaOutGridsList[i] == NULL );
-    }
-
-    // Allocate results
-    outputHitGrid = new CT_RegularGridInt(NULL, idHit, resultHit, top, bot, res, 0);
-    outputDeltaInGrid = new CT_RegularGridDouble (NULL, idDeltaIn, resultDeltaIn, top, bot, res, 0 );
-    outputDeltaOutGrid = new CT_RegularGridDouble (NULL, idDeltaOut, resultDeltaOut, top, bot, res, 0 );
-
-    for ( int i = 0 ; i < nCategories ; i++ )
-    {
-        categoryHitGridsList[i] = new CT_RegularGridInt(NULL,0, NULL, top, bot, res, 0);
-        categoryDeltaInGridsList[i] = new CT_RegularGridDouble(NULL,0, NULL, top, bot, res, 0);
-        categoryDeltaOutGridsList[i] = new CT_RegularGridDouble(NULL,0, NULL, top, bot, res, 0);
-    }
 
     // Declare each variable outside the loop in order to reduce allocating time
     float cloudSize = inputCloud->cloudSize();
@@ -332,10 +295,10 @@ void computeGridTools::computeHitGridAndDistancesAndCategories(const CT_Point &b
 
             // Getting the direction of the ray and creating it
             CT_Point direction;
-            direction.x = currentHitPoint.x - scanner.getPosition().x();
-            direction.y = currentHitPoint.y - scanner.getPosition().y();
-            direction.z = currentHitPoint.z - scanner.getPosition().z();
-            CT_Ray currentRay(NULL,0, NULL, scanner.getPosition(), direction );
+            direction.x = currentHitPoint.x - scanner->getPosition().x();
+            direction.y = currentHitPoint.y - scanner->getPosition().y();
+            direction.z = currentHitPoint.z - scanner->getPosition().z();
+            CT_Ray currentRay(NULL,0, NULL, scanner->getPosition(), direction );
 
             // Getting the in and out points in the voxel and updating the distances grids
             CT_Point in, out;
@@ -467,21 +430,10 @@ CT_RegularGridInt* computeGridTools::computeTheoriticalGrid(qint64 id, Result *r
 void computeGridTools::computeTheoriticalGridAndDistances(const CT_Point &bot,
                                                           const CT_Point &top,
                                                           float res,
-                                                          const CT_Scanner &scanner,
-                                                          qint64 idTheoritical,
-                                                          Result *resultTheoritical,
-                                                          CT_RegularGridInt *&outputTheoriticalGrid,
-                                                          qint64 idDeltaTheoritical,
-                                                          Result *resultDeltaTheoritical,
-                                                          CT_RegularGridDouble *&outputDeltaTheoriticalGrid)
+                                                          CT_Scanner* scanner,
+                                                          CT_RegularGridInt *outputTheoriticalGrid,
+                                                          CT_RegularGridDouble *outputDeltaTheoriticalGrid)
 {
-    // Make sure parameters are good
-    assert ( outputTheoriticalGrid == NULL && outputDeltaTheoriticalGrid == NULL );
-
-    // Allocate results
-    outputTheoriticalGrid = new CT_RegularGridInt(NULL, idTheoritical, resultTheoritical, top, bot, res, 0);
-    outputDeltaTheoriticalGrid = new CT_RegularGridDouble (NULL,idDeltaTheoritical, resultDeltaTheoritical, top, bot, res, 0 );
-
     // Creating visitors
     VisitorRaytracingIncrement* visitorIncrement = new VisitorRaytracingIncrement();
     VisitorRaytracingAddDistance* visitorDistances = new VisitorRaytracingAddDistance();
@@ -498,8 +450,8 @@ void computeGridTools::computeTheoriticalGridAndDistances(const CT_Point &bot,
     // Creates the ray traversal algorithm
     AlgorithmWoo algorithm;
 
-    int nHorizontalRays = scanner.getNHRays();
-    int nVerticalRays = scanner.getNVRays();
+    int nHorizontalRays = scanner->getNHRays();
+    int nVerticalRays = scanner->getNVRays();
     int totalRays = nVerticalRays * nHorizontalRays;
 
     // For all theoritical rays of the scanner
@@ -508,7 +460,7 @@ void computeGridTools::computeTheoriticalGridAndDistances(const CT_Point &bot,
         for ( int j = 0 ; j < nVerticalRays ; j++ )
         {
             // Get the next ray
-            CT_Ray* currentRay = new CT_Ray( scanner.ray(i,j) );
+            CT_Ray* currentRay = new CT_Ray( scanner->ray(i,j) );
 
             // Run the algorithm only if the ray intersects the grid
             if ( currentRay->intersect(outputTheoriticalGrid, tmp1, tmp2) )
@@ -607,19 +559,10 @@ void computeGridTools::computeBeforeGridAndDistances(const CT_Point &bot,
                                                      const CT_Point &top,
                                                      float res,
                                                      const CT_AbstractPointCloud *inputCloud,
-                                                     const CT_Scanner &scanner,
-                                                     qint64 idBefore,
-                                                     Result *resultBefore,
-                                                     CT_RegularGridInt *&outputBeforeGrid,
-                                                     qint64 idDeltaBefore,
-                                                     Result *resultDeltaBefore, CT_RegularGridDouble *&outputDeltaBeforeGrid)
+                                                     CT_Scanner* scanner,
+                                                     CT_RegularGridInt *outputBeforeGrid,
+                                                     CT_RegularGridDouble *outputDeltaBeforeGrid)
 {
-    // Make sure parameters are good
-    assert ( outputBeforeGrid == NULL && outputDeltaBeforeGrid == NULL );
-
-    // Allocate results
-    outputBeforeGrid = new CT_RegularGridInt(NULL, idBefore, resultBefore, top, bot, res, 0);
-    outputDeltaBeforeGrid = new CT_RegularGridDouble (NULL, idDeltaBefore, resultDeltaBefore, top, bot, res, 0 );
 
     // Creating visitors
     VisitorRaytracingIncrementButFirst* visitorIncrementButFirst = new VisitorRaytracingIncrementButFirst();
@@ -644,9 +587,9 @@ void computeGridTools::computeBeforeGridAndDistances(const CT_Point &bot,
     {
         // Create a ray which origin is the point of the scene and which direction is "the direction"from the scanner to the point"
         // Getting the direction
-        direction.x = (*inputCloud)[i].x - scanner.getPosition().x();
-        direction.y = (*inputCloud)[i].y - scanner.getPosition().y();
-        direction.z = (*inputCloud)[i].z - scanner.getPosition().z();
+        direction.x = (*inputCloud)[i].x - scanner->getPosition().x();
+        direction.y = (*inputCloud)[i].y - scanner->getPosition().y();
+        direction.z = (*inputCloud)[i].z - scanner->getPosition().z();
 
         if ( normCtPoint(direction) != 0 )
         {
@@ -690,15 +633,12 @@ void computeGridTools::computeBeforeGridAndDistances(const CT_Point &bot,
     outputDeltaBeforeGrid->calculateMinMax();
 }
 
-CT_RegularGridDouble* computeGridTools::computeDensityGrid(qint64 id, Result *result, CT_RegularGridInt *hitsGrid, CT_RegularGridInt *theoriticalGrid, CT_RegularGridInt *beforeGrid, int effectiveRayThresh)
+void computeGridTools::computeDensityGrid(CT_RegularGridDouble *densityGrid, CT_RegularGridInt *hitsGrid, CT_RegularGridInt *theoriticalGrid, CT_RegularGridInt *beforeGrid, int effectiveRayThresh)
 {
     // Checks if all grids have the same dimensions
     assert( hitsGrid->getDim().x == theoriticalGrid->getDim().x && hitsGrid->getDim().x == beforeGrid->getDim().x );
     assert( hitsGrid->getDim().y == theoriticalGrid->getDim().y && hitsGrid->getDim().y == beforeGrid->getDim().y );
     assert( hitsGrid->getDim().z == theoriticalGrid->getDim().z && hitsGrid->getDim().z == beforeGrid->getDim().z );
-
-    // Creating result grid
-    CT_RegularGridDouble* densityGrid = new CT_RegularGridDouble(NULL, id, result, hitsGrid->getTop(), hitsGrid->getBot(), hitsGrid->getRes() );
 
     unsigned int nbVoxels = densityGrid->nVoxels();
 
@@ -734,7 +674,6 @@ CT_RegularGridDouble* computeGridTools::computeDensityGrid(qint64 id, Result *re
     // Don't forget to calculate min and max in order to visualize it as a colored map
     densityGrid->calculateMinMax();
 
-    return densityGrid;
 }
 
 CT_RegularGridInt* computeGridTools::computeBestPointOfViewGrid(qint64 id,

@@ -140,16 +140,21 @@ void StepComputeDensityAndDistances::createOutResultModelListProtected()
     CT_OutStandardItemDrawableModel *itemOutModel_h;
     CT_OutStandardItemDrawableModel *itemOutModel_dout;
     CT_OutStandardItemDrawableModel *itemOutModel_din;
-    for (unsigned int i = 0 ; i < _nCategories ; i++ )
-    {
-        itemOutModel_h = new CT_OutStandardItemDrawableModel(QString(DEF_itemOut_h).append(QString::number(i)), new CT_RegularGridInt(), tr("HitsCat").append(QString::number(i)));
-        itemOutModel_dout = new CT_OutStandardItemDrawableModel(QString(DEF_itemOut_dout).append(QString::number(i)), new CT_RegularGridDouble(), tr("DistOutCat").append(QString::number(i)));
-        itemOutModel_din = new CT_OutStandardItemDrawableModel(QString(DEF_itemOut_din).append(QString::number(i)), new CT_RegularGridDouble(), tr("DistInCat").append(QString::number(i)));
 
-        groupOutModel_base->addItem(itemOutModel_h);
-        groupOutModel_base->addItem(itemOutModel_dout);
-        groupOutModel_base->addItem(itemOutModel_din);
+    if (_nCategories > 1)
+    {
+        for (unsigned int i = 0 ; i < _nCategories ; i++ )
+        {
+            itemOutModel_h = new CT_OutStandardItemDrawableModel(QString(DEF_itemOut_h).append(QString::number(i)), new CT_RegularGridInt(), tr("HitsCat").append(QString::number(i)));
+            itemOutModel_dout = new CT_OutStandardItemDrawableModel(QString(DEF_itemOut_dout).append(QString::number(i)), new CT_RegularGridDouble(), tr("DistOutCat").append(QString::number(i)));
+            itemOutModel_din = new CT_OutStandardItemDrawableModel(QString(DEF_itemOut_din).append(QString::number(i)), new CT_RegularGridDouble(), tr("DistInCat").append(QString::number(i)));
+
+            groupOutModel_base->addItem(itemOutModel_h);
+            groupOutModel_base->addItem(itemOutModel_dout);
+            groupOutModel_base->addItem(itemOutModel_din);
+        }
     }
+
 
     CT_OutStandardItemDrawableModel *itemOutModel_deltaout = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltaout, new CT_RegularGridInt(), tr("DeltaOut"));
     CT_OutStandardItemDrawableModel *itemOutModel_deltain = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltain, new CT_RegularGridInt(), tr("DeltaIn"));
@@ -246,6 +251,7 @@ void StepComputeDensityAndDistances::compute()
     // Get the base group model and create base group
     CT_OutStandardGroupModel* groupOutModel_base = (CT_OutStandardGroupModel*)getOutModelForCreation(outResult, DEF_groupOut_base);
     CT_StandardItemGroup* baseGroup = new CT_StandardItemGroup(groupOutModel_base,0, outResult);
+    outResult->addGroup(baseGroup);
 
     // Get the items models
     CT_OutStandardItemDrawableModel* itemOutModel_deltaout = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, DEF_itemOut_deltaout);
@@ -308,38 +314,17 @@ void StepComputeDensityAndDistances::compute()
         }
     }
 
-    // ATTENTION
-    // ATTENTION
-    // ATTENTION
-    // ATTENTION
-    // ATTENTION
-    // ATTENTION
-    // ATTENTION
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // Modifier les fonctions ci-dessous pour qu'elles ne créent plus les grilles !!!
-
-
     // Computing the different grids
-    computeGridTools::computeTheoriticalGridAndDistances( ctMin, ctMax, _res, *scanner, 0, outResult, theoriticalGrid, 1, outResult, deltaTheoritical );
-    computeGridTools::computeBeforeGridAndDistances( ctMin, ctMax, _res, scene->getPointCloud(), *scanner, 2, outResult, beforeGrid, 3, outResult, deltaBefore );
+    computeGridTools::computeTheoriticalGridAndDistances( ctMin, ctMax, _res, scanner, theoriticalGrid, deltaTheoritical );
+    computeGridTools::computeBeforeGridAndDistances( ctMin, ctMax, _res, scene->getPointCloud(), scanner, beforeGrid, deltaBefore );
 
     if ( _nCategories > 1 )
-        computeGridTools::computeHitGridAndDistancesAndCategories( ctMin, ctMax, _res, scene->getPointCloud(), *scanner, _intensityThresh, _greaterThanThresh, 4, outResult, hitGrid, 5, outResult, deltaInGrid, 6, outResult, deltaOutGrid, categoryHitsGridList, categoryDeltaInGridList, categoryDeltaOutGridList, _nCategories, _categoriesMarks );
+        computeGridTools::computeHitGridAndDistancesAndCategories( ctMin, ctMax, _res, scene->getPointCloud(), scanner, _intensityThresh, _greaterThanThresh, hitGrid, deltaInGrid, deltaOutGrid, categoryHitsGridList, categoryDeltaInGridList, categoryDeltaOutGridList, _nCategories, _categoriesMarks );
     else
-        computeGridTools::computeHitGridAndDistances( ctMin, ctMax, _res, scene->getPointCloud(), *scanner, _intensityThresh, _greaterThanThresh, 4, outResult, hitGrid, 5, outResult, deltaInGrid, 6, outResult, deltaOutGrid );
+        computeGridTools::computeHitGridAndDistances( ctMin, ctMax, _res, scene->getPointCloud(), scanner, _intensityThresh, _greaterThanThresh, hitGrid, deltaInGrid, deltaOutGrid );
 
-    densityGrid = computeGridTools::computeDensityGrid(7, outResult, hitGrid, theoriticalGrid, beforeGrid, _effectiveRayThresh );
+    computeGridTools::computeDensityGrid(densityGrid, hitGrid, theoriticalGrid, beforeGrid, _effectiveRayThresh );
 
-    if ( _nCategories > 1 )
-    {
-        // Setting the category grids result
-        for (unsigned int i = 0 ; i < _nCategories ; i++ )
-        {
-            categoryDeltaOutGridList[i]->changeResult(outResult); // 3 = deltaOut, deltaIn Hit
-            categoryDeltaInGridList[i]->changeResult(outResult);
-            categoryHitsGridList[i]->changeResult(outResult);
-        }
-    }
 
     baseGroup->addItemDrawable(deltaOutGrid);
     baseGroup->addItemDrawable(deltaInGrid);
@@ -350,11 +335,14 @@ void StepComputeDensityAndDistances::compute()
     baseGroup->addItemDrawable(hitGrid);
     baseGroup->addItemDrawable(densityGrid);
 
-    for (unsigned int i = 0 ; i < _nCategories ; i++ )
+    if ( _nCategories > 1 )
     {
-        baseGroup->addItemDrawable(categoryHitsGridList[i]);
-        baseGroup->addItemDrawable(categoryDeltaOutGridList[i]);
-        baseGroup->addItemDrawable(categoryDeltaInGridList[i]);
+        for (unsigned int i = 0 ; i < _nCategories ; i++ )
+        {
+            baseGroup->addItemDrawable(categoryHitsGridList[i]);
+            baseGroup->addItemDrawable(categoryDeltaOutGridList[i]);
+            baseGroup->addItemDrawable(categoryDeltaInGridList[i]);
+        }
     }
 
     // Save results in a file if demanded
