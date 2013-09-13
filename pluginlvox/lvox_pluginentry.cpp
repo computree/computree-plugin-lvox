@@ -50,4 +50,8 @@ StepPluginInterface* LVOX_PluginEntry::getStepPluginManager()
     return _stepPluginManager;
 }
 
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 Q_EXPORT_PLUGIN2(plug_lvoxv2, LVOX_PluginEntry)
+#endif
+
