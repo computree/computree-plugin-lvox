@@ -1,6 +1,10 @@
 include(../../pluginsharedv2/shared.pri)
 include($${PLUGIN_SHARED_DIR}/include.pri)
 
+contains ( QT_VERSION, "^5.*" ) {
+    LIBS += -lQt5Concurrent
+}
+
 TARGET = plug_lvoxv2
 
 HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
