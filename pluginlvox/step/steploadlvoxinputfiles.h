@@ -1,6 +1,6 @@
 /****************************************************************************
 
- Copyright (C) 2012-2012 Université de Sherbrooke, Québec, CANADA
+ Copyright (C) 2012-2012 UniversitÃ© de Sherbrooke, QuÃ©bec, CANADA
                      All rights reserved.
 
  Contact :  richard.fournier@usherbrooke.ca
@@ -40,7 +40,7 @@ class StepLoadLVoxInputFiles : public CT_AbstractStepLoadFileInScene
     Q_OBJECT
 
 public:
-    // Constructeur de l'étape
+    // Constructeur de l'Ã©tape
     StepLoadLVoxInputFiles(CT_StepInitializeData &data);
 
     // Description de l'etape (ce qu'elle fait), apparait dans la dialog box
@@ -84,7 +84,7 @@ private:
     float _zMax;
 
 public slots:
-    // De manière générale cette méthode devrait lire le nom du fichier �  ouvrir �  partir d'une boite de dialogue
+    // De maniÃ¨re gÃ©nÃ©rale cette mÃ©thode devrait lire le nom du fichier Ã  ouvrir Ã  partir d'une boite de dialogue
     bool configure();
 };
 

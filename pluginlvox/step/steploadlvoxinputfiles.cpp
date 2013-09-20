@@ -1,6 +1,6 @@
 /****************************************************************************
 
- Copyright (C) 2012-2012 Université de Sherbrooke, Québec, CANADA
+ Copyright (C) 2012-2012 UniversitÃ© de Sherbrooke, QuÃ©bec, CANADA
                      All rights reserved.
 
  Contact :  richard.fournier@usherbrooke.ca
@@ -44,7 +44,7 @@
 
 StepLoadLVoxInputFiles::StepLoadLVoxInputFiles(CT_StepInitializeData &data) : CT_AbstractStepLoadFileInScene(data)
 {
-    // On recupere les parametres de l'étape fournis par Qt
+    // On recupere les parametres de l'Ã©tape fournis par Qt
     //
     // Position de la fenetre a l'ecran par exemple
     QSettings *settings = data.getSettingsFile();

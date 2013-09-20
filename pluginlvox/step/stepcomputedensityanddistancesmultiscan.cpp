@@ -1,6 +1,6 @@
 /****************************************************************************
 
- Copyright (C) 2012-2012 Université de Sherbrooke, Québec, CANADA
+ Copyright (C) 2012-2012 UniversitÃ© de Sherbrooke, QuÃ©bec, CANADA
                      All rights reserved.
 
  Contact :  richard.fournier@usherbrooke.ca
@@ -86,11 +86,11 @@ void StepComputeDensityAndDistancesMultiScan::createInResultModelListProtected()
 
     CT_InStandardItemDrawableModel *item = new CT_InStandardItemDrawableModel(DEF_SearchInScene,
                                                                               CT_Scene::staticGetType(),
-                                                                              tr("Sc�ne"));
+                                                                              tr("Scène"));
 
     group->addItem(item);
 
-    CT_InResultModelGroup *resultModel = new CT_InResultModelGroup(DEF_SearchInResult, group, tr("Sc�ne(s)"));
+    CT_InResultModelGroup *resultModel = new CT_InResultModelGroup(DEF_SearchInResult, group, tr("Scène(s)"));
 
     addInResultModel(resultModel);
 

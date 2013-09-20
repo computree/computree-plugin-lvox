@@ -26,7 +26,7 @@ namespace mymaths
     /*!
     *  \brief Computes the solid angle of a face of a cube from a given point of view
     */
-	// Numface est le numéro de la face que l'on veut dans le voxel
+	// Numface est le numÃ©ro de la face que l'on veut dans le voxel
     double faceSolidAngle ( const CT_Point& voxelBot, const CT_Point& voxelTop, unsigned int numFace, const CT_Point& pointOfView );
 	
 	void voxelFaceToPoints ( const CT_Point& voxelBot, const CT_Point& voxelTop, unsigned int numFace,
