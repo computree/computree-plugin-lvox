@@ -73,8 +73,7 @@ namespace computeGridTools
     *
     *  \return Returns the hit grid storing the number of points inside each voxel
     */
-    CT_RegularGridInt* computeHitGrid( qint64 id,
-                                       Result* result,
+    CT_RegularGridInt* computeHitGrid( Result* result,
                                        const CT_Point& bot,
                                        const CT_Point& top,
                                        float res,
@@ -108,7 +107,6 @@ namespace computeGridTools
                                     double intensityThresh,
                                     bool greaterThan,
                                     QList< CT_RegularGridInt* >& categoryHitGridList,
-                                    QList< qint64 > idList,
                                     QList< Result* > resultList,
                                     int nCategories,
                                     vector<int>& benchmarks );
@@ -135,8 +133,7 @@ namespace computeGridTools
     *  \return Returns the main hit grid storing the number of points inside each voxel
     *
     */
-    CT_RegularGridInt* computeAllHitGrids( qint64 id,
-                                           Result* result,
+    CT_RegularGridInt* computeAllHitGrids( Result* result,
                                            const CT_Point& bot,
                                            const CT_Point& top,
                                            float res,
@@ -144,7 +141,6 @@ namespace computeGridTools
                                            double intensityThresh,
                                            bool greaterThan,
                                            QList< CT_RegularGridInt* >& categoryHitGridList,
-                                           QList< qint64 > idList,
                                            QList< Result* > resultList,
                                            int nCategories,
                                            vector<int>& benchmarks);
@@ -230,8 +226,7 @@ namespace computeGridTools
     *
     *  \return Returns the "theoritical" grid storing the number of theoritical rays inside each voxel
     */
-    CT_RegularGridInt* computeTheoriticalGrid( qint64 id,
-                                               Result* result,
+    CT_RegularGridInt* computeTheoriticalGrid( Result* result,
                                                const CT_Point& bot,
                                                const CT_Point& top,
                                                float res,
@@ -280,8 +275,7 @@ namespace computeGridTools
     *
     *  \return Returns the "before" grid storing the number of rays that should have pierced the voxel if it had not been intercepted before inside each voxel
     */
-    CT_RegularGridInt* computeBeforeGrid( qint64 id,
-                                          Result* result,
+    CT_RegularGridInt* computeBeforeGrid( Result* result,
                                           const CT_Point& bot,
                                           const CT_Point& top,
                                           float res,
@@ -358,8 +352,7 @@ namespace computeGridTools
     *
     *  \return Returns the "best point of view" grid storing the index of the scanner that describes it the best
     */
-    CT_RegularGridInt* computeBestPointOfViewGrid( qint64 id,
-                                                   Result* result,
+    CT_RegularGridInt* computeBestPointOfViewGrid( Result* result,
                                                    const CT_Point& bot,
                                                    const CT_Point& top,
                                                    float res,

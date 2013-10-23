@@ -338,10 +338,10 @@ void StepLoadFileLDF::readDataFile(QFile &f, int offset, bool little_endian)
 
 
      // Creation of different grids
-    CT_RegularGridDouble*	densityGrid = new CT_RegularGridDouble(itemOutModel_idg, 1 + _nCategories, outResultDensity, _top, _bot, _res );
-    CT_RegularGridInt*      hitGrid = new CT_RegularGridInt(itemOutModel_ihg, 2 + _nCategories, outResultHit, _top, _bot, _res );
-    CT_RegularGridInt*      theoriticalGrid = new CT_RegularGridInt(itemOutModel_itg, 3 + _nCategories, outResultTheoritical, _top, _bot, _res );
-    CT_RegularGridInt*      beforeGrid = new CT_RegularGridInt(itemOutModel_ibg, 4 + _nCategories, outResultBefore, _top, _bot, _res );
+    CT_RegularGridDouble*	densityGrid = new CT_RegularGridDouble(itemOutModel_idg, outResultDensity, _top, _bot, _res );
+    CT_RegularGridInt*      hitGrid = new CT_RegularGridInt(itemOutModel_ihg, outResultHit, _top, _bot, _res );
+    CT_RegularGridInt*      theoriticalGrid = new CT_RegularGridInt(itemOutModel_itg, outResultTheoritical, _top, _bot, _res );
+    CT_RegularGridInt*      beforeGrid = new CT_RegularGridInt(itemOutModel_ibg, outResultBefore, _top, _bot, _res );
 	
     QList< CT_RegularGridInt* > categoryHitGridList;
 	if ( _nCategories > 1 )
@@ -350,7 +350,7 @@ void StepLoadFileLDF::readDataFile(QFile &f, int offset, bool little_endian)
         {
             CT_ResultGroup* result = outResultList.at(i);
             CT_OutStandardItemDrawableModel* itemModel = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(result, QString("i%1").arg(i));
-            categoryHitGridList.push_back( new CT_RegularGridInt(itemModel, i+1, result, _top, _bot, _res ) );
+            categoryHitGridList.push_back( new CT_RegularGridInt(itemModel, result, _top, _bot, _res ) );
         }
 	}
 
@@ -417,19 +417,19 @@ void StepLoadFileLDF::readDataFile(QFile &f, int offset, bool little_endian)
         }
     }
 
-    CT_StandardItemGroup* groupOut_gbg = new CT_StandardItemGroup(groupOutModel_gbg, 0, outResultBefore);
+    CT_StandardItemGroup* groupOut_gbg = new CT_StandardItemGroup(groupOutModel_gbg, outResultBefore);
     groupOut_gbg->addItemDrawable(beforeGrid);
     outResultBefore->addGroup(groupOut_gbg);
 
-    CT_StandardItemGroup* groupOut_gtg = new CT_StandardItemGroup(groupOutModel_gtg, 0, outResultTheoritical);
+    CT_StandardItemGroup* groupOut_gtg = new CT_StandardItemGroup(groupOutModel_gtg, outResultTheoritical);
     groupOut_gtg->addItemDrawable(theoriticalGrid);
     outResultTheoritical->addGroup(groupOut_gtg);
 
-    CT_StandardItemGroup* groupOut_ghg = new CT_StandardItemGroup(groupOutModel_ghg, 0, outResultHit);
+    CT_StandardItemGroup* groupOut_ghg = new CT_StandardItemGroup(groupOutModel_ghg, outResultHit);
     groupOut_ghg->addItemDrawable(hitGrid);
     outResultHit->addGroup(groupOut_ghg);
 
-    CT_StandardItemGroup* groupOut_gdg = new CT_StandardItemGroup(groupOutModel_gdg, 0, outResultDensity);
+    CT_StandardItemGroup* groupOut_gdg = new CT_StandardItemGroup(groupOutModel_gdg, outResultDensity);
     groupOut_gdg->addItemDrawable(densityGrid);
     outResultDensity->addGroup(groupOut_gdg);
 
@@ -440,7 +440,7 @@ void StepLoadFileLDF::readDataFile(QFile &f, int offset, bool little_endian)
             CT_ResultGroup* result = outResultList.at(i);
             CT_OutStandardGroupModel* groupModel = (CT_OutStandardGroupModel*)getOutModelForCreation(result, QString("g%1").arg(i));
 
-            CT_StandardItemGroup* group = new CT_StandardItemGroup(groupModel, 0, result);
+            CT_StandardItemGroup* group = new CT_StandardItemGroup(groupModel, result);
             group->addItemDrawable(categoryHitGridList[i]);
             result->addGroup(group);
 

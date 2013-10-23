@@ -250,7 +250,7 @@ void StepComputeDensityAndDistances::compute()
 
     // Get the base group model and create base group
     CT_OutStandardGroupModel* groupOutModel_base = (CT_OutStandardGroupModel*)getOutModelForCreation(outResult, DEF_groupOut_base);
-    CT_StandardItemGroup* baseGroup = new CT_StandardItemGroup(groupOutModel_base,0, outResult);
+    CT_StandardItemGroup* baseGroup = new CT_StandardItemGroup(groupOutModel_base,outResult);
     outResult->addGroup(baseGroup);
 
     // Get the items models
@@ -266,7 +266,6 @@ void StepComputeDensityAndDistances::compute()
 
     // Creating a new scanner from the input parameters
     CT_Scanner* scanner = new CT_Scanner(itemOutModel_scan,
-                                         0,
                                          outResult,
                                          0,
                                          QVector3D(_scanPosX, _scanPosY, _scanPosZ),
@@ -285,14 +284,14 @@ void StepComputeDensityAndDistances::compute()
     ctMax.x = scene->xMax(); ctMax.y = scene->yMax(); ctMax.z = scene->zMax();
 
     // Declaring the output grids
-    CT_RegularGridDouble*   deltaOutGrid = new CT_RegularGridDouble(itemOutModel_deltaout, _nCategories, outResult, ctMax, ctMin, _res, 0);
-    CT_RegularGridDouble*   deltaInGrid = new CT_RegularGridDouble(itemOutModel_deltain, _nCategories + 1, outResult, ctMax, ctMin, _res, 0);
-    CT_RegularGridDouble*   deltaBefore = new CT_RegularGridDouble(itemOutModel_deltabef, _nCategories + 2, outResult, ctMax, ctMin, _res, 0);
-    CT_RegularGridDouble*   deltaTheoritical = new CT_RegularGridDouble(itemOutModel_deltatheo, _nCategories + 3, outResult, ctMax, ctMin, _res, 0);
-    CT_RegularGridInt*      beforeGrid = new CT_RegularGridInt(itemOutModel_bef, _nCategories + 6, outResult, ctMax, ctMin, _res, 0);;
-    CT_RegularGridInt*      theoriticalGrid = new CT_RegularGridInt(itemOutModel_theo, _nCategories + 6, outResult, ctMax, ctMin, _res, 0);;
-    CT_RegularGridInt*      hitGrid = new CT_RegularGridInt(itemOutModel_hits, _nCategories + 6, outResult, ctMax, ctMin, _res, 0);
-    CT_RegularGridDouble*   densityGrid = new CT_RegularGridDouble(itemOutModel_density, _nCategories + 7, outResult, ctMax, ctMin, _res, 0);
+    CT_RegularGridDouble*   deltaOutGrid = new CT_RegularGridDouble(itemOutModel_deltaout, outResult, ctMax, ctMin, _res, 0);
+    CT_RegularGridDouble*   deltaInGrid = new CT_RegularGridDouble(itemOutModel_deltain, outResult, ctMax, ctMin, _res, 0);
+    CT_RegularGridDouble*   deltaBefore = new CT_RegularGridDouble(itemOutModel_deltabef, outResult, ctMax, ctMin, _res, 0);
+    CT_RegularGridDouble*   deltaTheoritical = new CT_RegularGridDouble(itemOutModel_deltatheo, outResult, ctMax, ctMin, _res, 0);
+    CT_RegularGridInt*      beforeGrid = new CT_RegularGridInt(itemOutModel_bef, outResult, ctMax, ctMin, _res, 0);;
+    CT_RegularGridInt*      theoriticalGrid = new CT_RegularGridInt(itemOutModel_theo, outResult, ctMax, ctMin, _res, 0);;
+    CT_RegularGridInt*      hitGrid = new CT_RegularGridInt(itemOutModel_hits, outResult, ctMax, ctMin, _res, 0);
+    CT_RegularGridDouble*   densityGrid = new CT_RegularGridDouble(itemOutModel_density, outResult, ctMax, ctMin, _res, 0);
 
     QList< CT_RegularGridInt* > categoryHitsGridList;
     QList< CT_RegularGridDouble* > categoryDeltaInGridList;
@@ -308,9 +307,9 @@ void StepComputeDensityAndDistances::compute()
             CT_OutStandardItemDrawableModel* itemOutModel_din = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, QString(DEF_itemOut_din).append(QString::number(i)));
 
 
-            categoryHitsGridList.push_back(new CT_RegularGridInt(itemOutModel_h, 3*i, outResult, ctMax, ctMin, _res, 0));
-            categoryDeltaOutGridList.push_back(new CT_RegularGridDouble(itemOutModel_dout, 3*i+1, outResult, ctMax, ctMin, _res, 0));
-            categoryDeltaInGridList.push_back(new CT_RegularGridDouble(itemOutModel_din, 3*i+2, outResult, ctMax, ctMin, _res, 0));
+            categoryHitsGridList.push_back(new CT_RegularGridInt(itemOutModel_h, outResult, ctMax, ctMin, _res, 0));
+            categoryDeltaOutGridList.push_back(new CT_RegularGridDouble(itemOutModel_dout, outResult, ctMax, ctMin, _res, 0));
+            categoryDeltaInGridList.push_back(new CT_RegularGridDouble(itemOutModel_din, outResult, ctMax, ctMin, _res, 0));
         }
     }
 
