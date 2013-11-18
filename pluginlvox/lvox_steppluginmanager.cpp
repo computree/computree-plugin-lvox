@@ -46,6 +46,9 @@
 
 //#include "step/stepcomputevisibility.h"
 
+
+#include "step/lvox_stepcomputedensity.h"
+
 LVOX_StepPluginManager::LVOX_StepPluginManager() : CT_AbstractStepPlugin()
 {
 }
@@ -61,6 +64,10 @@ bool LVOX_StepPluginManager::loadGenericsStep()
     // Steps with single scan input
 //    sep->addStep( new StepComputeDensityOnly(*createNewStepInitializeData(NULL)) );
     sep->addStep( new StepComputeDensityAndDistances(*createNewStepInitializeData(NULL)) );
+
+
+    sep = addNewSeparator(new CT_StepSeparator());
+    sep->addStep( new LVOX_StepComputeDensity(*createNewStepInitializeData(NULL)) );
 
 //    sep = addNewSeparator(new CT_StepSeparator());
 

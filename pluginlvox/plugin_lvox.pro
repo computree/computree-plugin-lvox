@@ -29,7 +29,9 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
 #    step/steploadfilemdf.h \
 #    step/steploadfilemox.h \
 #    step/stepcomputevisibility.h \
-    step/stepcomputedensityanddistances.h
+    step/stepcomputedensityanddistances.h \
+    step/lvox_stepcomputedensity.h \
+    tools/lvox_computegridtools.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -53,7 +55,9 @@ SOURCES += \
 #    step/steploadfilemdf.cpp \
 #    step/steploadfilemox.cpp \
 #    step/stepcomputevisibility.cpp \
-    step/stepcomputedensityanddistances.cpp
+    step/stepcomputedensityanddistances.cpp \
+    step/lvox_stepcomputedensity.cpp \
+    tools/lvox_computegridtools.cpp
 
 TRANSLATIONS    = plug_lvoxv2_en.ts
 
