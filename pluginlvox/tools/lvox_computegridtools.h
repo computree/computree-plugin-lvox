@@ -34,10 +34,10 @@
 #include "ct_itemdrawable/ct_regulargridint.h"      // Using integers regular grids
 #include "ct_itemdrawable/ct_regulargriddouble.h"   // Using doubles regular grids
 
-#include "ct_itemdrawable/ct_scanner.h"             // Using scanners to compute grids
 
 #include "ct_itemdrawable/ct_scene.h"               // Using scenes to compute grids
 #include "ct_itemdrawable/ct_grid3d.h"
+#include "ct_itemdrawable/ct_scanner.h"             // Using scanners to compute grids
 
 #include "qvector3d.h"
 
@@ -62,10 +62,41 @@ public:
     *
     *  \return Returns the hit grid storing the number of points inside each voxel
     */
-    static void computeHitGrid(CT_Grid3D<int> *grilleHits,
-                                const CT_Scene* scene,
-                                double intensityThresh,
-                                bool greaterThan );
+    static void computeHitGrid(CT_Scanner *scanner,
+                               CT_Grid3D<int> *grilleHits,
+                               CT_Grid3D<double> *grilleIn,
+                               CT_Grid3D<double> *grilleOut,
+                               const CT_Scene* scene,
+                               double intensityThresh,
+                               bool greaterThan );
+
+
+private:
+
+    /*!
+    *  \brief Calculates the intersection between a cubic cell and a ray
+    *
+    *  This method uses the algorithm from Williams et al.
+    *  ****************************************************************
+    *  Williams, A., Barrus, S., & Morley, R. (2005).
+    *  An efficient and robust ray-box intersection algorithm.
+    *  ACM SIGGRAPH 2005
+    *  1-4.
+    *  *****************************************************************
+    */
+    static bool intersectsRay(const QVector3D &scanCenter,
+                              const QVector3D &scanDirection,
+                              const QVector3D &bottomCorner,
+                              const float &res,
+                              QVector3D &inPoint,
+                              QVector3D &outPoint);
+
+    static bool updateIntervals(const float &bc,
+                         const float &uc,
+                         const float &sc,
+                         const float &sd,
+                         double &t0, double &t1);
+
 
 };
 

@@ -156,10 +156,10 @@ void StepComputeDensityAndDistances::createOutResultModelListProtected()
     }
 
 
-    CT_OutStandardItemDrawableModel *itemOutModel_deltaout = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltaout, new CT_RegularGridInt(), tr("DeltaOut"));
-    CT_OutStandardItemDrawableModel *itemOutModel_deltain = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltain, new CT_RegularGridInt(), tr("DeltaIn"));
-    CT_OutStandardItemDrawableModel *itemOutModel_deltabef = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltabef, new CT_RegularGridInt(), tr("DeltaBefore"));
-    CT_OutStandardItemDrawableModel *itemOutModel_deltatheo = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltatheo, new CT_RegularGridInt(), tr("DeltaTheorical"));
+    CT_OutStandardItemDrawableModel *itemOutModel_deltaout = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltaout, new CT_RegularGridDouble(), tr("DeltaOut"));
+    CT_OutStandardItemDrawableModel *itemOutModel_deltain = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltain, new CT_RegularGridDouble(), tr("DeltaIn"));
+    CT_OutStandardItemDrawableModel *itemOutModel_deltabef = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltabef, new CT_RegularGridDouble(), tr("DeltaBefore"));
+    CT_OutStandardItemDrawableModel *itemOutModel_deltatheo = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltatheo, new CT_RegularGridDouble(), tr("DeltaTheorical"));
     CT_OutStandardItemDrawableModel *itemOutModel_bef = new CT_OutStandardItemDrawableModel(DEF_itemOut_bef, new CT_RegularGridInt(), tr("Before"));
     CT_OutStandardItemDrawableModel *itemOutModel_theo = new CT_OutStandardItemDrawableModel(DEF_itemOut_theo, new CT_RegularGridInt(), tr("Theorical"));
     CT_OutStandardItemDrawableModel *itemOutModel_hits = new CT_OutStandardItemDrawableModel(DEF_itemOut_hits, new CT_RegularGridInt(), tr("Hits"));
