@@ -1,0 +1,134 @@
+/****************************************************************************
+
+ Copyright (C) 2012-2012 Universite de Sherbrooke, Quebec, CANADA
+                     All rights reserved.
+
+ Contact :  richard.fournier@usherbrooke.ca
+            jean-francois.cote@nrcan-rncan.gc.ca
+            joris.ravaglia@gmail.com
+
+ Developers : Joris RAVAGLIA
+ Adapted by Alexandre Piboule for Computree 2.0
+
+ This file is part of Computree version 2.0.
+
+ Computree is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Computree is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Computree.  If not, see <http://www.gnu.org/licenses/>.
+
+*****************************************************************************/
+
+#ifndef LVOX_VISITORRAYTRACINGADDDISTANCE_H
+#define LVOX_VISITORRAYTRACINGADDDISTANCE_H
+
+#include "abstractvisitorraytracing.h"                          // Inherits from the AbstractVisitorRaytracing class
+#include "ct_itemdrawable/ct_ray.h"                             // Needs a pointer to a ray to compute the distance to add
+
+/** \class LVOX_VisitorRaytracingAddDistance
+    \brief This class is a specialization of the AbstractVisitorRaytracing class.
+           It visits a voxel from a grid increasing the value associated to the voxel by the distance the ray spends in the voxels.
+
+           This visitor should only be used to visit :
+           \li \c AlignLeft CT_RegularGridInt
+           \li \c AlignLeft CT_RegularGridFloat
+           \li \c AlignLeft CT_RegularGridDouble
+*/
+
+class LVOX_VisitorRaytracingAddDistance : public AbstractVisitorRaytracing
+{
+public:
+//********************************************//
+//         Constructors/Destructors           //
+//********************************************//
+    /*!
+    *  \brief Default constructor
+    *
+    *  Default constructor of the class
+    *  Each attribute will be set to 0 or NULL
+    *  Each vector will be empty
+    *
+    */
+    LVOX_VisitorRaytracingAddDistance();
+
+    /*!
+    *  \brief Constructor
+    *
+    *  \param ray : ray to compute the time spent in the voxel
+    *
+    */
+    LVOX_VisitorRaytracingAddDistance( CT_Ray* ray );
+
+    /*!
+    *  \brief Copy constructor
+    *
+    *  Copy constructor of the class
+    *
+    *  \param visitor : visitor to copy
+    */
+    LVOX_VisitorRaytracingAddDistance( const LVOX_VisitorRaytracingAddDistance& visitor );
+
+    /*!
+    *  \brief Destructor
+    *
+    *  Destructor of the class
+    *
+    */
+    ~LVOX_VisitorRaytracingAddDistance();
+
+//********************************************//
+//                Operators                   //
+//********************************************//
+    /*!
+    *  \brief Assignment operator
+    *
+    *  Assignment operator of the class
+    *
+    *  \param visitor : visitor to copy
+    */
+    LVOX_VisitorRaytracingAddDistance& operator= (const LVOX_VisitorRaytracingAddDistance& visitor);
+
+//********************************************//
+//                  Getters                   //
+//********************************************//
+    /*!
+    *  \brief Getter of the class
+    *
+    *  \return Returns the bottom left corner of the factory
+    */
+    inline CT_Ray* getRay () const { return _ray; }
+
+//********************************************//
+//                  Setters                   //
+//********************************************//
+    /*!
+    *  \brief Setter of the class
+    */
+    inline void setRay ( CT_Ray* ray ) { _ray = ray; }
+
+//********************************************//
+//             Visiting method                //
+//********************************************//
+    /*!
+    *  \brief Visiting method
+    *
+    *  Increment the data of a specific voxel in a given grid
+    *
+    *  \param grid : the grid to modify
+    *  \param voxelID : the index of the voxel that needs to be incremented
+    */
+    void visit(CT_AbstractRegularGridDataInterface *grid, int voxelID);
+
+private :
+    CT_Ray* _ray; /*!< ray to compute the time spent in the voxel*/
+};
+
+#endif // LVOX_VISITORRAYTRACINGADDDISTANCE_H

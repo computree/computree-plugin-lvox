@@ -1,6 +1,6 @@
 /****************************************************************************
 
- Copyright (C) 2012-2012 UniversitÃ© de Sherbrooke, QuÃ©bec, CANADA
+ Copyright (C) 2012-2012 Universite de Sherbrooke, Quebec, CANADA
                      All rights reserved.
 
  Contact :  richard.fournier@usherbrooke.ca
@@ -8,6 +8,7 @@
             joris.ravaglia@gmail.com
 
  Developers : Joris RAVAGLIA
+ Adapted by Alexandre Piboule for Computree 2.0
 
  This file is part of Computree version 2.0.
 

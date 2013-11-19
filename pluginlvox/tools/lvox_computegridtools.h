@@ -8,23 +8,22 @@
             joris.ravaglia@gmail.com
 
  Developers : Joris RAVAGLIA
+ Adapted by Alexandre Piboule for Computree 2.0
 
- Adapted to Computree 2.0 by Alexandre PIBOULE
+ This file is part of Computree version 2.0.
 
- This file is part of LVox plugin for Computree.
-
- LVox plugin is free software: you can redistribute it and/or modify
+ Computree is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
 
- LVox plugin is distributed in the hope that it will be useful,
+ Computree is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with LVox plugin.  If not, see <http://www.gnu.org/licenses/>.
+ along with Computree.  If not, see <http://www.gnu.org/licenses/>.
 
 *****************************************************************************/
 
@@ -69,35 +68,6 @@ public:
                                const CT_Scene* scene,
                                double intensityThresh,
                                bool greaterThan );
-
-
-private:
-
-    /*!
-    *  \brief Calculates the intersection between a cubic cell and a ray
-    *
-    *  This method uses the algorithm from Williams et al.
-    *  ****************************************************************
-    *  Williams, A., Barrus, S., & Morley, R. (2005).
-    *  An efficient and robust ray-box intersection algorithm.
-    *  ACM SIGGRAPH 2005
-    *  1-4.
-    *  *****************************************************************
-    */
-    static bool intersectsRay(const QVector3D &scanCenter,
-                              const QVector3D &scanDirection,
-                              const QVector3D &bottomCorner,
-                              const float &res,
-                              QVector3D &inPoint,
-                              QVector3D &outPoint);
-
-    static bool updateIntervals(const double &bc,
-                         const double &uc,
-                         const double &sc,
-                         const double &sd,
-                         double &t0, double &t1);
-
-
 };
 
 #endif // LVOX_COMPUTEGRIDTOOLS_H

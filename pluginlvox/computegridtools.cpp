@@ -404,7 +404,7 @@ CT_RegularGridInt* computeGridTools::computeTheoriticalGrid(Result *result, cons
         for ( int j = 0 ; j < nVerticalRays ; j++ )
         {
             // Get the next ray
-            CT_Ray* currentRay = new CT_Ray( scanner.ray(i,j) );
+            CT_Ray* currentRay = scanner.ray(i,j);
 
             // Run the algorithm only if the ray intersects the grid
             if ( currentRay->intersect(theoriticalGrid, tmp1, tmp2) )
@@ -460,7 +460,7 @@ void computeGridTools::computeTheoriticalGridAndDistances(const CT_Point &bot,
         for ( int j = 0 ; j < nVerticalRays ; j++ )
         {
             // Get the next ray
-            CT_Ray* currentRay = new CT_Ray( scanner->ray(i,j) );
+            CT_Ray* currentRay = scanner->ray(i,j);
 
             // Run the algorithm only if the ray intersects the grid
             if ( currentRay->intersect(outputTheoriticalGrid, tmp1, tmp2) )

@@ -31,7 +31,14 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
 #    step/stepcomputevisibility.h \
     step/stepcomputedensityanddistances.h \
     step/lvox_stepcomputedensity.h \
-    tools/lvox_computegridtools.h
+    tools/lvox_computegridtools.h \
+    tools/lvox_algorithmewoo.h \
+    tools/lvox_algorithmewoo.hpp \
+    tools/visitors/lvox_visitorraytracingincrementbutfirst.h \
+    tools/visitors/lvox_visitorraytracingincrement.h \
+    tools/visitors/lvox_visitorraytracingadddistancebutfirst.h \
+    tools/visitors/lvox_visitorraytracingadddistance.h \
+    tools/visitors/lvox_abstractvisitorraytracing.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -57,7 +64,13 @@ SOURCES += \
 #    step/stepcomputevisibility.cpp \
     step/stepcomputedensityanddistances.cpp \
     step/lvox_stepcomputedensity.cpp \
-    tools/lvox_computegridtools.cpp
+    tools/lvox_computegridtools.cpp \
+    tools/lvox_algorithmewoo.cpp \
+    tools/visitors/lvox_visitorraytracingincrementbutfirst.cpp \
+    tools/visitors/lvox_visitorraytracingincrement.cpp \
+    tools/visitors/lvox_visitorraytracingadddistancebutfirst.cpp \
+    tools/visitors/lvox_visitorraytracingadddistance.cpp \
+    tools/visitors/lvox_abstractvisitorraytracing.cpp
 
 TRANSLATIONS    = plug_lvoxv2_en.ts
 

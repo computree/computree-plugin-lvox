@@ -27,32 +27,4 @@
 
 *****************************************************************************/
 
-#ifndef LVOX_PLUGIN_ENTRY_H
-#define LVOX_PLUGIN_ENTRY_H
-
-#include "interfaces.h"
-
-class LVOX_StepPluginManager;
-
-class LVOX_PluginEntry : public PluginInterface
-{
-    Q_OBJECT
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    Q_PLUGIN_METADATA(IID PluginInterface_iid)
-#endif
-
-    Q_INTERFACES(PluginInterface)
-
-public:
-    LVOX_PluginEntry();
-    ~LVOX_PluginEntry();
-
-    QString getVersion() const;
-    StepPluginInterface* getStepPluginManager();
-
-private:
-    LVOX_StepPluginManager *_stepPluginManager;
-};
-
-#endif // LVOX_PLUGIN_ENTRY_H
+#include "lvox_algorithmewoo.h"

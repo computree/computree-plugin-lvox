@@ -27,32 +27,22 @@
 
 *****************************************************************************/
 
-#ifndef LVOX_PLUGIN_ENTRY_H
-#define LVOX_PLUGIN_ENTRY_H
+#ifndef LVOX_VISITORRAYTRACINGADDDISTANCEBUTFIRST_H
+#define LVOX_VISITORRAYTRACINGADDDISTANCEBUTFIRST_H
 
-#include "interfaces.h"
+#include "visitorraytracingadddistance.h"
 
-class LVOX_StepPluginManager;
-
-class LVOX_PluginEntry : public PluginInterface
+class LVOX_VisitorRaytracingAddDistanceButFirst : public VisitorRaytracingAddDistance
 {
-    Q_OBJECT
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    Q_PLUGIN_METADATA(IID PluginInterface_iid)
-#endif
-
-    Q_INTERFACES(PluginInterface)
-
 public:
-    LVOX_PluginEntry();
-    ~LVOX_PluginEntry();
-
-    QString getVersion() const;
-    StepPluginInterface* getStepPluginManager();
-
-private:
-    LVOX_StepPluginManager *_stepPluginManager;
+    LVOX_VisitorRaytracingAddDistanceButFirst();
+	
+	void visit(CT_AbstractRegularGridDataInterface *grid, int voxelID);
+	
+	void reset ();
+	
+private :
+	bool	_first;
 };
 
-#endif // LVOX_PLUGIN_ENTRY_H
+#endif // LVOX_VISITORRAYTRACINGADDDISTANCEBUTFIRST_H
