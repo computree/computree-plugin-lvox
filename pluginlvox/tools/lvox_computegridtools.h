@@ -91,10 +91,10 @@ private:
                               QVector3D &inPoint,
                               QVector3D &outPoint);
 
-    static bool updateIntervals(const float &bc,
-                         const float &uc,
-                         const float &sc,
-                         const float &sd,
+    static bool updateIntervals(const double &bc,
+                         const double &uc,
+                         const double &sc,
+                         const double &sd,
                          double &t0, double &t1);
 
 

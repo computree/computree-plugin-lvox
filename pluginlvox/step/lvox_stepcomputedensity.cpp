@@ -291,13 +291,13 @@ void LVOX_StepComputeDensity::compute()
     ctMax.x = scene->xMax(); ctMax.y = scene->yMax(); ctMax.z = scene->zMax();
 
     // Declaring the output grids
-    CT_Grid3D<double>*   deltaOutGrid = new CT_Grid3D<double>(itemOutModel_deltaout, outResult, scene->xMin(), scene->yMin(), scene->zMin(), scene->xMax(), scene->yMax(), scene->zMax(), _res, -1, true, 0);
-    CT_Grid3D<double>*   deltaInGrid = new CT_Grid3D<double>(itemOutModel_deltain, outResult, scene->xMin(), scene->yMin(), scene->zMin(), scene->xMax(), scene->yMax(), scene->zMax(), _res, -1, true, 0);
+    CT_Grid3D<double>*   deltaOutGrid = new CT_Grid3D<double>(itemOutModel_deltaout, outResult, scene->xMin(), scene->yMin(), scene->zMin(), scene->xMax(), scene->yMax(), scene->zMax(), _res, -1, 0, true);
+    CT_Grid3D<double>*   deltaInGrid = new CT_Grid3D<double>(itemOutModel_deltain, outResult, scene->xMin(), scene->yMin(), scene->zMin(), scene->xMax(), scene->yMax(), scene->zMax(), _res, -1, 0, true);
     CT_RegularGridDouble*   deltaBefore = new CT_RegularGridDouble(itemOutModel_deltabef, outResult, ctMax, ctMin, _res, 0);
     CT_RegularGridDouble*   deltaTheoritical = new CT_RegularGridDouble(itemOutModel_deltatheo, outResult, ctMax, ctMin, _res, 0);
     CT_RegularGridInt*      beforeGrid = new CT_RegularGridInt(itemOutModel_bef, outResult, ctMax, ctMin, _res, 0);;
     CT_RegularGridInt*      theoriticalGrid = new CT_RegularGridInt(itemOutModel_theo, outResult, ctMax, ctMin, _res, 0);;
-    CT_Grid3D<int>*      hitGrid = new CT_Grid3D<int>(itemOutModel_hits, outResult, scene->xMin(), scene->yMin(), scene->zMin(), scene->xMax(), scene->yMax(), scene->zMax(), _res, -1, true, 0);
+    CT_Grid3D<int>*      hitGrid = new CT_Grid3D<int>(itemOutModel_hits, outResult, scene->xMin(), scene->yMin(), scene->zMin(), scene->xMax(), scene->yMax(), scene->zMax(), _res, -1, 0, true);
     CT_RegularGridDouble*   densityGrid = new CT_RegularGridDouble(itemOutModel_density, outResult, ctMax, ctMin, _res, 0);
 
     QList< CT_RegularGridInt* > categoryHitsGridList;

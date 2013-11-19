@@ -52,37 +52,62 @@ void LVOX_ComputeGridTools::computeHitGrid(CT_Scanner *scanner,
     {
         const int &index = (*pointCloudIndex)[i];
         const CT_Point &point = (*pointCloud)[index];
+        int indice = grilleHits->indexAtXYZ(point.x, point.y, point.z);
 
-        // Hits Computing
-        if    ((greaterThan && (point.intensity > intensityThresh))
-           || (!greaterThan && (point.intensity < intensityThresh)))
+        if (indice < 0)
         {
-            if (!grilleHits->addValueAtXYZ(point.x, point.y, point.z, 1))
+            qDebug() << "Le point "<< i << " de la scene n'est pas dans la grille";
+        } else
+        {
+            // Hits Computing
+            if    ((greaterThan && (point.intensity > intensityThresh))
+                   || (!greaterThan && (point.intensity < intensityThresh)))
             {
-                qDebug() << "Le point "<< i << " de la scene n'est pas dans la grille";
+                grilleHits->addValueAtIndex(indice, 1);
+
+                // Distances Sum Computing
+                QVector3D direction (point.x - scanPos.x(),
+                                     point.y - scanPos.y(),
+                                     point.z - scanPos.z());
+                // Normalizing direction
+                direction.normalize();
+
+                QVector3D bottom, in, out;
+                grilleHits->getCellBottomLeftCornerAtXYZ(point.x, point.y, point.z, bottom);
+
+                if (intersectsRay(scanPos, direction, bottom, grilleHits->resolution(), in, out))
+                {
+                    double distanceIn = sqrt(pow(in.x()-point.x, 2) + pow(in.y()-point.y, 2) + pow(in.z()-point.z, 2));
+                    double distanceOut = sqrt(pow(out.x()-point.x, 2) + pow(out.y()-point.y, 2) + pow(out.z()-point.z, 2));
+
+                    grilleIn->addValueAtIndex(indice, distanceIn);
+                    grilleOut->addValueAtIndex(indice, distanceOut);
+                }
             }
         }
-
-        // Distances Computing
-        QVector3D direction (point.x - scanPos.x(),
-                             point.y - scanPos.y(),
-                             point.z - scanPos.z());
-        // Normalizing direction
-        direction.normalize();
-
-        QVector3D bottom, in, out;
-        grilleHits->getCellBottomLeftCornerAtXYZ(point.x, point.y, point.z, bottom);
-
-        if (intersectsRay(scanPos, direction, bottom, grilleHits->resolution(), in, out))
-        {
-            double distanceIn = sqrt(pow(in.x()-point.x, 2) + pow(in.y()-point.y, 2) + pow(in.z()-point.z, 2));
-            double distanceOut = sqrt(pow(out.x()-point.x, 2) + pow(out.y()-point.y, 2) + pow(out.z()-point.z, 2));
-
-            grilleIn->addValueAtXYZ(point.x, point.y, point.z, distanceIn);
-            grilleOut->addValueAtXYZ(point.x, point.y, point.z, distanceOut);
-        }
-
     }
+
+    // Convert sums into means
+    int ncells = grilleHits->nCells();
+    for (int i = 0 ; i < ncells ; i++)
+    {
+        double value = grilleHits->valueAtIndex(i);
+        int na = grilleHits->NA();
+        if (value==0 || value==na)
+        {
+            grilleIn->setValueAtIndex(i, grilleIn->NA());
+            grilleOut->setValueAtIndex(i, grilleOut->NA());
+        } else {
+            double invalue = grilleIn->valueAtIndex(i) / value;
+            double outvalue = grilleOut->valueAtIndex(i) / value;
+
+            grilleIn->setValueAtIndex(i, invalue);
+            grilleOut->setValueAtIndex(i, outvalue);
+        }
+    }
+    grilleHits->computeMinMax();
+    grilleIn->computeMinMax();
+    grilleOut->computeMinMax();
 }
 
 bool LVOX_ComputeGridTools::intersectsRay(const QVector3D &scanCenter,
@@ -125,10 +150,10 @@ bool LVOX_ComputeGridTools::intersectsRay(const QVector3D &scanCenter,
     return true;
 }
 
-bool LVOX_ComputeGridTools::updateIntervals(const float &bc,
-                                            const float &uc,
-                                            const float &sc,
-                                            const float &sd,
+bool LVOX_ComputeGridTools::updateIntervals(const double &bc,
+                                            const double &uc,
+                                            const double &sc,
+                                            const double &sd,
                                             double &t0, double &t1)
 {
     // Update interval for bounding box slab
