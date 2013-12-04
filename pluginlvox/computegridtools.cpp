@@ -516,6 +516,7 @@ CT_RegularGridInt* computeGridTools::computeBeforeGrid(Result *result, const CT_
     gridsList << beforeGrid;
     visitorsList << visitorIncrementButFirst;
 
+
     // Creates the ray traversal algorithm
     AlgorithmWoo algorithm;
 
@@ -566,7 +567,8 @@ void computeGridTools::computeBeforeGridAndDistances(const CT_Point &bot,
 
     // Creating visitors
     VisitorRaytracingIncrementButFirst* visitorIncrementButFirst = new VisitorRaytracingIncrementButFirst();
-    VisitorRaytracingAddDistanceButFirst* visitorDistancesButFirst = new VisitorRaytracingAddDistanceButFirst();
+    VisitorRaytracingAddDistanceButFirst*
+visitorDistancesButFirst = new VisitorRaytracingAddDistanceButFirst();
 
     // Creating a buffering CT_Point
     CT_Point direction;

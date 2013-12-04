@@ -27,7 +27,6 @@
 
 *****************************************************************************/
 
-
 #include "lvox_stepcomputedensity.h"
 
 #include "ct_itemdrawable/model/inModel/ct_inoneormoregroupmodel.h"
@@ -44,24 +43,21 @@
 #include "ct_result/ct_resultgroup.h"
 
 // Inclusion of used ItemDrawable classes
-#include "ct_itemdrawable/ct_regulargriddouble.h"
-#include "ct_itemdrawable/ct_regulargridint.h"
+#include "ct_itemdrawable/ct_scene.h"
 #include "ct_itemdrawable/ct_scanner.h"
-
 #include "ct_itemdrawable/ct_grid3d.h"
-
 #include "qvector3d.h"
 
 #include "ct_step/abstract/ct_abstractsteploadfile.h"
-#include "ct_view/ct_stepconfigurabledialog.h"          // Parameter window
+#include "ct_view/ct_stepconfigurabledialog.h"
 
-#include "ct_itemdrawable/ct_scene.h"                   // This step takes a scene as input parameter
-
-#include "algorithmewoo.h"                              // Using Woo algorithm for raytrace
-#include "visitorraytracingincrement.h"                 // Visitor of the raytracing algorithm
+#include "algorithmewoo.h"
+#include "tools/lvox_computehitsthread.h"
+#include "tools/lvox_computetheoriticalsthread.h"
+#include "tools/lvox_computebeforethread.h"
 
 #include <QFileInfo>
-#include <QDebug>                                       // Some printing output in debug mode
+#include <QDebug>
 
 
 #define DEF_SearchInResult "r"
@@ -70,9 +66,6 @@
 // Alias for indexing out models
 #define DEF_resultOut_grid "grid"
 #define DEF_groupOut_base "base"
-#define DEF_itemOut_h "h"
-#define DEF_itemOut_dout "dout"
-#define DEF_itemOut_din "din"
 #define DEF_itemOut_deltaout "deltaout"
 #define DEF_itemOut_deltain "deltain"
 #define DEF_itemOut_deltabef "deltabef"
@@ -93,10 +86,6 @@ LVOX_StepComputeDensity::LVOX_StepComputeDensity(CT_StepInitializeData &dataInit
     _greaterThanThresh = true;
 
     _effectiveRayThresh = 10;
-
-    _nCategories = 1;
-    _categoriesMarks.resize( 4, -1 );
-    _saveGrid = true;
 
     //********************************************//
     //           Attributes of the scanner        //
@@ -139,37 +128,16 @@ void LVOX_StepComputeDensity::createInResultModelListProtected()
 
 void LVOX_StepComputeDensity::createOutResultModelListProtected()
 {
-//    _nCategories = computeGridTools::getNCategories( _categoriesMarks );
-
     CT_OutStandardGroupModel *groupOutModel_base = new CT_OutStandardGroupModel(DEF_groupOut_base, new CT_StandardItemGroup(), tr("base"));
-
-//    CT_OutStandardItemDrawableModel *itemOutModel_h;
-//    CT_OutStandardItemDrawableModel *itemOutModel_dout;
-//    CT_OutStandardItemDrawableModel *itemOutModel_din;
-
-//    if (_nCategories > 1)
-//    {
-//        for (unsigned int i = 0 ; i < _nCategories ; i++ )
-//        {
-//            itemOutModel_h = new CT_OutStandardItemDrawableModel(QString(DEF_itemOut_h).append(QString::number(i)), new CT_RegularGridInt(), tr("HitsCat").append(QString::number(i)));
-//            itemOutModel_dout = new CT_OutStandardItemDrawableModel(QString(DEF_itemOut_dout).append(QString::number(i)), new CT_RegularGridDouble(), tr("DistOutCat").append(QString::number(i)));
-//            itemOutModel_din = new CT_OutStandardItemDrawableModel(QString(DEF_itemOut_din).append(QString::number(i)), new CT_RegularGridDouble(), tr("DistInCat").append(QString::number(i)));
-
-//            groupOutModel_base->addItem(itemOutModel_h);
-//            groupOutModel_base->addItem(itemOutModel_dout);
-//            groupOutModel_base->addItem(itemOutModel_din);
-//        }
-//    }
-
 
     CT_OutStandardItemDrawableModel *itemOutModel_deltaout = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltaout, new CT_Grid3D<double>(), tr("DeltaOut"));
     CT_OutStandardItemDrawableModel *itemOutModel_deltain = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltain, new CT_Grid3D<double>(), tr("DeltaIn"));
-    CT_OutStandardItemDrawableModel *itemOutModel_deltabef = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltabef, new CT_RegularGridInt(), tr("DeltaBefore"));
-    CT_OutStandardItemDrawableModel *itemOutModel_deltatheo = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltatheo, new CT_RegularGridInt(), tr("DeltaTheorical"));
-    CT_OutStandardItemDrawableModel *itemOutModel_bef = new CT_OutStandardItemDrawableModel(DEF_itemOut_bef, new CT_RegularGridInt(), tr("Before"));
-    CT_OutStandardItemDrawableModel *itemOutModel_theo = new CT_OutStandardItemDrawableModel(DEF_itemOut_theo, new CT_RegularGridInt(), tr("Theorical"));
+    CT_OutStandardItemDrawableModel *itemOutModel_deltabef = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltabef, new CT_Grid3D<int>(), tr("DeltaBefore"));
+    CT_OutStandardItemDrawableModel *itemOutModel_deltatheo = new CT_OutStandardItemDrawableModel(DEF_itemOut_deltatheo, new CT_Grid3D<int>(), tr("DeltaTheorical"));
+    CT_OutStandardItemDrawableModel *itemOutModel_bef = new CT_OutStandardItemDrawableModel(DEF_itemOut_bef, new CT_Grid3D<int>(), tr("Before"));
+    CT_OutStandardItemDrawableModel *itemOutModel_theo = new CT_OutStandardItemDrawableModel(DEF_itemOut_theo, new CT_Grid3D<int>(), tr("Theorical"));
     CT_OutStandardItemDrawableModel *itemOutModel_hits = new CT_OutStandardItemDrawableModel(DEF_itemOut_hits, new CT_Grid3D<int>(), tr("Hits"));
-    CT_OutStandardItemDrawableModel *itemOutModel_density = new CT_OutStandardItemDrawableModel(DEF_itemOut_density, new CT_RegularGridDouble(), tr("Density"));
+    CT_OutStandardItemDrawableModel *itemOutModel_density = new CT_OutStandardItemDrawableModel(DEF_itemOut_density, new CT_Grid3D<double>(), tr("Density"));
     CT_OutStandardItemDrawableModel *itemOutModel_scan = new CT_OutStandardItemDrawableModel(DEF_itemOut_scan, new CT_Scanner(), tr("Scanner"));
 
     groupOutModel_base->addItem(itemOutModel_deltaout);
@@ -198,13 +166,6 @@ void LVOX_StepComputeDensity::createPostConfigurationDialog()
     configDialog->addBool("Consider the threshold as a minimum value","","",_greaterThanThresh);
     configDialog->addDouble(tr("Minimum number of effective ray in a voxel to take it into account"),tr(""),-100000,100000,2, _effectiveRayThresh );
 
-    configDialog->addInt(tr("Benchmark between first and second category"), tr(""), -10000, 1000000, _categoriesMarks[0]);
-    configDialog->addInt(tr("Benchmark between second and thirs category"), tr(""), -10000, 1000000, _categoriesMarks[1]);
-    configDialog->addInt(tr("Benchmark between third and fourth category"), tr(""), -10000, 1000000, _categoriesMarks[2]);
-    configDialog->addInt(tr("Benchmark between fourth and fifth category"), tr(""), -10000, 1000000, _categoriesMarks[3]);
-
-    configDialog->addBool("Save in LVox file in \"LVox Density File\" format (.ldf)","","",_saveGrid);
-
     //********************************************//
     //           Attributes of the scanner        //
     //********************************************//
@@ -226,23 +187,6 @@ void LVOX_StepComputeDensity::createPostConfigurationDialog()
 
 void LVOX_StepComputeDensity::compute()
 {
-    // Get the input file name and path
-    //QString filePathAndName = (dynamic_cast<CT_VirtualAbstractStep*> (this->parentStep()))->getAllSettings()->at(0).toString();
-
-    Step* parent = this;
-    while (parent->parentStep() != NULL) {parent = parent->parentStep();}
-
-    CT_AbstractStepLoadFile* loadFileStep = dynamic_cast<CT_AbstractStepLoadFile*>(parent);
-    if (loadFileStep == NULL) {
-        return;
-    }
-    QString filePathAndName = loadFileStep->getFilePath();
-
-
-    QFileInfo fileInfo ( filePathAndName );
-    _inputInFilePath = fileInfo.absolutePath()+QString("/");
-    _inputInFileName = fileInfo.baseName();
-
     // Get the input scene parameter
     CT_ResultGroup *inResult = getInputResults().first();
     CT_InAbstractItemDrawableModel *inSceneModel = (CT_InAbstractItemDrawableModel*) getInModelForResearch(inResult, DEF_SearchInScene);
@@ -282,57 +226,36 @@ void LVOX_StepComputeDensity::compute()
                                          _scanVRes,
                                          _scanInitTheta,
                                          _scanInitPhi,
-                                         _scanClockWise );
-
-    // Convert the bbox of the scene into a CT_Point
-    CT_Point ctMin, ctMax;
-    ctMin.x = scene->xMin(); ctMin.y = scene->yMin(); ctMin.z = scene->zMin();
-    ctMax.x = scene->xMax(); ctMax.y = scene->yMax(); ctMax.z = scene->zMax();
+                                         _scanClockWise);
 
     // Declaring the output grids
-    CT_Grid3D<double>*   deltaOutGrid = new CT_Grid3D<double>(itemOutModel_deltaout, outResult, scene->xMin(), scene->yMin(), scene->zMin(), scene->xMax(), scene->yMax(), scene->zMax(), _res, -1, 0, true);
-    CT_Grid3D<double>*   deltaInGrid = new CT_Grid3D<double>(itemOutModel_deltain, outResult, scene->xMin(), scene->yMin(), scene->zMin(), scene->xMax(), scene->yMax(), scene->zMax(), _res, -1, 0, true);
-    CT_RegularGridDouble*   deltaBefore = new CT_RegularGridDouble(itemOutModel_deltabef, outResult, ctMax, ctMin, _res, 0);
-    CT_RegularGridDouble*   deltaTheoritical = new CT_RegularGridDouble(itemOutModel_deltatheo, outResult, ctMax, ctMin, _res, 0);
-    CT_RegularGridInt*      beforeGrid = new CT_RegularGridInt(itemOutModel_bef, outResult, ctMax, ctMin, _res, 0);;
-    CT_RegularGridInt*      theoriticalGrid = new CT_RegularGridInt(itemOutModel_theo, outResult, ctMax, ctMin, _res, 0);;
     CT_Grid3D<int>*      hitGrid = new CT_Grid3D<int>(itemOutModel_hits, outResult, scene->xMin(), scene->yMin(), scene->zMin(), scene->xMax(), scene->yMax(), scene->zMax(), _res, -1, 0, true);
-    CT_RegularGridDouble*   densityGrid = new CT_RegularGridDouble(itemOutModel_density, outResult, ctMax, ctMin, _res, 0);
+    CT_Grid3D<double>*   deltaInGrid = new CT_Grid3D<double>(itemOutModel_deltain, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+    CT_Grid3D<double>*   deltaOutGrid = new CT_Grid3D<double>(itemOutModel_deltaout, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+    CT_Grid3D<int>*      theoriticalGrid = new CT_Grid3D<int>(itemOutModel_theo, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+    CT_Grid3D<double>*   deltaTheoritical = new CT_Grid3D<double>(itemOutModel_deltatheo, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+    CT_Grid3D<int>*      beforeGrid = new CT_Grid3D<int>(itemOutModel_bef, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+    CT_Grid3D<double>*   deltaBefore = new CT_Grid3D<double>(itemOutModel_deltabef, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+    CT_Grid3D<double>*   densityGrid = new CT_Grid3D<double>(itemOutModel_density, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
 
-    QList< CT_RegularGridInt* > categoryHitsGridList;
-    QList< CT_RegularGridDouble* > categoryDeltaInGridList;
-    QList< CT_RegularGridDouble* > categoryDeltaOutGridList;
+    setProgress(5);
 
-//    if ( _nCategories > 1 )
-//    {
-//        // Filling the lists
-//        for (unsigned int i = 0 ; i < _nCategories ; i++ )
-//        {
-//            CT_OutStandardItemDrawableModel* itemOutModel_h = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, QString(DEF_itemOut_h).append(QString::number(i)));
-//            CT_OutStandardItemDrawableModel* itemOutModel_dout = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, QString(DEF_itemOut_dout).append(QString::number(i)));
-//            CT_OutStandardItemDrawableModel* itemOutModel_din = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, QString(DEF_itemOut_din).append(QString::number(i)));
+    LVOX_ComputeHitsThread hitsThread(scanner, hitGrid, deltaInGrid, deltaOutGrid, scene, _intensityThresh, _greaterThanThresh);
+    hitsThread.start();
 
-
-//            categoryHitsGridList.push_back(new CT_RegularGridInt(itemOutModel_h, outResult, ctMax, ctMin, _res, 0));
-//            categoryDeltaOutGridList.push_back(new CT_RegularGridDouble(itemOutModel_dout, outResult, ctMax, ctMin, _res, 0));
-//            categoryDeltaInGridList.push_back(new CT_RegularGridDouble(itemOutModel_din, outResult, ctMax, ctMin, _res, 0));
-//        }
-//    }
-
-    // Computing the different grids
-//    computeGridTools::computeTheoriticalGridAndDistances( ctMin, ctMax, _res, scanner, theoriticalGrid, deltaTheoritical );
-//    computeGridTools::computeBeforeGridAndDistances( ctMin, ctMax, _res, scene->getPointCloud(), scanner, beforeGrid, deltaBefore );
-
-//    if ( _nCategories > 1 )
-//        computeGridTools::computeHitGridAndDistancesAndCategories( ctMin, ctMax, _res, scene->getPointCloud(), scanner, _intensityThresh, _greaterThanThresh, hitGrid, deltaInGrid, deltaOutGrid, categoryHitsGridList, categoryDeltaInGridList, categoryDeltaOutGridList, _nCategories, _categoriesMarks );
-//    else
-//        LVOX_ComputeGridTools::computeHitGridAndDistances( ctMin, ctMax, _res, scene->getPointCloud(), scanner, _intensityThresh, _greaterThanThresh, hitGrid, deltaInGrid, deltaOutGrid );
-
-        LVOX_ComputeGridTools::computeHitGrid(scanner, hitGrid, deltaInGrid, deltaOutGrid, scene, _intensityThresh, _greaterThanThresh);
+    LVOX_ComputeTheoriticalsThread theoricalThread(scanner, theoriticalGrid, deltaTheoritical);
+    theoricalThread.start();
 
 
-//    computeGridTools::computeDensityGrid(densityGrid, hitGrid, theoriticalGrid, beforeGrid, _effectiveRayThresh );
+    LVOX_ComputeBeforeThread beforeThread(scanner, beforeGrid, deltaBefore, scene, _intensityThresh, _greaterThanThresh);
+    beforeThread.start();
 
+
+    //    computeGridTools::computeDensityGrid(densityGrid, hitGrid, theoriticalGrid, beforeGrid, _effectiveRayThresh );
+
+    hitsThread.wait();
+    beforeThread.wait();
+    theoricalThread.wait();
 
     baseGroup->addItemDrawable(deltaOutGrid);
     baseGroup->addItemDrawable(deltaInGrid);
@@ -342,34 +265,7 @@ void LVOX_StepComputeDensity::compute()
     baseGroup->addItemDrawable(theoriticalGrid);
     baseGroup->addItemDrawable(hitGrid);
     baseGroup->addItemDrawable(densityGrid);
+    
+    setProgress(100);
 
-    if ( _nCategories > 1 )
-    {
-        for (unsigned int i = 0 ; i < _nCategories ; i++ )
-        {
-            baseGroup->addItemDrawable(categoryHitsGridList[i]);
-            baseGroup->addItemDrawable(categoryDeltaOutGridList[i]);
-            baseGroup->addItemDrawable(categoryDeltaInGridList[i]);
-        }
-    }
-
-//    // Save results in a file if demanded
-//    if ( _saveGrid )
-//    {
-//        computeGridTools::saveDensityAndDistancesResult( densityGrid,
-//                                                         hitGrid,
-//                                                         theoriticalGrid,
-//                                                         beforeGrid,
-//                                                         deltaTheoritical,
-//                                                         deltaBefore,
-//                                                         deltaInGrid,
-//                                                         deltaOutGrid,
-//                                                         categoryHitsGridList,
-//                                                         categoryDeltaInGridList,
-//                                                         categoryDeltaOutGridList,
-//                                                         _nCategories,
-//                                                         _categoriesMarks,
-//                                                         _inputInFilePath,
-//                                                         _inputInFileName );
-//    }
 }

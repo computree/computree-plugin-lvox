@@ -37,7 +37,6 @@
 */
 
 #include "ct_step/abstract/ct_abstractstep.h"                    // The step inherits from ct_abstractstep
-#include "tools/lvox_computegridtools.h"                         // Tools to compute the different grids
 
 /** \class  LVOX_StepComputeDensity
     \brief
@@ -118,19 +117,12 @@ private:
 //********************************************//
 //              Attributes of LVox            //
 //********************************************//
-    QString         _inputInFilePath;       /*!< path of the input lvox file*/
-    QString         _inputInFileName;       /*!< name of the input lvox file (without extension)*/
 
     double          _res;                   /*!< size of a voxel*/
     double          _intensityThresh;       /*!< minimum or maximum (depending on the _greaterthanThresh attribute) intensity for a point to contribute to the results*/
     bool            _greaterThanThresh;     /*!< if false, then the intensity threshold is considered as the maximum intensity to take into account*/
 
     double          _effectiveRayThresh;    /*!< minimum number of effective ray (Nt-Nb) in the voxel to calculate a density*/
-
-    unsigned int    _nCategories;           /*!< number of categories */
-    vector< int >   _categoriesMarks;       /*!< benchmarks between all categories*/
-
-    bool            _saveGrid;              /*!< save the grid or not*/
 
 //********************************************//
 //           Attributes of the scanner        //
