@@ -8,15 +8,13 @@ LVOX_ComputeBeforeThread::LVOX_ComputeBeforeThread(CT_Scanner *scanner,
                                                    CT_Grid3D<int> *outputBeforeGrid,
                                                    CT_Grid3D<double> *outputDeltaBeforeGrid,
                                                    const CT_Scene *scene,
-                                                   double intensityThresh,
-                                                   bool greaterThan) : QThread()
+                                                   bool computeDistance) : CT_MonitoredQThread()
 {
     _scanner = scanner;
     _outputBeforeGrid = outputBeforeGrid;
     _outputDeltaBeforeGrid = outputDeltaBeforeGrid;
     _scene = scene;
-    _intensityThresh = intensityThresh;
-    _greaterThan = greaterThan;
+    _computeDistance = computeDistance;
 }
 
 void LVOX_ComputeBeforeThread::run()
@@ -30,17 +28,24 @@ void LVOX_ComputeBeforeThread::run()
     _outputBeforeGrid->getMaxCoordinates(top);
 
     // Creates visitors
-    LVOX_DistanceVisitor distVisitor(_outputDeltaBeforeGrid);
-    LVOX_CountVisitor countVisitor(_outputBeforeGrid);
     QList<CT_AbstractGrid3DBeamVisitor*> list;
-    list.append(&distVisitor);
+
+    LVOX_CountVisitor countVisitor(_outputBeforeGrid);
     list.append(&countVisitor);
+
+    if (_computeDistance)
+    {
+        LVOX_DistanceVisitor distVisitor(_outputDeltaBeforeGrid);
+        list.append(&distVisitor);
+    }
 
     // Creates traversal algorithm
     CT_Grid3DWooTraversalAlgorithm<int> algo(_outputBeforeGrid, false, list);
 
     CT_Beam beam(NULL, NULL);
     QVector3D origin, direction;
+
+    int progressStep = n_points / 20;
 
     for (quint64 i = 0 ; i < n_points; i++)
     {
@@ -63,21 +68,33 @@ void LVOX_ComputeBeforeThread::run()
         {
             algo.compute(beam);
         }
-    }
 
-    // To get the mean distance we have to divide in each voxel the sum of distances by the number of hits
-    for (int i = 0 ; i < _outputBeforeGrid->nCells() ; i++ )
-    {
-        if ( _outputBeforeGrid->valueAtIndex(i) == 0 )
+        if (i % progressStep == 0)
         {
-            _outputDeltaBeforeGrid->setValueAtIndex(i,-1);
-        } else
-        {
-            _outputDeltaBeforeGrid->setValueAtIndex(i, _outputDeltaBeforeGrid->valueAtIndex(i)/(double)_outputBeforeGrid->valueAtIndex(i));
+            _progress = 100*i/n_points;
+            emit progressChanged();
         }
     }
 
     // Don't forget to calculate min and max in order to visualize it as a colored map
     _outputBeforeGrid->computeMinMax();
-    _outputDeltaBeforeGrid->computeMinMax();
+
+    if (_computeDistance)
+    {
+        // To get the mean distance we have to divide in each voxel the sum of distances by the number of hits
+        for (int i = 0 ; i < _outputBeforeGrid->nCells() ; i++ )
+        {
+            if ( _outputBeforeGrid->valueAtIndex(i) == 0 )
+            {
+                _outputDeltaBeforeGrid->setValueAtIndex(i,-1);
+            } else
+            {
+                _outputDeltaBeforeGrid->setValueAtIndex(i, _outputDeltaBeforeGrid->valueAtIndex(i)/(double)_outputBeforeGrid->valueAtIndex(i));
+            }
+        }
+        _outputDeltaBeforeGrid->computeMinMax();
+    }
+
+    _progress = 100;
+    emit progressChanged();
 }

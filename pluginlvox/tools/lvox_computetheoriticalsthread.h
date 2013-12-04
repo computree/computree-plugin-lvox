@@ -4,6 +4,7 @@
 #include <QThread>
 #include "ct_itemdrawable/ct_scanner.h"
 #include "ct_itemdrawable/ct_grid3d.h"
+#include "ct_tools/ct_monitoredqthread.h"
 
 /*!
 *  \brief Computes the "theoritical" grid of a point cloud and the distances associated (delta theoritical)
@@ -16,12 +17,13 @@
 *  \param _outputDeltaTheoriticalGrid : output deltaTheoritical grid
 *
 */
-class LVOX_ComputeTheoriticalsThread : public QThread
+class LVOX_ComputeTheoriticalsThread : public CT_MonitoredQThread
 {
 public:
     LVOX_ComputeTheoriticalsThread(CT_Scanner *scanner,
                                    CT_Grid3D<int> *outputTheoriticalGrid,
-                                   CT_Grid3D<double> *outputDeltaTheoriticalGrid);
+                                   CT_Grid3D<double> *outputDeltaTheoriticalGrid,
+                                   bool computeDistance);
 
     void run();
 
@@ -29,7 +31,7 @@ private:
     CT_Scanner*         _scanner;
     CT_Grid3D<int>*     _outputTheoriticalGrid;
     CT_Grid3D<double>*  _outputDeltaTheoriticalGrid;
-
+    bool                _computeDistance;
 };
 
 #endif // LVOX_COMPUTETHEORITICALSTHREAD_H

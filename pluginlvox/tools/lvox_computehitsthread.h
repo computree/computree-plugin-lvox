@@ -5,6 +5,7 @@
 #include "ct_itemdrawable/ct_grid3d.h"
 #include "ct_itemdrawable/ct_scanner.h"
 #include "ct_itemdrawable/ct_scene.h"
+#include "ct_tools/ct_monitoredqthread.h"
 
 /*!
  * \brief Computes the "hit" grid of a point cloud
@@ -19,7 +20,7 @@
  * \param _intensityThresh minimum or maximum intensity for a hit to contribute to the results
  * \param _greaterThan if true, only consider intensity greater than the threshold, otherwise only consider intensity below that threshold
  */
-class LVOX_ComputeHitsThread : public QThread
+class LVOX_ComputeHitsThread : public CT_MonitoredQThread
 {
     Q_OBJECT
 public:
@@ -28,8 +29,7 @@ public:
                            CT_Grid3D<double> *grilleIn,
                            CT_Grid3D<double> *grilleOut,
                            const CT_Scene *scene,
-                           double intensityThresh,
-                           bool greaterThan);
+                           bool computeDistance);
 
     void run();
 
@@ -39,8 +39,7 @@ private:
     CT_Grid3D<double>*  _grilleIn;
     CT_Grid3D<double>*  _grilleOut;
     const CT_Scene*     _scene;
-    double              _intensityThresh;
-    bool                _greaterThan;
+    bool                _computeDistance;
 };
 
 #endif // LVOX_COMPUTEHITSTHREAD_H

@@ -28,20 +28,25 @@
 *****************************************************************************/
 
 
-#ifndef LVOX_STEPCOMPUTEDENSITY_H
-#define LVOX_STEPCOMPUTEDENSITY_H
+#ifndef LVOX_STEPCOMPUTELVOXGRIDS_H
+#define LVOX_STEPCOMPUTELVOXGRIDS_H
 
-/** \file LVOX_StepComputeDensity.h
+/** \file LVOX_StepComputeLvoxGrids.h
     \author Ravaglia J. - mailto : joris.ravaglia@gmail.com
     \version 0.1
 */
 
 #include "ct_step/abstract/ct_abstractstep.h"                    // The step inherits from ct_abstractstep
 
-/** \class  LVOX_StepComputeDensity
+// Inclusion of auto-indexation system
+#include "ct_tools/model/ct_autorenamemodels.h"
+#include "ct_tools/ct_monitoredqthread.h"
+
+
+/** \class  LVOX_StepComputeLvoxGrids
     \brief
 */
-class LVOX_StepComputeDensity : public CT_AbstractStep
+class LVOX_StepComputeLvoxGrids : public CT_AbstractStep
 {
     /** \def    Q_OBJECT :
         \brief  Macro from the Qt environment. Useful to get the name of the step (among others)*/
@@ -54,7 +59,7 @@ public:
     *  Constructor of the class
     *  \param dataInit : informations about the step : parent step, plugin manager managing this step and some settings from Qt (for the Q_OBJECT?).
     */
-    LVOX_StepComputeDensity(CT_StepInitializeData &dataInit);
+    LVOX_StepComputeLvoxGrids(CT_StepInitializeData &dataInit);
 
     /*!
     *  \brief Gives a description of the step
@@ -113,16 +118,31 @@ protected:
     */
     virtual void compute();
 
+public slots:
+    void updateProgress();
+
 private:
+
+    // Declaration of autoRenames Variables (groups or items addes to In models copies)
+    CT_AutoRenameModels _deltaout_ModelName;
+    CT_AutoRenameModels _deltain_ModelName;
+    CT_AutoRenameModels _deltabef_ModelName;
+    CT_AutoRenameModels _deltatheo_ModelName;
+    CT_AutoRenameModels _bef_ModelName;
+    CT_AutoRenameModels _theo_ModelName;
+    CT_AutoRenameModels _hits_ModelName;
+    CT_AutoRenameModels _density_ModelName;
+    CT_AutoRenameModels _scan_ModelName;
+
+    QList<CT_MonitoredQThread*>     _threadList;
+
 //********************************************//
 //              Attributes of LVox            //
 //********************************************//
 
     double          _res;                   /*!< size of a voxel*/
-    double          _intensityThresh;       /*!< minimum or maximum (depending on the _greaterthanThresh attribute) intensity for a point to contribute to the results*/
-    bool            _greaterThanThresh;     /*!< if false, then the intensity threshold is considered as the maximum intensity to take into account*/
-
     double          _effectiveRayThresh;    /*!< minimum number of effective ray (Nt-Nb) in the voxel to calculate a density*/
+    bool            _computeDistances;
 
 //********************************************//
 //           Attributes of the scanner        //
@@ -139,4 +159,4 @@ private:
     bool        _scanClockWise;             /*!< Whether the scan has been done in clockwise or not*/
 };
 
-#endif // LVOX_STEPCOMPUTEDENSITY_H
+#endif // LVOX_STEPCOMPUTELVOXGRIDS_H

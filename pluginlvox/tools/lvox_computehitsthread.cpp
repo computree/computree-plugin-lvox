@@ -5,16 +5,14 @@ LVOX_ComputeHitsThread::LVOX_ComputeHitsThread(CT_Scanner *scanner,
                                                CT_Grid3D<double> *grilleIn,
                                                CT_Grid3D<double> *grilleOut,
                                                const CT_Scene *scene,
-                                               double intensityThresh,
-                                               bool greaterThan) : QThread()
+                                               bool computeDistance) : CT_MonitoredQThread()
 {
     _scanner = scanner;
     _grilleHits = grilleHits;
     _grilleIn = grilleIn;
     _grilleOut = grilleOut;
     _scene = scene;
-    _intensityThresh = intensityThresh;
-    _greaterThan = greaterThan;
+    _computeDistance = computeDistance;
 }
 
 void LVOX_ComputeHitsThread::run()
@@ -24,6 +22,8 @@ void LVOX_ComputeHitsThread::run()
     quint64 n_points = pointCloudIndex->indexSize();
     QVector3D scanPos = _scanner->getPosition();
     float res = _grilleHits->resolution();
+
+    int progressStep = n_points / 20;
 
     for (quint64 i = 0 ; i < n_points; i++)
     {
@@ -37,11 +37,10 @@ void LVOX_ComputeHitsThread::run()
         } else
         {
             // Hits Computing
-            if    ((_greaterThan && (point.intensity > _intensityThresh))
-                   || (!_greaterThan && (point.intensity < _intensityThresh)))
-            {
-                _grilleHits->addValueAtIndex(indice, 1);
+            _grilleHits->addValueAtIndex(indice, 1);
 
+            if (_computeDistance)
+            {
                 // Distances Sum Computing
                 QVector3D direction (point.x - scanPos.x(),
                                      point.y - scanPos.y(),
@@ -65,28 +64,41 @@ void LVOX_ComputeHitsThread::run()
                 }
             }
         }
-    }
 
-    // Convert sums into means
-    int ncells = _grilleHits->nCells();
-    for (int i = 0 ; i < ncells ; i++)
-    {
-        double value = _grilleHits->valueAtIndex(i);
-        int na = _grilleHits->NA();
-        if (value==0 || value==na)
+        if (i % progressStep == 0)
         {
-            _grilleIn->setValueAtIndex(i, _grilleIn->NA());
-            _grilleOut->setValueAtIndex(i, _grilleOut->NA());
-        } else {
-            double invalue = _grilleIn->valueAtIndex(i) / value;
-            double outvalue = _grilleOut->valueAtIndex(i) / value;
-
-            _grilleIn->setValueAtIndex(i, invalue);
-            _grilleOut->setValueAtIndex(i, outvalue);
+            _progress = 100*i/n_points;
+            emit progressChanged();
         }
     }
+
     _grilleHits->computeMinMax();
-    _grilleIn->computeMinMax();
-    _grilleOut->computeMinMax();
+
+    if (_computeDistance)
+    {
+        // Convert sums into means
+        int ncells = _grilleHits->nCells();
+        for (int i = 0 ; i < ncells ; i++)
+        {
+            double value = _grilleHits->valueAtIndex(i);
+            int na = _grilleHits->NA();
+            if (value==0 || value==na)
+            {
+                _grilleIn->setValueAtIndex(i, _grilleIn->NA());
+                _grilleOut->setValueAtIndex(i, _grilleOut->NA());
+            } else {
+                double invalue = _grilleIn->valueAtIndex(i) / value;
+                double outvalue = _grilleOut->valueAtIndex(i) / value;
+
+                _grilleIn->setValueAtIndex(i, invalue);
+                _grilleOut->setValueAtIndex(i, outvalue);
+            }
+        }
+        _grilleIn->computeMinMax();
+        _grilleOut->computeMinMax();
+    }
+
+    _progress = 100;
+    emit progressChanged();
 }
 
