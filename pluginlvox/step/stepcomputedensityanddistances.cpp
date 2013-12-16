@@ -101,7 +101,7 @@ StepComputeDensityAndDistances::StepComputeDensityAndDistances(CT_StepInitialize
     _scanHFov = 360;
     _scanVFov = 150;
     _scanInitTheta = 0;
-    _scanInitPhi = -60;
+    _scanInitPhi = 0;
     _scanHRes = 0.036;
     _scanVRes = 0.036;
     _scanClockWise = false;

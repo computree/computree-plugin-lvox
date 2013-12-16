@@ -23,8 +23,6 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
 #    step/steploadlvoxinputfiles.h \
 #    step/stepcomputedensityonlymultiscan.h \
 #    step/stepcomputedensityanddistancesmultiscan.h \
-    step/steploadfileldf.h \
-    step/steploadfileasc.h \
 #    step/steploadfilevox.h \
 #    step/steploadfilemdf.h \
 #    step/steploadfilemox.h \
@@ -54,8 +52,6 @@ SOURCES += \
 #    step/stepcomputedensityonly.cpp \
 #    step/stepcomputedensityonlymultiscan.cpp \
 #    step/stepcomputedensityanddistancesmultiscan.cpp \
-    step/steploadfileldf.cpp \
-    step/steploadfileasc.cpp \
 #    step/steploadfilevox.cpp \
 #    step/steploadfilemdf.cpp \
 #    step/steploadfilemox.cpp \

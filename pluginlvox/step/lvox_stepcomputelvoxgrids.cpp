@@ -87,7 +87,7 @@ LVOX_StepComputeLvoxGrids::LVOX_StepComputeLvoxGrids(CT_StepInitializeData &data
     _scanHFov = 360;
     _scanVFov = 150;
     _scanInitTheta = 0;
-    _scanInitPhi = -60;
+    _scanInitPhi = 0;
     _scanHRes = 0.036;
     _scanVRes = 0.036;
     _scanClockWise = false;
@@ -267,6 +267,7 @@ void LVOX_StepComputeLvoxGrids::compute()
                 CT_Grid3D<double>*   deltaTheoritical = NULL;
                 CT_Grid3D<double>*   deltaBefore = NULL;
 
+                group->addItemDrawable(scanner);
                 group->addItemDrawable(hitGrid);
                 group->addItemDrawable(theoriticalGrid);
                 group->addItemDrawable(beforeGrid);
