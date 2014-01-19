@@ -30,9 +30,6 @@
 
 #include "ct_stepseparator.h"
 #include "ct_steploadfileseparator.h"
-
-
-#include "step/stepcomputedensityanddistances.h"         // Step computing the density index and the distances of a single scan
 #include "step/lvox_stepcomputelvoxgrids.h"
 
 LVOX_StepPluginManager::LVOX_StepPluginManager() : CT_AbstractStepPlugin()
@@ -48,7 +45,6 @@ bool LVOX_StepPluginManager::loadGenericsStep()
     CT_StepSeparator *sep = addNewSeparator(new CT_StepSeparator());
 
     // Steps with single scan input
-    sep->addStep( new StepComputeDensityAndDistances(*createNewStepInitializeData(NULL)) );
 
     sep = addNewSeparator(new CT_StepSeparator());
     sep->addStep( new LVOX_StepComputeLvoxGrids(*createNewStepInitializeData(NULL)) );

@@ -55,7 +55,6 @@
 #include "ct_step/abstract/ct_abstractsteploadfile.h"
 #include "ct_view/ct_stepconfigurabledialog.h"
 
-#include "algorithmewoo.h"
 #include "tools/lvox_computehitsthread.h"
 #include "tools/lvox_computetheoriticalsthread.h"
 #include "tools/lvox_computebeforethread.h"

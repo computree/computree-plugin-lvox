@@ -10,15 +10,6 @@ TARGET = plug_lvoxv2
 HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     lvox_steppluginmanager.h \
     lvox_pluginentry.h \
-    gridfactory.h \
-    algorithmewoo.h \
-    abstractvisitorraytracing.h \
-    visitorraytracingincrement.h \
-    visitorraytracingadddistance.h \
-    computegridtools.h \
-    visitorraytracingincrementbutfirst.h \
-    visitorraytracingadddistancebutfirst.h \
-    mymaths.h \
 #    step/stepcomputedensityonly.h \
 #    step/steploadlvoxinputfiles.h \
 #    step/stepcomputedensityonlymultiscan.h \
@@ -27,7 +18,6 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
 #    step/steploadfilemdf.h \
 #    step/steploadfilemox.h \
 #    step/stepcomputevisibility.h \
-    step/stepcomputedensityanddistances.h \
     tools/lvox_distancevisitor.h \
     tools/lvox_countvisitor.h \
     tools/lvox_computehitsthread.h \
@@ -39,15 +29,6 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
 SOURCES += \
     lvox_pluginentry.cpp \
     lvox_steppluginmanager.cpp \
-    gridfactory.cpp \
-    algorithmewoo.cpp \
-    abstractvisitorraytracing.cpp \
-    visitorraytracingincrement.cpp \
-    visitorraytracingadddistance.cpp \
-    computegridtools.cpp \
-    visitorraytracingincrementbutfirst.cpp \
-    visitorraytracingadddistancebutfirst.cpp \  
-    mymaths.cpp \
 #    step/steploadlvoxinputfiles.cpp \
 #    step/stepcomputedensityonly.cpp \
 #    step/stepcomputedensityonlymultiscan.cpp \
@@ -56,7 +37,6 @@ SOURCES += \
 #    step/steploadfilemdf.cpp \
 #    step/steploadfilemox.cpp \
 #    step/stepcomputevisibility.cpp \
-    step/stepcomputedensityanddistances.cpp \
     tools/lvox_distancevisitor.cpp \
     tools/lvox_countvisitor.cpp \
     tools/lvox_computehitsthread.cpp \
