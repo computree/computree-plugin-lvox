@@ -155,8 +155,9 @@ void LVOX_StepLoadInFile::compute()
     while (it.hasNext())
     {
         it.next();
-        CT_Reader_ASCRGB reader(it.key());
 
+
+        CT_Reader_ASCRGB reader(it.key());
         CT_Scanner* scanner = it.value();
 
         if (reader.isValid())
@@ -164,14 +165,16 @@ void LVOX_StepLoadInFile::compute()
             QPair<CT_Scene*, CT_PointsAttributesColor*> itemsRead = reader.getSceneAndColors(resultOut_individualScenes, itemOutModel_individualScene, itemOutModel_individualSceneColor, _radius);
 
             CT_Scene* scene = itemsRead.first;
-            individualScenes.append(scene->getPointCloudIndexRegistered());
-
             CT_PointsAttributesColor* colors = itemsRead.second;
 
-            CT_StandardItemGroup* groupOut_individualScene = new CT_StandardItemGroup(groupOutModel_individualScenes, resultOut_individualScenes);
 
             if (scene != NULL)
             {
+
+                CT_StandardItemGroup* groupOut_individualScene = new CT_StandardItemGroup(groupOutModel_individualScenes, resultOut_individualScenes);
+
+                individualScenes.append(scene->getPointCloudIndexRegistered());
+
                 QVector3D min, max;
                 scene->getBoundingShape()->getBoundingBox(min, max);
                 if (min.x() < xmin) {xmin = min.x();}
@@ -188,13 +191,16 @@ void LVOX_StepLoadInFile::compute()
                 if (scene->zMin()<zmin) {zmin = scene->zMin();}
                 if (scene->zMax()>zmax) {zmax = scene->zMax();}
                 */
+
+                groupOut_individualScene->addItemDrawable(scene);
+
+                if (colors != NULL) {groupOut_individualScene->addItemDrawable(colors);}
+
+                if (scanner != NULL) {groupOut_individualScene->addItemDrawable(scanner);}
+
+                resultOut_individualScenes->addGroup(groupOut_individualScene);
             }
 
-            if (colors != NULL) {groupOut_individualScene->addItemDrawable(colors);}
-
-            if (scanner != NULL) {groupOut_individualScene->addItemDrawable(scanner);}
-
-            resultOut_individualScenes->addGroup(groupOut_individualScene);
 
         } else {
             delete scanner;
@@ -207,11 +213,11 @@ void LVOX_StepLoadInFile::compute()
 
     CT_StandardItemGroup* groupOut_mergedScene = new CT_StandardItemGroup(groupOutModel_mergedScene, resultOut_mergedScene);
 
-    //CT_Scene *mergedScene = new CT_Scene(itemOutModel_mergedScene, resultOut_mergedScene);
-    //mergedScene->setBoundingShape(new CT_AxisAlignedBoundingBox(QVector3D(xmin,ymin,zmin), QVector3D(xmax,ymax,zmax)));
-    //mergedScene->setPointCloudIndexRegistered(PS_REPOSITORY->mergePointCloudContiguous(individualScenes));
+    CT_Scene *mergedScene = new CT_Scene(itemOutModel_mergedScene, resultOut_mergedScene);
+    mergedScene->setBoundingShape(new CT_AxisAlignedBoundingBox(QVector3D(xmin,ymin,zmin), QVector3D(xmax,ymax,zmax)));
+    mergedScene->setPointCloudIndexRegistered(PS_REPOSITORY->mergePointCloudContiguous(individualScenes));
 
-    //groupOut_mergedScene->addItemDrawable(mergedScene);
+    groupOut_mergedScene->addItemDrawable(mergedScene);
     resultOut_mergedScene->addGroup(groupOut_mergedScene);
 
     setProgress(100);
