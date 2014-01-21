@@ -18,6 +18,8 @@
 #include "ct_itemdrawable/ct_pointsattributescolor.h"
 #include "ct_global/ct_context.h"
 
+#include <limits>
+
 #include "ct_reader/ct_reader_ascrgb.h"
 #include "qfile.h"
 #include "qtextstream.h"
