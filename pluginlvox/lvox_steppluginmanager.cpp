@@ -30,7 +30,9 @@
 
 #include "ct_stepseparator.h"
 #include "ct_steploadfileseparator.h"
+#include "ct_stepcanbeaddedfirstseparator.h"
 #include "step/lvox_stepcomputelvoxgrids.h"
+#include "step/lvox_steploadinfile.h"
 
 LVOX_StepPluginManager::LVOX_StepPluginManager() : CT_AbstractStepPlugin()
 {
@@ -63,5 +65,9 @@ bool LVOX_StepPluginManager::loadOpenFileStep()
 
 bool LVOX_StepPluginManager::loadCanBeAddedFirstStep()
 {
+    CT_StepCanBeAddedFirstSeparator *sep = addNewSeparator(new CT_StepCanBeAddedFirstSeparator());
+
+    sep->addStep(new LVOX_StepLoadInFile(*createNewStepInitializeData(NULL)));
+
     return true;
 }
