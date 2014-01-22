@@ -33,6 +33,7 @@
 #include "ct_stepcanbeaddedfirstseparator.h"
 #include "step/lvox_stepcomputelvoxgrids.h"
 #include "step/lvox_steploadinfile.h"
+#include "step/lvox_stepcombinedensitygrids.h"
 
 LVOX_StepPluginManager::LVOX_StepPluginManager() : CT_AbstractStepPlugin()
 {
@@ -50,6 +51,7 @@ bool LVOX_StepPluginManager::loadGenericsStep()
 
     sep = addNewSeparator(new CT_StepSeparator());
     sep->addStep( new LVOX_StepComputeLvoxGrids(*createNewStepInitializeData(NULL)) );
+    sep->addStep( new LVOX_StepCombineDensityGrids(*createNewStepInitializeData(NULL)) );
 
 	
     return true;
