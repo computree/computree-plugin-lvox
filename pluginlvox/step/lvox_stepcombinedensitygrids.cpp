@@ -151,11 +151,11 @@ void LVOX_StepCombineDensityGrids::createOutResultModelListProtected()
 void LVOX_StepCombineDensityGrids::createPostConfigurationDialog()
 {
     // Gets in models to test the presence of optional grids
-    CT_ResultGroup* resultIn_grids = getInputResultsForModel(DEF_resultIn_grids).first();
+    CT_OutAbstractResultModel* resultIn_model = (CT_OutAbstractResultModel*) getInResultsModel().first();
 
-    CT_InAbstractItemDrawableModel* itemInModel_hits = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_grids, DEF_itemIn_hits);
-    CT_InAbstractItemDrawableModel* itemInModel_theorical = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_grids, DEF_itemIn_theorical);
-    CT_InAbstractItemDrawableModel* itemInModel_before = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_grids, DEF_itemIn_before);
+    CT_InAbstractItemDrawableModel* itemInModel_hits = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_model, DEF_itemIn_hits);
+    CT_InAbstractItemDrawableModel* itemInModel_theorical = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_model, DEF_itemIn_theorical);
+    CT_InAbstractItemDrawableModel* itemInModel_before = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_model, DEF_itemIn_before);
 
     CT_StepConfigurableDialog *configDialog = newStandardPostConfigurationDialog();
 
