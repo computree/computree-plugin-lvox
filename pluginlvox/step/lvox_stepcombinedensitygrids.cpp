@@ -18,6 +18,8 @@
 #include "ct_itemdrawable/ct_grid3d.h"
 #include "qdebug.h"
 
+#include "ct_result/model/inModel/tools/ct_inturnmanager.h"
+
 // Alias for indexing in models
 #define DEF_resultIn_grids "rgrids"
 #define DEF_groupIn_grids "grids"
@@ -150,12 +152,17 @@ void LVOX_StepCombineDensityGrids::createOutResultModelListProtected()
 // Semi-automatic creation of step parameters DialogBox
 void LVOX_StepCombineDensityGrids::createPostConfigurationDialog()
 {
-    // Gets in models to test the presence of optional grids
-    CT_OutAbstractResultModel* resultIn_model = (CT_OutAbstractResultModel*) getInResultsModel().first();
+    CT_InTurnManager *man = getInTurnManager();
+    man->getTurnIndexManager()->resetTurnIndex();
+    man->createSearchModelListForCurrentTurn();
 
-    CT_InAbstractItemDrawableModel* itemInModel_hits = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_model, DEF_itemIn_hits);
-    CT_InAbstractItemDrawableModel* itemInModel_theorical = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_model, DEF_itemIn_theorical);
-    CT_InAbstractItemDrawableModel* itemInModel_before = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_model, DEF_itemIn_before);
+    // Gets in models to test the presence of optional grids
+    CT_InResultModelGroup* resultIn_model = (CT_InResultModelGroup*) man->getInResultModel(DEF_resultIn_grids);
+    CT_OutAbstractResultModel *resultOut_model = resultIn_model->getPossibilitiesSavedChecked().first()->outModel();
+
+    CT_InAbstractItemDrawableModel* itemInModel_hits = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultOut_model, DEF_itemIn_hits);
+    CT_InAbstractItemDrawableModel* itemInModel_theorical = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultOut_model, DEF_itemIn_theorical);
+    CT_InAbstractItemDrawableModel* itemInModel_before = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultOut_model, DEF_itemIn_before);
 
     CT_StepConfigurableDialog *configDialog = newStandardPostConfigurationDialog();
 
@@ -164,14 +171,14 @@ void LVOX_StepCombineDensityGrids::createPostConfigurationDialog()
     configDialog->addText("Mode de combinaison des grilles de densité :","","");
     configDialog->addExcludeValue("", "", "max (densité)", bg_mode, maxDensity);
 
-    if (itemInModel_theorical!=NULL && itemInModel_before!=NULL)
+    if (itemInModel_theorical->getPossibilitiesSavedChecked().size() > 0 && itemInModel_before->getPossibilitiesSavedChecked().size() > 0)
     {
         configDialog->addExcludeValue("", "", "max (nt - nb)", bg_mode, maxNt_Nb);
     } else {
         configDialog->addText("", "max (nt - nb)", "- Non disponible : grilles nt/nb manquante(s)");
     }
 
-    if (itemInModel_hits!=NULL)
+    if (itemInModel_hits->getPossibilitiesSavedChecked().size() > 0)
     {
         configDialog->addExcludeValue("", "", "max (ni)", bg_mode, maxNi);
     } else {
