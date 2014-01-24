@@ -13,6 +13,7 @@
 
 // Inclusion of standard result class
 #include "ct_result/ct_resultgroup.h"
+#include "ct_result/model/inModel/tools/ct_inturnmanager.h"
 
 // Inclusion of used ItemDrawable classes
 #include "ct_itemdrawable/ct_grid3d.h"
@@ -146,6 +147,7 @@ void LVOX_StepCombineDensityGrids::createOutResultModelListProtected()
                                                                               groupOutModel_grids,
                                                                               tr("grids"),
                                                                               tr(""));
+    setMaximumTurn(1);
     addOutResultModel(resultOutModel_grids);
 }
 
@@ -197,9 +199,9 @@ void LVOX_StepCombineDensityGrids::compute()
     CT_InAbstractItemDrawableModel* itemInModel_before = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_grids, DEF_itemIn_before);
     CT_InAbstractItemDrawableModel* itemInModel_density = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_grids, DEF_itemIn_density);
 
-    bool use_ni = (itemInModel_hits!=NULL);
-    bool use_nt = (itemInModel_theorical!=NULL);
-    bool use_nb = (itemInModel_before!=NULL);
+    bool use_ni = (itemInModel_hits->getPossibilitiesSavedChecked().size() > 0);
+    bool use_nt = (itemInModel_theorical->getPossibilitiesSavedChecked().size() > 0);
+    bool use_nb = (itemInModel_before->getPossibilitiesSavedChecked().size() > 0);
 
     // coherence control between models and _mode parameter
     if (_mode < 0 || _mode > 2) {qDebug() << "Configuration non prévue !"; return;}
