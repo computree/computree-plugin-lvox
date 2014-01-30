@@ -5,7 +5,7 @@
 #include "tools/lvox_distancevisitor.h"
 #include "tools/lvox_countvisitor.h"
 
-LVOX_ComputeTheoriticalsThread::LVOX_ComputeTheoriticalsThread(CT_Scanner *scanner,
+LVOX_ComputeTheoriticalsThread::LVOX_ComputeTheoriticalsThread(const CT_Scanner *scanner,
                                                                CT_Grid3D<int> *outputTheoriticalGrid,
                                                                CT_Grid3D<double> *outputDeltaTheoriticalGrid,
                                                                bool computeDistance) : CT_MonitoredQThread()

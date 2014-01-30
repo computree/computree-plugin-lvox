@@ -10,7 +10,7 @@
 class LVOX_ComputeBeforeThread : public CT_MonitoredQThread
 {
 public:
-    LVOX_ComputeBeforeThread(CT_Scanner *scanner,
+    LVOX_ComputeBeforeThread(const CT_Scanner *scanner,
                              CT_Grid3D<int> *outputBeforeGrid,
                              CT_Grid3D<double> *outputDeltaBeforeGrid,
                              const CT_Scene *scene,
@@ -19,7 +19,7 @@ public:
     void run();
 
 private:
-    CT_Scanner*         _scanner;
+    const CT_Scanner*   _scanner;
     CT_Grid3D<int>*     _outputBeforeGrid;
     CT_Grid3D<double>*  _outputDeltaBeforeGrid;
     const CT_Scene*     _scene;

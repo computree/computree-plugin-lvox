@@ -77,7 +77,7 @@ void LVOX_StepLoadInFile::createOutResultModelListProtected()
                                                                                             tr("IndividualScene"));
 
     CT_OutStandardItemDrawableModel *itemOutModel_individualSceneColor = new CT_OutStandardItemDrawableModel(DEF_itemOut_individualSceneColor,
-                                                                                            new CT_Scene(),
+                                                                                            new CT_PointsAttributesColor(),
                                                                                             tr("IndividualSceneColors"));
 
     CT_OutStandardItemDrawableModel *itemOutModel_scanner = new CT_OutStandardItemDrawableModel(DEF_itemOut_scanner, 

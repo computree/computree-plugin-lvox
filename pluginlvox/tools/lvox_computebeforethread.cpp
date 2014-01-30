@@ -4,7 +4,7 @@
 #include "tools/lvox_distancevisitor.h"
 #include "tools/lvox_countvisitor.h"
 
-LVOX_ComputeBeforeThread::LVOX_ComputeBeforeThread(CT_Scanner *scanner,
+LVOX_ComputeBeforeThread::LVOX_ComputeBeforeThread(const CT_Scanner *scanner,
                                                    CT_Grid3D<int> *outputBeforeGrid,
                                                    CT_Grid3D<double> *outputDeltaBeforeGrid,
                                                    const CT_Scene *scene,

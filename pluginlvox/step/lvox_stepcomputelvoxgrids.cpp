@@ -62,10 +62,12 @@
 
 #include <QFileInfo>
 #include <QDebug>
+#include <limits>
 
 
 #define DEF_SearchInResult "r"
 #define DEF_SearchInScene   "sc"
+#define DEF_SearchInScan   "sca"
 #define DEF_SearchInGroup   "gr"
 
 LVOX_StepComputeLvoxGrids::LVOX_StepComputeLvoxGrids(CT_StepInitializeData &dataInit) : CT_AbstractStep(dataInit)
@@ -75,21 +77,7 @@ LVOX_StepComputeLvoxGrids::LVOX_StepComputeLvoxGrids(CT_StepInitializeData &data
     //********************************************//
     _res = 0.5;
     _effectiveRayThresh = 10;
-    _computeDistances = true;
-
-    //********************************************//
-    //           Attributes of the scanner        //
-    //********************************************//
-    _scanPosX = 0;
-    _scanPosY = 0;
-    _scanPosZ = 0;
-    _scanHFov = 360;
-    _scanVFov = 150;
-    _scanInitTheta = 0;
-    _scanInitPhi = 0;
-    _scanHRes = 0.036;
-    _scanVRes = 0.036;
-    _scanClockWise = false;
+    _computeDistances = false;
 }
 
 QString LVOX_StepComputeLvoxGrids::getStepDescription() const
@@ -115,6 +103,10 @@ void LVOX_StepComputeLvoxGrids::createInResultModelListProtected()
     CT_InStandardItemDrawableModel *item = new CT_InStandardItemDrawableModel(DEF_SearchInScene, CT_Scene::staticGetType(), tr("Scène"));
     group->addItem(item);
 
+    CT_InStandardItemDrawableModel *item_scanner = new CT_InStandardItemDrawableModel(DEF_SearchInScan, CT_Scanner::staticGetType(), tr("Scanner"));
+    group->addItem(item_scanner);
+
+
     CT_InResultModelGroupToCopy *resultModel = new CT_InResultModelGroupToCopy(DEF_SearchInResult, rootGroup, tr("Scène(s)"));
     addInResultModel(resultModel);
 }
@@ -125,7 +117,6 @@ void LVOX_StepComputeLvoxGrids::createOutResultModelListProtected()
     CT_InResultModelGroupToCopy *resultModel = (CT_InResultModelGroupToCopy*)getInResultModel(DEF_SearchInResult);
 
     // Create out models for output grids
-    CT_OutStandardItemDrawableModel *itemOutModel_scan = new CT_OutStandardItemDrawableModel("", new CT_Scanner(), tr("Scanner"));
     CT_OutStandardItemDrawableModel *itemOutModel_bef = new CT_OutStandardItemDrawableModel("", new CT_Grid3D<int>(), tr("Before"));
     CT_OutStandardItemDrawableModel *itemOutModel_theo = new CT_OutStandardItemDrawableModel("", new CT_Grid3D<int>(), tr("Theorical"));
     CT_OutStandardItemDrawableModel *itemOutModel_hits = new CT_OutStandardItemDrawableModel("", new CT_Grid3D<int>(), tr("Hits"));
@@ -149,7 +140,6 @@ void LVOX_StepComputeLvoxGrids::createOutResultModelListProtected()
     QList<CT_AbstractOutModelCopyAction*> actions;
 
     // Create the action to add the item corresponding to _itemOut_gr_ModelName
-    actions << new CT_OutModelCopyActionAddModelItemInGroup(DEF_SearchInGroup, itemOutModel_scan, _scan_ModelName);
     actions << new CT_OutModelCopyActionAddModelItemInGroup(DEF_SearchInGroup, itemOutModel_hits, _hits_ModelName);
     actions << new CT_OutModelCopyActionAddModelItemInGroup(DEF_SearchInGroup, itemOutModel_theo, _theo_ModelName);
     actions << new CT_OutModelCopyActionAddModelItemInGroup(DEF_SearchInGroup, itemOutModel_bef, _bef_ModelName);
@@ -178,37 +168,18 @@ void LVOX_StepComputeLvoxGrids::createPostConfigurationDialog()
     configDialog->addDouble(tr("Minimum number of effective ray in a voxel to take it into account"),tr(""),-100000,100000,2, _effectiveRayThresh );
     configDialog->addBool(tr("Compute Distances"), tr(""), tr(""), _computeDistances);
 
-    //********************************************//
-    //           Attributes of the scanner        //
-    //********************************************//
-    configDialog->addDouble(tr("Position du scanner x"),tr("metres"),-10000,10000,2, _scanPosX );
-    configDialog->addDouble(tr("Position du scanner y"),tr("metres"),-10000,10000,2, _scanPosY );
-    configDialog->addDouble(tr("Position du scanner z"),tr("metres"),-10000,10000,2, _scanPosZ );
-
-    configDialog->addDouble(tr("Champ de vue horizontal du scanner"),tr("degres"),0.0001,360,2, _scanHFov );
-    configDialog->addDouble(tr("Champ de vue vertical du scanner"),tr("degres"),0.0001,360,2, _scanVFov );
-
-    configDialog->addDouble(tr("Theta initial du scanner"),tr("degres"),-359.99,359.99,2, _scanInitTheta );
-    configDialog->addDouble(tr("Phi initial du scanner"),tr("degres"),0,180,2, _scanInitPhi );
-
-    configDialog->addDouble(tr("Resolution angulaire horizontale du scanner"),tr("degres"),0.0001,10000,3, _scanHRes );
-    configDialog->addDouble(tr("Resolution angulaire verticale du scanner"),tr("degres"),0.0001,10000,3, _scanVRes );
-
-    configDialog->addBool("Scanner sens horaire","","",_scanClockWise);
 }
 
 void LVOX_StepComputeLvoxGrids::compute()
 {   
-    // Get the group model corresponding to DEF_SearchInGroup
     CT_InAbstractGroupModel* groupInModel = (CT_InAbstractGroupModel*)getInModelForResearchIfUseCopy(DEF_SearchInResult, DEF_SearchInGroup);
-    // Get the group model corresponding to DEF_SearchInScene
     CT_InAbstractItemDrawableModel* inSceneModel = (CT_InAbstractItemDrawableModel*)getInModelForResearchIfUseCopy(DEF_SearchInResult, DEF_SearchInScene);
+    CT_InAbstractItemDrawableModel* inScannerModel = (CT_InAbstractItemDrawableModel*)getInModelForResearchIfUseCopy(DEF_SearchInResult, DEF_SearchInScan);
 
     // Gets the out result
     CT_ResultGroup* outResult = getOutResultList().first();
 
     // Get the output items models
-    CT_OutStandardItemDrawableModel* itemOutModel_scan = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, _scan_ModelName.completeName());
     CT_OutStandardItemDrawableModel* itemOutModel_hits = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, _hits_ModelName.completeName());
     CT_OutStandardItemDrawableModel* itemOutModel_theo = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, _theo_ModelName.completeName());
     CT_OutStandardItemDrawableModel* itemOutModel_bef = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(outResult, _bef_ModelName.completeName());
@@ -230,6 +201,16 @@ void LVOX_StepComputeLvoxGrids::compute()
     QList<CT_MonitoredQThread*> baseThreads;
     QList<CT_MonitoredQThread*> densityThreads;
 
+    QMap<CT_AbstractItemGroup*, QPair<const CT_Scene*, const CT_Scanner*> > pointsOfView;
+
+    // Global limits of generated grids
+    float xMin = std::numeric_limits<float>::max();
+    float yMin = std::numeric_limits<float>::max();
+    float zMin = std::numeric_limits<float>::max();
+    float xMax = std::numeric_limits<float>::min();
+    float yMax = std::numeric_limits<float>::min();
+    float zMax = std::numeric_limits<float>::min();
+
     // on va rechercher tous les groupes contenant des nuages de points (qui ont été choisi par l'utilisateur)
     if(outResult->recursiveBeginIterateGroups(*groupInModel))
     {
@@ -239,101 +220,114 @@ void LVOX_StepComputeLvoxGrids::compute()
         while(((group = outResult->recursiveNextGroup()) != NULL) && (!isStopped()))
         {
             const CT_Scene* scene = (CT_Scene*)group->findFirstItem(inSceneModel);
-            if (scene!=NULL)
+            const CT_Scanner* scanner = (CT_Scanner*)group->findFirstItem(inScannerModel);
+
+            if (scene!=NULL && scanner!=NULL)
             {
-                // Creating a new scanner from the input parameters
-                CT_Scanner* scanner = new CT_Scanner(itemOutModel_scan,
-                                                     outResult,
-                                                     0,
-                                                     QVector3D(_scanPosX, _scanPosY, _scanPosZ),
-                                                     QVector3D(0,0,1),
-                                                     _scanHFov,
-                                                     _scanVFov,
-                                                     _scanHRes,
-                                                     _scanVRes,
-                                                     _scanInitTheta,
-                                                     _scanInitPhi,
-                                                     _scanClockWise);
+                pointsOfView.insert(group, QPair<const CT_Scene*, const CT_Scanner*>(scene, scanner));
 
-                // Declaring the output grids
-                CT_Grid3D<int>*      hitGrid = new CT_Grid3D<int>(itemOutModel_hits, outResult, scene->xMin(), scene->yMin(), scene->zMin(), scene->xMax(), scene->yMax(), scene->zMax(), _res, -1, 0, true);
-                CT_Grid3D<int>*      theoriticalGrid = new CT_Grid3D<int>(itemOutModel_theo, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-                CT_Grid3D<int>*      beforeGrid = new CT_Grid3D<int>(itemOutModel_bef, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-                CT_Grid3D<double>*   density = new CT_Grid3D<double>(itemOutModel_density, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+                if (scene->xMin() < xMin) {xMin = scene->xMin();}
+                if (scene->yMin() < yMin) {yMin = scene->yMin();}
+                if (scene->zMin() < zMin) {zMin = scene->zMin();}
+                if (scene->xMax() > xMax) {xMax = scene->xMax();}
+                if (scene->yMax() > yMax) {yMax = scene->yMax();}
+                if (scene->zMax() > zMax) {zMax = scene->zMax();}
 
-                CT_Grid3D<double>*   deltaInGrid = NULL;
-                CT_Grid3D<double>*   deltaOutGrid = NULL;
-                CT_Grid3D<double>*   deltaTheoritical = NULL;
-                CT_Grid3D<double>*   deltaBefore = NULL;
+                if (scanner->getCenterX() < xMin) {xMin = scanner->getCenterX();}
+                if (scanner->getCenterY() < yMin) {yMin = scanner->getCenterY();}
+                if (scanner->getCenterZ() < zMin) {zMin = scanner->getCenterZ();}
 
-                group->addItemDrawable(scanner);
-                group->addItemDrawable(hitGrid);
-                group->addItemDrawable(theoriticalGrid);
-                group->addItemDrawable(beforeGrid);
-                group->addItemDrawable(density);
-
-                if (_computeDistances)
-                {
-                    deltaInGrid = new CT_Grid3D<double>(itemOutModel_deltain, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-                    deltaOutGrid = new CT_Grid3D<double>(itemOutModel_deltaout, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-                    deltaTheoritical = new CT_Grid3D<double>(itemOutModel_deltatheo, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-                    deltaBefore = new CT_Grid3D<double>(itemOutModel_deltabef, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-
-                    group->addItemDrawable(deltaInGrid);
-                    group->addItemDrawable(deltaOutGrid);
-                    group->addItemDrawable(deltaTheoritical);
-                    group->addItemDrawable(deltaBefore);
-                }
-
-                LVOX_ComputeHitsThread* hitsThread = new LVOX_ComputeHitsThread(scanner, hitGrid, deltaInGrid, deltaOutGrid, scene, _computeDistances);
-                connect(hitsThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
-                hitsThread->start();
-                _threadList.append(hitsThread);
-                baseThreads.append(hitsThread);
-
-                LVOX_ComputeTheoriticalsThread* theoricalThread = new LVOX_ComputeTheoriticalsThread(scanner, theoriticalGrid, deltaTheoritical, _computeDistances);
-                connect(theoricalThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
-                theoricalThread->start();
-                _threadList.append(theoricalThread);
-                baseThreads.append(theoricalThread);
-
-                LVOX_ComputeBeforeThread* beforeThread = new LVOX_ComputeBeforeThread(scanner, beforeGrid, deltaBefore, scene, _computeDistances);
-                connect(beforeThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
-                beforeThread->start();
-                _threadList.append(beforeThread);
-                baseThreads.append(beforeThread);
-
-                LVOX_ComputeDensityThread* densityThread = new LVOX_ComputeDensityThread(density, hitGrid, theoriticalGrid, beforeGrid, _effectiveRayThresh);
-                connect(densityThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
-                _threadList.append(densityThread);
-                densityThreads.append(densityThread);
+                if (scanner->getCenterX() < xMax) {xMax = scanner->getCenterX();}
+                if (scanner->getCenterY() < yMax) {yMax = scanner->getCenterY();}
+                if (scanner->getCenterZ() < zMax) {zMax = scanner->getCenterZ();}
             }
         }
-
-        int size = baseThreads.size();
-        for (int i = 0 ; i < size ; ++i)
-        {
-            baseThreads.at(i)->wait();
-            disconnect(baseThreads.at(i), SIGNAL(progressChanged()), this, SLOT(updateProgress()));
-            updateProgress();
-        }
-
-        size = densityThreads.size();
-
-        for (int i = 0 ; i < size ; ++i)
-        {
-            densityThreads.at(i)->start();
-        }
-
-        for (int i = 0 ; i < size ; ++i)
-        {
-            densityThreads.at(i)->wait();
-            disconnect(densityThreads.at(i), SIGNAL(progressChanged()), this, SLOT(updateProgress()));
-            updateProgress();
-        }
-
-        qDeleteAll(_threadList);
     }
+
+    QMapIterator<CT_AbstractItemGroup*, QPair<const CT_Scene*, const CT_Scanner*> > it(pointsOfView);
+    while (it.hasNext() && !isStopped())
+    {
+        it.next();
+        CT_AbstractItemGroup* group = it.key();
+        const CT_Scene* scene = it.value().first;
+        const CT_Scanner* scanner =it.value().second;
+
+        // Declaring the output grids
+        CT_Grid3D<int>*      hitGrid = new CT_Grid3D<int>(itemOutModel_hits, outResult, xMin, yMin, zMin, xMax, yMax, zMax, _res, -1, 0, true);
+        CT_Grid3D<int>*      theoriticalGrid = new CT_Grid3D<int>(itemOutModel_theo, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+        CT_Grid3D<int>*      beforeGrid = new CT_Grid3D<int>(itemOutModel_bef, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+        CT_Grid3D<double>*   density = new CT_Grid3D<double>(itemOutModel_density, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+
+        CT_Grid3D<double>*   deltaInGrid = NULL;
+        CT_Grid3D<double>*   deltaOutGrid = NULL;
+        CT_Grid3D<double>*   deltaTheoritical = NULL;
+        CT_Grid3D<double>*   deltaBefore = NULL;
+
+        group->addItemDrawable(hitGrid);
+        group->addItemDrawable(theoriticalGrid);
+        group->addItemDrawable(beforeGrid);
+        group->addItemDrawable(density);
+
+        if (_computeDistances)
+        {
+            deltaInGrid = new CT_Grid3D<double>(itemOutModel_deltain, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            deltaOutGrid = new CT_Grid3D<double>(itemOutModel_deltaout, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            deltaTheoritical = new CT_Grid3D<double>(itemOutModel_deltatheo, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            deltaBefore = new CT_Grid3D<double>(itemOutModel_deltabef, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+
+            group->addItemDrawable(deltaInGrid);
+            group->addItemDrawable(deltaOutGrid);
+            group->addItemDrawable(deltaTheoritical);
+            group->addItemDrawable(deltaBefore);
+        }
+
+        LVOX_ComputeHitsThread* hitsThread = new LVOX_ComputeHitsThread(scanner, hitGrid, deltaInGrid, deltaOutGrid, scene, _computeDistances);
+        connect(hitsThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()),Qt::BlockingQueuedConnection);
+        hitsThread->start();
+        _threadList.append(hitsThread);
+        baseThreads.append(hitsThread);
+
+        LVOX_ComputeTheoriticalsThread* theoricalThread = new LVOX_ComputeTheoriticalsThread(scanner, theoriticalGrid, deltaTheoritical, _computeDistances);
+        connect(theoricalThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()),Qt::BlockingQueuedConnection);
+        theoricalThread->start();
+        _threadList.append(theoricalThread);
+        baseThreads.append(theoricalThread);
+
+        LVOX_ComputeBeforeThread* beforeThread = new LVOX_ComputeBeforeThread(scanner, beforeGrid, deltaBefore, scene, _computeDistances);
+        connect(beforeThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()),Qt::BlockingQueuedConnection);
+        beforeThread->start();
+        _threadList.append(beforeThread);
+        baseThreads.append(beforeThread);
+
+        LVOX_ComputeDensityThread* densityThread = new LVOX_ComputeDensityThread(density, hitGrid, theoriticalGrid, beforeGrid, _effectiveRayThresh);
+        connect(densityThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()),Qt::BlockingQueuedConnection);
+        _threadList.append(densityThread);
+        densityThreads.append(densityThread);
+    }
+
+    int size = baseThreads.size();
+    for (int i = 0 ; i < size ; ++i)
+    {
+        baseThreads.at(i)->wait();
+        disconnect(baseThreads.at(i), SIGNAL(progressChanged()), this, SLOT(updateProgress()));
+        updateProgress();
+    }
+
+    size = densityThreads.size();
+
+    for (int i = 0 ; i < size ; ++i)
+    {
+        densityThreads.at(i)->start();
+    }
+
+    for (int i = 0 ; i < size ; ++i)
+    {
+        densityThreads.at(i)->wait();
+        disconnect(densityThreads.at(i), SIGNAL(progressChanged()), this, SLOT(updateProgress()));
+        updateProgress();
+    }
+
+    qDeleteAll(_threadList);
 
     setProgress(100);
 

@@ -20,7 +20,7 @@
 class LVOX_ComputeTheoriticalsThread : public CT_MonitoredQThread
 {
 public:
-    LVOX_ComputeTheoriticalsThread(CT_Scanner *scanner,
+    LVOX_ComputeTheoriticalsThread(const CT_Scanner *scanner,
                                    CT_Grid3D<int> *outputTheoriticalGrid,
                                    CT_Grid3D<double> *outputDeltaTheoriticalGrid,
                                    bool computeDistance);
@@ -28,7 +28,7 @@ public:
     void run();
 
 private:
-    CT_Scanner*         _scanner;
+    const CT_Scanner*   _scanner;
     CT_Grid3D<int>*     _outputTheoriticalGrid;
     CT_Grid3D<double>*  _outputDeltaTheoriticalGrid;
     bool                _computeDistance;

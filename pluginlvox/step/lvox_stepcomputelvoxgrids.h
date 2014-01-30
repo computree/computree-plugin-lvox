@@ -132,7 +132,6 @@ private:
     CT_AutoRenameModels _theo_ModelName;
     CT_AutoRenameModels _hits_ModelName;
     CT_AutoRenameModels _density_ModelName;
-    CT_AutoRenameModels _scan_ModelName;
 
     QList<CT_MonitoredQThread*>     _threadList;
 
@@ -144,19 +143,6 @@ private:
     double          _effectiveRayThresh;    /*!< minimum number of effective ray (Nt-Nb) in the voxel to calculate a density*/
     bool            _computeDistances;
 
-//********************************************//
-//           Attributes of the scanner        //
-//********************************************//
-    double      _scanPosX;                  /*!< Position of the scanner in world coordinate system*/
-    double      _scanPosY;                  /*!< Position of the scanner in world coordinate system*/
-    double      _scanPosZ;                  /*!< Position of the scanner in world coordinate system*/
-    double      _scanHFov;                  /*!< horizontal field of view*/
-    double      _scanVFov;                  /*!< vertical field of view*/
-    double      _scanInitTheta;             /*!< initial horizontal angle of the measurement in the world coordinate system*/
-    double      _scanInitPhi;               /*!< initial vertical angle of the measurement in the world coordinate system*/
-    double      _scanHRes;                  /*!< horizontal angle resolution of the scan*/
-    double      _scanVRes;                  /*!< vertical angle resolution of the scan*/
-    bool        _scanClockWise;             /*!< Whether the scan has been done in clockwise or not*/
 };
 
 #endif // LVOX_STEPCOMPUTELVOXGRIDS_H

@@ -1,6 +1,6 @@
 #include "lvox_computehitsthread.h"
 
-LVOX_ComputeHitsThread::LVOX_ComputeHitsThread(CT_Scanner *scanner,
+LVOX_ComputeHitsThread::LVOX_ComputeHitsThread(const CT_Scanner *scanner,
                                                CT_Grid3D<int> *grilleHits,
                                                CT_Grid3D<double> *grilleIn,
                                                CT_Grid3D<double> *grilleOut,
