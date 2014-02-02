@@ -143,9 +143,9 @@ void LVOX_StepLoadInFile::compute()
     float ymin = std::numeric_limits<float>::max();
     float zmin = std::numeric_limits<float>::max();
 
-    float xmax = std::numeric_limits<float>::min();
-    float ymax = std::numeric_limits<float>::min();
-    float zmax = std::numeric_limits<float>::min();
+    float xmax = -std::numeric_limits<float>::max();
+    float ymax = -std::numeric_limits<float>::max();
+    float zmax = -std::numeric_limits<float>::max();
 
     QList<CT_PointCloudIndexRegistrationManager::CT_AbstractPCIR> individualScenes;
 
@@ -178,7 +178,7 @@ void LVOX_StepLoadInFile::compute()
                 individualScenes.append(scene->getPointCloudIndexRegistered());
 
                 QVector3D min, max;
-                scene->getBoundingShape()->getBoundingBox(min, max);
+                scene->getBoundingBox(min, max);
                 if (min.x() < xmin) {xmin = min.x();}
                 if (max.x() > xmax) {xmax = max.x();}
                 if (min.y() < ymin) {ymin = min.y();}
@@ -216,8 +216,8 @@ void LVOX_StepLoadInFile::compute()
     CT_StandardItemGroup* groupOut_mergedScene = new CT_StandardItemGroup(groupOutModel_mergedScene, resultOut_mergedScene);
 
     CT_Scene *mergedScene = new CT_Scene(itemOutModel_mergedScene, resultOut_mergedScene);
-    mergedScene->setBoundingShape(new CT_AxisAlignedBoundingBox(QVector3D(xmin,ymin,zmin), QVector3D(xmax,ymax,zmax)));
     mergedScene->setPointCloudIndexRegistered(PS_REPOSITORY->mergePointCloudContiguous(individualScenes));
+    mergedScene->setBoundingBox(xmin,ymin,zmin,xmax,ymax,zmax);
 
     groupOut_mergedScene->addItemDrawable(mergedScene);
     resultOut_mergedScene->addGroup(groupOut_mergedScene);

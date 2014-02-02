@@ -19,7 +19,7 @@ LVOX_ComputeBeforeThread::LVOX_ComputeBeforeThread(const CT_Scanner *scanner,
 
 void LVOX_ComputeBeforeThread::run()
 {
-    const CT_AbstractPointCloud *pointCloud = _scene->getPointCloud();
+    qDebug() << "Début de LVOX_ComputeBeforeThread / ScanId=" << _scanner->getScanID();
     const CT_AbstractPointCloudIndex *pointCloudIndex = _scene->getPointCloudIndex();
     quint64 n_points = pointCloudIndex->indexSize();
 
@@ -49,8 +49,8 @@ void LVOX_ComputeBeforeThread::run()
 
     for (quint64 i = 0 ; i < n_points; i++)
     {
-        const int &index = (*pointCloudIndex)[i];
-        const CT_Point &point = (*pointCloud)[index];
+        int index;
+        const CT_Point &point = pointCloudIndex->constPointAt(i, index);
 
         direction.setX(point.x - _scanner->getPosition().x());
         direction.setY(point.y - _scanner->getPosition().y());
@@ -97,4 +97,5 @@ void LVOX_ComputeBeforeThread::run()
 
     _progress = 100;
     emit progressChanged();
+    qDebug() << "Fin de LVOX_ComputeBeforeThread / ScanId=" << _scanner->getScanID();
 }

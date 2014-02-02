@@ -73,3 +73,8 @@ bool LVOX_StepPluginManager::loadCanBeAddedFirstStep()
 
     return true;
 }
+
+bool LVOX_StepPluginManager::loadActions()
+{
+    return true;
+}

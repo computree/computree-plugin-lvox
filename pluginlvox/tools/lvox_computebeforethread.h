@@ -9,6 +9,7 @@
 
 class LVOX_ComputeBeforeThread : public CT_MonitoredQThread
 {
+    Q_OBJECT
 public:
     LVOX_ComputeBeforeThread(const CT_Scanner *scanner,
                              CT_Grid3D<int> *outputBeforeGrid,

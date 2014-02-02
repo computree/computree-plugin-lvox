@@ -207,9 +207,9 @@ void LVOX_StepComputeLvoxGrids::compute()
     float xMin = std::numeric_limits<float>::max();
     float yMin = std::numeric_limits<float>::max();
     float zMin = std::numeric_limits<float>::max();
-    float xMax = std::numeric_limits<float>::min();
-    float yMax = std::numeric_limits<float>::min();
-    float zMax = std::numeric_limits<float>::min();
+    float xMax = -std::numeric_limits<float>::max();
+    float yMax = -std::numeric_limits<float>::max();
+    float zMax = -std::numeric_limits<float>::max();
 
     // on va rechercher tous les groupes contenant des nuages de points (qui ont été choisi par l'utilisateur)
     if(outResult->recursiveBeginIterateGroups(*groupInModel))
@@ -222,24 +222,28 @@ void LVOX_StepComputeLvoxGrids::compute()
             const CT_Scene* scene = (CT_Scene*)group->findFirstItem(inSceneModel);
             const CT_Scanner* scanner = (CT_Scanner*)group->findFirstItem(inScannerModel);
 
+
             if (scene!=NULL && scanner!=NULL)
             {
                 pointsOfView.insert(group, QPair<const CT_Scene*, const CT_Scanner*>(scene, scanner));
 
-                if (scene->xMin() < xMin) {xMin = scene->xMin();}
-                if (scene->yMin() < yMin) {yMin = scene->yMin();}
-                if (scene->zMin() < zMin) {zMin = scene->zMin();}
-                if (scene->xMax() > xMax) {xMax = scene->xMax();}
-                if (scene->yMax() > yMax) {yMax = scene->yMax();}
-                if (scene->zMax() > zMax) {zMax = scene->zMax();}
+                QVector3D min, max;
+                scene->getBoundingBox(min, max);
+
+                if (min.x() < xMin) {xMin = min.x();}
+                if (min.y() < yMin) {yMin = min.y();}
+                if (min.z() < zMin) {zMin = min.z();}
+                if (max.x() > xMax) {xMax = max.x();}
+                if (max.y() > yMax) {yMax = max.y();}
+                if (max.z() > zMax) {zMax = max.z();}
 
                 if (scanner->getCenterX() < xMin) {xMin = scanner->getCenterX();}
                 if (scanner->getCenterY() < yMin) {yMin = scanner->getCenterY();}
                 if (scanner->getCenterZ() < zMin) {zMin = scanner->getCenterZ();}
 
-                if (scanner->getCenterX() < xMax) {xMax = scanner->getCenterX();}
-                if (scanner->getCenterY() < yMax) {yMax = scanner->getCenterY();}
-                if (scanner->getCenterZ() < zMax) {zMax = scanner->getCenterZ();}
+                if (scanner->getCenterX() > xMax) {xMax = scanner->getCenterX();}
+                if (scanner->getCenterY() > yMax) {yMax = scanner->getCenterY();}
+                if (scanner->getCenterZ() > zMax) {zMax = scanner->getCenterZ();}
             }
         }
     }
@@ -282,50 +286,58 @@ void LVOX_StepComputeLvoxGrids::compute()
         }
 
         LVOX_ComputeHitsThread* hitsThread = new LVOX_ComputeHitsThread(scanner, hitGrid, deltaInGrid, deltaOutGrid, scene, _computeDistances);
-        connect(hitsThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()),Qt::BlockingQueuedConnection);
-        hitsThread->start();
+        connect(hitsThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
         _threadList.append(hitsThread);
         baseThreads.append(hitsThread);
 
         LVOX_ComputeTheoriticalsThread* theoricalThread = new LVOX_ComputeTheoriticalsThread(scanner, theoriticalGrid, deltaTheoritical, _computeDistances);
-        connect(theoricalThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()),Qt::BlockingQueuedConnection);
-        theoricalThread->start();
+        connect(theoricalThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
         _threadList.append(theoricalThread);
         baseThreads.append(theoricalThread);
 
         LVOX_ComputeBeforeThread* beforeThread = new LVOX_ComputeBeforeThread(scanner, beforeGrid, deltaBefore, scene, _computeDistances);
-        connect(beforeThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()),Qt::BlockingQueuedConnection);
-        beforeThread->start();
+        connect(beforeThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
         _threadList.append(beforeThread);
         baseThreads.append(beforeThread);
 
         LVOX_ComputeDensityThread* densityThread = new LVOX_ComputeDensityThread(density, hitGrid, theoriticalGrid, beforeGrid, _effectiveRayThresh);
-        connect(densityThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()),Qt::BlockingQueuedConnection);
+        connect(densityThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
         _threadList.append(densityThread);
         densityThreads.append(densityThread);
     }
 
     int size = baseThreads.size();
+
     for (int i = 0 ; i < size ; ++i)
     {
+        qDebug() << "LVOX_StepComputeLvoxGrids / baseThreads, i = " << i;
+        baseThreads.at(i)->start();
         baseThreads.at(i)->wait();
-        disconnect(baseThreads.at(i), SIGNAL(progressChanged()), this, SLOT(updateProgress()));
-        updateProgress();
     }
+
+//    for (int i = 0 ; i < size ; ++i)
+//    {
+//        baseThreads.at(i)->wait();
+//        disconnect(baseThreads.at(i), SIGNAL(progressChanged()), this, SLOT(updateProgress()));
+//        updateProgress();
+//    }
 
     size = densityThreads.size();
 
     for (int i = 0 ; i < size ; ++i)
     {
+        qDebug() << "LVOX_StepComputeLvoxGrids / densityThreads, i = " << i;
         densityThreads.at(i)->start();
+        densityThreads.at(i)->wait();
+
     }
 
-    for (int i = 0 ; i < size ; ++i)
-    {
-        densityThreads.at(i)->wait();
-        disconnect(densityThreads.at(i), SIGNAL(progressChanged()), this, SLOT(updateProgress()));
-        updateProgress();
-    }
+//    for (int i = 0 ; i < size ; ++i)
+//    {
+//        densityThreads.at(i)->wait();
+//        disconnect(densityThreads.at(i), SIGNAL(progressChanged()), this, SLOT(updateProgress()));
+//        updateProgress();
+//    }
 
     qDeleteAll(_threadList);
 
@@ -344,6 +356,7 @@ void LVOX_StepComputeLvoxGrids::updateProgress()
     }
 
     progress /= size;
-    setProgress(progress);
+    qDebug() << progress;
+    //setProgress(progress);
 }
 

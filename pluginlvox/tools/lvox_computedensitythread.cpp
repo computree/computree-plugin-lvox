@@ -15,6 +15,7 @@ LVOX_ComputeDensityThread::LVOX_ComputeDensityThread(CT_Grid3D<double> *densityG
 
 void LVOX_ComputeDensityThread::run()
 {
+    qDebug() << "Début de LVOX_ComputeDensityThread";
     int nbVoxels = _densityGrid->nCells();
 
     // For each voxel
@@ -48,4 +49,5 @@ void LVOX_ComputeDensityThread::run()
 
     // Don't forget to calculate min and max in order to visualize it as a colored map
     _densityGrid->computeMinMax();
+    qDebug() << "Fin de LVOX_ComputeDensityThread";
 }

@@ -19,6 +19,7 @@
 */
 class LVOX_ComputeTheoriticalsThread : public CT_MonitoredQThread
 {
+    Q_OBJECT
 public:
     LVOX_ComputeTheoriticalsThread(const CT_Scanner *scanner,
                                    CT_Grid3D<int> *outputTheoriticalGrid,

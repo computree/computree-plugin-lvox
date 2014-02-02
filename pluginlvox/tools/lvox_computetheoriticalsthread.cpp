@@ -18,6 +18,7 @@ LVOX_ComputeTheoriticalsThread::LVOX_ComputeTheoriticalsThread(const CT_Scanner 
 
 void LVOX_ComputeTheoriticalsThread::run()
 {
+    qDebug() << "Début de LVOX_ComputeTheoriticalsThread / ScanId=" << _scanner->getScanID();
     QVector3D bot, top;
     _outputTheoriticalGrid->getMinCoordinates(bot);
     _outputTheoriticalGrid->getMaxCoordinates(top);
@@ -88,4 +89,5 @@ void LVOX_ComputeTheoriticalsThread::run()
 
     _progress = 100;
     emit progressChanged();
+    qDebug() << "Fin de LVOX_ComputeTheoriticalsThread / ScanId=" << _scanner->getScanID();
 }

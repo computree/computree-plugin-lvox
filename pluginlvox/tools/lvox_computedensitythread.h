@@ -6,6 +6,7 @@
 
 class LVOX_ComputeDensityThread : public CT_MonitoredQThread
 {
+    Q_OBJECT
 public:
     LVOX_ComputeDensityThread(CT_Grid3D<double> *densityGrid,
                               CT_Grid3D<int> *hitsGrid,

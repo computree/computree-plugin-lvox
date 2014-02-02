@@ -43,6 +43,7 @@ protected:
     bool loadGenericsStep();
     bool loadOpenFileStep();
     bool loadCanBeAddedFirstStep();
+    bool loadActions();
 };
 
 #endif // LVOX_STEP_PLUGIN_MANAGER_H
