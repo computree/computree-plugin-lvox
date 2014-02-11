@@ -52,13 +52,13 @@ void LVOX_ComputeBeforeThread::run()
         int index;
         const CT_Point &point = pointCloudIndex->constPointAt(i, index);
 
-        direction.setX(point.x - _scanner->getPosition().x());
-        direction.setY(point.y - _scanner->getPosition().y());
-        direction.setZ(point.z - _scanner->getPosition().z());
+        direction.setX(point.x() - _scanner->getPosition().x());
+        direction.setY(point.y() - _scanner->getPosition().y());
+        direction.setZ(point.z() - _scanner->getPosition().z());
 
-        origin.setX(point.x);
-        origin.setY(point.y);
-        origin.setZ(point.z);
+        origin.setX(point.x());
+        origin.setY(point.y());
+        origin.setZ(point.z());
 
         // Get the next ray
         beam.setOrigin(origin);

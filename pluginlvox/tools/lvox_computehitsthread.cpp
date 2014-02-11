@@ -29,7 +29,7 @@ void LVOX_ComputeHitsThread::run()
     {
         int index;
         const CT_Point &point = pointCloudIndex->constPointAt(i, index);
-        int indice = _grilleHits->indexAtXYZ(point.x, point.y, point.z);
+        int indice = _grilleHits->indexAtXYZ(point.x(), point.y(), point.z());
 
         if (indice < 0)
         {
@@ -42,12 +42,12 @@ void LVOX_ComputeHitsThread::run()
             if (_computeDistance)
             {
                 // Distances Sum Computing
-                QVector3D direction (point.x - scanPos.x(),
-                                     point.y - scanPos.y(),
-                                     point.z - scanPos.z());
+                QVector3D direction (point.x() - scanPos.x(),
+                                     point.y() - scanPos.y(),
+                                     point.z() - scanPos.z());
 
                 QVector3D bottom, top, in, out;
-                _grilleHits->getCellBottomLeftCornerAtXYZ(point.x, point.y, point.z, bottom);
+                _grilleHits->getCellBottomLeftCornerAtXYZ(point.x(), point.y(), point.z(), bottom);
                 top.setX(bottom.x() + res);
                 top.setY(bottom.y() + res);
                 top.setZ(bottom.z() + res);
@@ -56,8 +56,8 @@ void LVOX_ComputeHitsThread::run()
 
                 if (beam.intersect(bottom, top, in, out))
                 {
-                    double distanceIn = sqrt(pow(in.x()-point.x, 2) + pow(in.y()-point.y, 2) + pow(in.z()-point.z, 2));
-                    double distanceOut = sqrt(pow(out.x()-point.x, 2) + pow(out.y()-point.y, 2) + pow(out.z()-point.z, 2));
+                    double distanceIn = sqrt(pow(in.x()-point.x(), 2) + pow(in.y()-point.y(), 2) + pow(in.z()-point.z(), 2));
+                    double distanceOut = sqrt(pow(out.x()-point.x(), 2) + pow(out.y()-point.y(), 2) + pow(out.z()-point.z(), 2));
 
                     _grilleIn->addValueAtIndex(indice, distanceIn);
                     _grilleOut->addValueAtIndex(indice, distanceOut);
