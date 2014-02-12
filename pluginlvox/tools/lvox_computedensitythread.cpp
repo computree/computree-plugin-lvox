@@ -22,10 +22,10 @@ void LVOX_ComputeDensityThread::run()
     for ( int i = 0 ; i < nbVoxels ; i++ )
     {
         // Compute the density index
-        // If there is not enough information
-        if ( _theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i) < _effectiveRayThresh )
+        // Avoid division by 0
+        if ( _theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i) == 0 )
         {
-            _densityGrid->setValueAtIndex(i, -3);
+            _densityGrid->setValueAtIndex(i, -1);
         }
 
         // If there is an error (nb > nt)
@@ -34,11 +34,12 @@ void LVOX_ComputeDensityThread::run()
             _densityGrid->setValueAtIndex(i, -2);
         }
 
-        // Avoid division by 0
-        else if ( _theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i) == 0 )
+        // If there is not enough information
+        else if ( _theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i) < _effectiveRayThresh )
         {
-            _densityGrid->setValueAtIndex(i, -1);
+            _densityGrid->setValueAtIndex(i, -3);
         }
+
 
         // Normal case
         else

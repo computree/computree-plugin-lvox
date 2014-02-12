@@ -46,7 +46,8 @@ public:
     {
         maxDensity = 0,
         maxNt_Nb = 1,
-        maxNi = 2
+        maxNi = 2,
+        sumNiSumNtNb = 3
     };
 
     /*! \brief Step constructor
@@ -99,6 +100,7 @@ private:
 
     // Step parameters
     int    _mode;
+    int    _effectiveRayThresh;
 
 };
 

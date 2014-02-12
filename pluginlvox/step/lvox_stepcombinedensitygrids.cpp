@@ -42,6 +42,7 @@
 LVOX_StepCombineDensityGrids::LVOX_StepCombineDensityGrids(CT_StepInitializeData &dataInit) : CT_AbstractStep(dataInit)
 {
     _mode = 0;
+    _effectiveRayThresh = 10;
 }
 
 // Step description (tooltip of contextual menu)
@@ -112,6 +113,7 @@ void LVOX_StepCombineDensityGrids::createOutResultModelListProtected()
     if (_mode == maxDensity)    {modeString = "max(density)";}
     else if (_mode == maxNt_Nb) {modeString = "max(nt-nb)";}
     else if (_mode == maxNi)    {modeString = "max(ni)";}
+    else if (_mode == sumNiSumNtNb)    {modeString = "sum(ni)/sum(nt-nb)";}
 
     CT_OutStandardGroupModel *groupOutModel_grids = new CT_OutStandardGroupModel(DEF_groupOut_grids,
                                                                                  new CT_StandardItemGroup(),
@@ -168,23 +170,32 @@ void LVOX_StepCombineDensityGrids::createPostConfigurationDialog()
 
     CT_StepConfigurableDialog *configDialog = newStandardPostConfigurationDialog();
 
+
     CT_ButtonGroup &bg_mode = configDialog->addButtonGroup(_mode);
 
-    configDialog->addText("Mode de combinaison des grilles de densité :","","");
-    configDialog->addExcludeValue("", "", "max (densité)", bg_mode, maxDensity);
+    configDialog->addText("Mode de combinaison", "des grilles de densité :","");
+    configDialog->addExcludeValue("max (densité)", "", "", bg_mode, maxDensity);
 
     if (itemInModel_theorical->getPossibilitiesSavedChecked().size() > 0 && itemInModel_before->getPossibilitiesSavedChecked().size() > 0)
     {
-        configDialog->addExcludeValue("", "", "max (nt - nb)", bg_mode, maxNt_Nb);
+        configDialog->addExcludeValue("max (nt - nb)", "", "", bg_mode, maxNt_Nb);
     } else {
-        configDialog->addText("", "max (nt - nb)", "- Non disponible : grilles nt/nb manquante(s)");
+        configDialog->addText("max (nt - nb)", "Non disponible : ", "grille(s) nt/nb manquante(s)");
     }
 
     if (itemInModel_hits->getPossibilitiesSavedChecked().size() > 0)
     {
-        configDialog->addExcludeValue("", "", "max (ni)", bg_mode, maxNi);
+        configDialog->addExcludeValue("max (ni)", "", "", bg_mode, maxNi);
     } else {
-        configDialog->addText("", "max (ni)", "- Non disponible : grille ni manquante");
+        configDialog->addText("max (ni)", "Non disponible : ", "grille ni manquante");
+    }
+
+    if (itemInModel_hits->getPossibilitiesSavedChecked().size() > 0 && itemInModel_theorical->getPossibilitiesSavedChecked().size() > 0 && itemInModel_before->getPossibilitiesSavedChecked().size() > 0)
+    {
+        configDialog->addExcludeValue("sum(ni) / sum(nt - nb)", "", "", bg_mode, sumNiSumNtNb);
+        configDialog->addInt(tr("    -> (nt - nb) minimum"),tr(""),-100000,100000, _effectiveRayThresh );
+    } else {
+        configDialog->addText("sum(ni) / sum(nt - nb)", "Non disponible : ", "grille(s) ni/nt/nb manquante(s)");
     }
 
 }
@@ -207,6 +218,7 @@ void LVOX_StepCombineDensityGrids::compute()
     if (_mode < 0 || _mode > 2) {qDebug() << "Configuration non prévue !"; return;}
     if (_mode == maxNt_Nb && (!use_nt || !use_nb)) {qDebug() << "Configuration non prévue !"; return;}
     if (_mode == maxNi && !use_ni) {qDebug() << "Configuration non prévue !"; return;}
+    if (_mode == sumNiSumNtNb && (!use_nt || !use_nb || !use_ni)) {qDebug() << "Configuration non prévue !"; return;}
 
     float xmin, ymin, zmin, res, NAd;
     int xdim, ydim, zdim, NAi, NAt, NAb;
@@ -370,6 +382,43 @@ void LVOX_StepCombineDensityGrids::compute()
                         replace = ((in_nt->valueAtIndex(index) - in_nb->valueAtIndex(index)) > (itemOut_theorical->valueAtIndex(index) - itemOut_before->valueAtIndex(index)));
                     } else if (_mode = maxNi) {
                         replace = (in_ni->valueAtIndex(index) > itemOut_hits->valueAtIndex(index));
+                    } else if (_mode = sumNiSumNtNb) {
+                        replace = false;
+
+                        itemOut_hits->addValueAtIndex(index, in_ni->valueAtIndex(index));
+                        itemOut_theorical->addValueAtIndex(index, in_nt->valueAtIndex(index));
+                        itemOut_before->addValueAtIndex(index, in_nb->valueAtIndex(index));
+
+                        if (i == InGrids_density.size() - 1)
+                        {                            
+                            int ni = itemOut_hits->valueAtIndex(index);
+                            int nt = itemOut_theorical->valueAtIndex(index);
+                            int nb = itemOut_before->valueAtIndex(index);
+
+                            int ntMnb = nt - nb;
+
+                            // Avoid division by 0
+                            if (ntMnb == 0 )
+                            {
+                                itemOut_density->setValueAtIndex(index, -1);
+                            }
+                            // If there is an error (nb > nt)
+                            else if (ntMnb < 0 )
+                            {
+                                itemOut_density->setValueAtIndex(index, -2);
+                            }
+                            // If there is not enough information
+                            else if (ntMnb < _effectiveRayThresh )
+                            {
+                                itemOut_density->setValueAtIndex(index, -3);
+                            }
+                            // Normal case
+                            else
+                            {
+                                float density = (float) ni / ((float) ntMnb);
+                                itemOut_density->setValueAtIndex(index, density);
+                            }
+                        }
                     }
 
                     if (replace)

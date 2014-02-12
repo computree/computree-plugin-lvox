@@ -140,7 +140,7 @@ private:
 //********************************************//
 
     double          _res;                   /*!< size of a voxel*/
-    double          _effectiveRayThresh;    /*!< minimum number of effective ray (Nt-Nb) in the voxel to calculate a density*/
+    int             _effectiveRayThresh;    /*!< minimum number of effective ray (Nt-Nb) in the voxel to calculate a density*/
     bool            _computeDistances;
 
 };

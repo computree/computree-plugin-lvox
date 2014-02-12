@@ -165,7 +165,7 @@ void LVOX_StepComputeLvoxGrids::createPostConfigurationDialog()
     //              Attributes of LVox            //
     //********************************************//
     configDialog->addDouble(tr("Size of a voxel"),tr("meters"),0.0001,10000,2, _res );
-    configDialog->addDouble(tr("Minimum number of effective ray in a voxel to take it into account"),tr(""),-100000,100000,2, _effectiveRayThresh );
+    configDialog->addInt(tr("Minimum number of effective ray in a voxel to take it into account"),tr(""),-100000,100000, _effectiveRayThresh );
     configDialog->addBool(tr("Compute Distances"), tr(""), tr(""), _computeDistances);
 
 }
