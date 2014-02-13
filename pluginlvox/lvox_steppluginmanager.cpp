@@ -50,6 +50,7 @@ bool LVOX_StepPluginManager::loadGenericsStep()
     // Steps with single scan input
 
     sep = addNewSeparator(new CT_StepSeparator());
+    sep->addStep(new LVOX_StepLoadInFile(*createNewStepInitializeData(NULL)));
     sep->addStep( new LVOX_StepComputeLvoxGrids(*createNewStepInitializeData(NULL)) );
     sep->addStep( new LVOX_StepCombineDensityGrids(*createNewStepInitializeData(NULL)) );
 

@@ -254,9 +254,9 @@ void LVOX_StepCombineDensityGrids::compute()
             if (firstGrid)
             {
                 firstGrid = false;
-                xmin = itemIn_density->xMin();
-                ymin = itemIn_density->yMin();
-                zmin = itemIn_density->zMin();
+                xmin = itemIn_density->minX();
+                ymin = itemIn_density->minY();
+                zmin = itemIn_density->minZ();
                 xdim = itemIn_density->xdim();
                 ydim = itemIn_density->ydim();
                 zdim = itemIn_density->zdim();
@@ -266,9 +266,9 @@ void LVOX_StepCombineDensityGrids::compute()
                 NAt = itemIn_theorical->NA();
                 NAb = itemIn_before->NA();
             } else {
-                if (xmin != itemIn_density->xMin()) {qDebug() << "xmin non homogène !"; return; }
-                if (ymin != itemIn_density->yMin()) {qDebug() << "ymin non homogène !"; return; }
-                if (zmin != itemIn_density->zMin()) {qDebug() << "zmin non homogène !"; return; }
+                if (xmin != itemIn_density->minX()) {qDebug() << "xmin non homogène !"; return; }
+                if (ymin != itemIn_density->minY()) {qDebug() << "ymin non homogène !"; return; }
+                if (zmin != itemIn_density->minZ()) {qDebug() << "zmin non homogène !"; return; }
                 if (xdim != itemIn_density->xdim()) {qDebug() << "xdim non homogène !"; return; }
                 if (ydim != itemIn_density->ydim()) {qDebug() << "ydim non homogène !"; return; }
                 if (zdim != itemIn_density->zdim()) {qDebug() << "zdim non homogène !"; return; }

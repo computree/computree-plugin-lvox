@@ -70,12 +70,16 @@
 #define DEF_SearchInScan   "sca"
 #define DEF_SearchInGroup   "gr"
 
+#define DEF_SearchInResultRefGrid "rg"
+#define DEF_SearchInRefGrid   "grd"
+
 LVOX_StepComputeLvoxGrids::LVOX_StepComputeLvoxGrids(CT_StepInitializeData &dataInit) : CT_AbstractStep(dataInit)
 {
     //********************************************//
     //              Attributes of LVox            //
     //********************************************//
     _res = 0.5;
+    _useRefGridResolution = true;
     _effectiveRayThresh = 10;
     _computeDistances = false;
 }
@@ -109,6 +113,18 @@ void LVOX_StepComputeLvoxGrids::createInResultModelListProtected()
 
     CT_InResultModelGroupToCopy *resultModel = new CT_InResultModelGroupToCopy(DEF_SearchInResult, rootGroup, tr("Scène(s)"));
     addInResultModel(resultModel);
+
+
+    CT_InZeroOrMoreGroupModel *rootGroup_refgrid = new CT_InZeroOrMoreGroupModel();
+
+    CT_InStandardItemDrawableModel *refgrid = new CT_InStandardItemDrawableModel(DEF_SearchInRefGrid,
+                                                                                 CT_AbstractGrid3D::staticGetType(),
+                                                                                 tr("Grille de référence"));
+    rootGroup_refgrid->addItem(refgrid);
+
+    CT_InResultModelGroup *resultModelRefGrid = new CT_InResultModelGroup(DEF_SearchInResultRefGrid, rootGroup_refgrid, tr("Grille de référence"), tr("OPTIONNEL"), true);
+    addInResultModel(resultModelRefGrid);
+    resultModelRefGrid->setMinimumNumberOfPossibilityThatMustBeSelectedForOneTurn(0);
 }
 
 void LVOX_StepComputeLvoxGrids::createOutResultModelListProtected()
@@ -164,7 +180,8 @@ void LVOX_StepComputeLvoxGrids::createPostConfigurationDialog()
     //********************************************//
     //              Attributes of LVox            //
     //********************************************//
-    configDialog->addDouble(tr("Size of a voxel"),tr("meters"),0.0001,10000,2, _res );
+    configDialog->addBool(tr("Use reference grid resolution"), tr("(if reference grid has been specified...)"), tr(""), _useRefGridResolution);
+    configDialog->addDouble(tr("If not : resolution of the grids"),tr("meters"),0.0001,10000,2, _res );
     configDialog->addInt(tr("Minimum number of effective ray in a voxel to take it into account"),tr(""),-100000,100000, _effectiveRayThresh );
     configDialog->addBool(tr("Compute Distances"), tr(""), tr(""), _computeDistances);
 
@@ -175,6 +192,21 @@ void LVOX_StepComputeLvoxGrids::compute()
     CT_InAbstractGroupModel* groupInModel = (CT_InAbstractGroupModel*)getInModelForResearchIfUseCopy(DEF_SearchInResult, DEF_SearchInGroup);
     CT_InAbstractItemDrawableModel* inSceneModel = (CT_InAbstractItemDrawableModel*)getInModelForResearchIfUseCopy(DEF_SearchInResult, DEF_SearchInScene);
     CT_InAbstractItemDrawableModel* inScannerModel = (CT_InAbstractItemDrawableModel*)getInModelForResearchIfUseCopy(DEF_SearchInResult, DEF_SearchInScan);
+
+    bool refGridSpecified = false;
+    CT_AbstractGrid3D* refGrid = NULL;
+
+    // Gets the optionnal reference grid
+    QList<CT_ResultGroup*> inResultsList = getInputResultsForModel(DEF_SearchInResultRefGrid);
+
+    if (inResultsList.size() > 0)
+    {
+        CT_ResultGroup* inResult_RefGrid = inResultsList.first();
+        CT_InAbstractItemDrawableModel* inRefGridModel = (CT_InAbstractItemDrawableModel*)getInModelForResearch(inResult_RefGrid, DEF_SearchInRefGrid);
+        inResult_RefGrid->recursiveBeginIterateItems(*inRefGridModel);
+        refGrid = (CT_AbstractGrid3D*) inResult_RefGrid->recursiveNextItem();
+        if (refGrid != NULL) {refGridSpecified = true;}
+    }
 
     // Gets the out result
     CT_ResultGroup* outResult = getOutResultList().first();
@@ -248,6 +280,43 @@ void LVOX_StepComputeLvoxGrids::compute()
         }
     }
 
+    // If specified, use the reference grid resolution
+    if (refGridSpecified && _useRefGridResolution)
+    {
+        _res = refGrid->resolution();
+        qDebug() << "resolution=" << _res;
+    }
+
+    // Synchronize (x,y) of the grid to refGrid (if specified)
+    if (refGridSpecified)
+    {
+        if (refGrid->minX() <= xMin) {xMin = refGrid->minX();}
+        else {
+            float newMinX = refGrid->minX();
+
+            while (newMinX > xMin){newMinX = newMinX - _res;}
+            xMin = newMinX;
+        }
+
+        if (refGrid->minY() <= yMin) {yMin = refGrid->minY();}
+        else {
+            float newMinY = refGrid->minY();
+            while (newMinY > yMin){newMinY = newMinY - _res;}
+            yMin = newMinY;
+        }
+
+        if (refGrid->minZ() <= zMin) {zMin = refGrid->minZ();}
+        else {
+            float newMinZ = refGrid->minZ();
+            while (newMinZ > zMin) {newMinZ = newMinZ - _res;}
+            zMin = newMinZ;
+        }
+
+        if (refGrid->maxX() > xMax) {xMax = refGrid->maxX();}
+        if (refGrid->maxY() > yMax) {yMax = refGrid->maxY();}
+        if (refGrid->maxZ() > zMax) {zMax = refGrid->maxZ();}
+    }
+
     QMapIterator<CT_AbstractItemGroup*, QPair<const CT_Scene*, const CT_Scanner*> > it(pointsOfView);
     while (it.hasNext() && !isStopped())
     {
@@ -258,9 +327,9 @@ void LVOX_StepComputeLvoxGrids::compute()
 
         // Declaring the output grids
         CT_Grid3D<int>*      hitGrid = new CT_Grid3D<int>(itemOutModel_hits, outResult, xMin, yMin, zMin, xMax, yMax, zMax, _res, -1, 0, true);
-        CT_Grid3D<int>*      theoriticalGrid = new CT_Grid3D<int>(itemOutModel_theo, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-        CT_Grid3D<int>*      beforeGrid = new CT_Grid3D<int>(itemOutModel_bef, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-        CT_Grid3D<double>*   density = new CT_Grid3D<double>(itemOutModel_density, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+        CT_Grid3D<int>*      theoriticalGrid = new CT_Grid3D<int>(itemOutModel_theo, outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+        CT_Grid3D<int>*      beforeGrid = new CT_Grid3D<int>(itemOutModel_bef, outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+        CT_Grid3D<double>*   density = new CT_Grid3D<double>(itemOutModel_density, outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
 
         CT_Grid3D<double>*   deltaInGrid = NULL;
         CT_Grid3D<double>*   deltaOutGrid = NULL;
@@ -274,10 +343,10 @@ void LVOX_StepComputeLvoxGrids::compute()
 
         if (_computeDistances)
         {
-            deltaInGrid = new CT_Grid3D<double>(itemOutModel_deltain, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-            deltaOutGrid = new CT_Grid3D<double>(itemOutModel_deltaout, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-            deltaTheoritical = new CT_Grid3D<double>(itemOutModel_deltatheo, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-            deltaBefore = new CT_Grid3D<double>(itemOutModel_deltabef, outResult, hitGrid->xMin(), hitGrid->yMin(), hitGrid->zMin(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            deltaInGrid = new CT_Grid3D<double>(itemOutModel_deltain, outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            deltaOutGrid = new CT_Grid3D<double>(itemOutModel_deltaout, outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            deltaTheoritical = new CT_Grid3D<double>(itemOutModel_deltatheo, outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            deltaBefore = new CT_Grid3D<double>(itemOutModel_deltabef, outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
 
             group->addItemDrawable(deltaInGrid);
             group->addItemDrawable(deltaOutGrid);
