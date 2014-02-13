@@ -284,7 +284,6 @@ void LVOX_StepComputeLvoxGrids::compute()
     if (refGridSpecified && _useRefGridResolution)
     {
         _res = refGrid->resolution();
-        qDebug() << "resolution=" << _res;
     }
 
     // Synchronize (x,y) of the grid to refGrid (if specified)
