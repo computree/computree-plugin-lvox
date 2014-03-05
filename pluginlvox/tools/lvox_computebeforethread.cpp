@@ -40,7 +40,7 @@ void LVOX_ComputeBeforeThread::run()
     }
 
     // Creates traversal algorithm
-    CT_Grid3DWooTraversalAlgorithm<int> algo(_outputBeforeGrid, false, list);
+    CT_Grid3DWooTraversalAlgorithm algo(_outputBeforeGrid, false, list);
 
     CT_Beam beam(NULL, NULL);
     QVector3D origin, direction;

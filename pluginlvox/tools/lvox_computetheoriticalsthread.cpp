@@ -41,7 +41,7 @@ void LVOX_ComputeTheoriticalsThread::run()
     }
 
     // Creates traversal algorithm
-    CT_Grid3DWooTraversalAlgorithm<int> algo(_outputTheoriticalGrid, true, list);
+    CT_Grid3DWooTraversalAlgorithm algo(_outputTheoriticalGrid, true, list);
 
     CT_Beam beam(NULL, NULL);
 
