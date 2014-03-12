@@ -21,7 +21,7 @@ void LVOX_ComputeBeforeThread::run()
 {
     qDebug() << "Début de LVOX_ComputeBeforeThread / ScanId=" << _scanner->getScanID();
     const CT_AbstractPointCloudIndex *pointCloudIndex = _scene->getPointCloudIndex();
-    quint64 n_points = pointCloudIndex->indexSize();
+    size_t n_points = pointCloudIndex->indexSize();
 
     QVector3D bot, top;
     _outputBeforeGrid->getMinCoordinates(bot);
@@ -47,10 +47,10 @@ void LVOX_ComputeBeforeThread::run()
 
     int progressStep = n_points / 20;
 
-    for (quint64 i = 0 ; i < n_points; i++)
+    for (size_t i = 0 ; i < n_points; i++)
     {
-        int index;
-        const CT_Point &point = pointCloudIndex->constPointAt(i, index);
+        size_t index;
+        const CT_Point &point = pointCloudIndex->constTAt(i, index);
 
         direction.setX(point.x - _scanner->getPosition().x());
         direction.setY(point.y - _scanner->getPosition().y());

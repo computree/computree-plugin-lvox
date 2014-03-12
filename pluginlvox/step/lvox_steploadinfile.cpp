@@ -147,7 +147,7 @@ void LVOX_StepLoadInFile::compute()
     float ymax = -std::numeric_limits<float>::max();
     float zmax = -std::numeric_limits<float>::max();
 
-    QList<CT_PointCloudIndexRegistrationManager::CT_AbstractPCIR> individualScenes;
+    QList<CT_ABSTRACT_PCIR> individualScenes;
 
     int baseProgress = 0;
     int progressIncrement = 100/scansMap.size();

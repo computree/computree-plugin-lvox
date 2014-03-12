@@ -19,16 +19,16 @@ void LVOX_ComputeHitsThread::run()
 {
     qDebug() << "Début de LVOX_ComputeHitsThread / ScanId=" << _scanner->getScanID();
     const CT_AbstractPointCloudIndex *pointCloudIndex = _scene->getPointCloudIndex();
-    quint64 n_points = pointCloudIndex->indexSize();
+    size_t n_points = pointCloudIndex->indexSize();
     QVector3D scanPos = _scanner->getPosition();
     float res = _grilleHits->resolution();
 
     int progressStep = n_points / 20;
 
-    for (quint64 i = 0 ; i < n_points; i++)
+    for (size_t i = 0 ; i < n_points; i++)
     {
-        int index;
-        const CT_Point &point = pointCloudIndex->constPointAt(i, index);
+        size_t index;
+        const CT_Point &point = pointCloudIndex->constTAt(i, index);
         int indice = _grilleHits->indexAtXYZ(point.x, point.y, point.z);
 
         if (indice < 0)
