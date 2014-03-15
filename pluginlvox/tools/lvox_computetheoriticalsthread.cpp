@@ -74,7 +74,7 @@ void LVOX_ComputeTheoriticalsThread::run()
     if (_computeDistance)
     {
         // To get the mean distance we have to divide in each voxel the sum of distances by the number of hits
-        for (int i = 0 ; i < _outputTheoriticalGrid->nCells() ; i++ )
+        for (size_t i = 0 ; i < _outputTheoriticalGrid->nCells() ; i++ )
         {
             if ( _outputTheoriticalGrid->valueAtIndex(i) == 0 )
             {

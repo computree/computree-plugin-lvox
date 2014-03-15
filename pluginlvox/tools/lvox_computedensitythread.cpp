@@ -16,10 +16,10 @@ LVOX_ComputeDensityThread::LVOX_ComputeDensityThread(CT_Grid3D<double> *densityG
 void LVOX_ComputeDensityThread::run()
 {
     qDebug() << "Début de LVOX_ComputeDensityThread";
-    int nbVoxels = _densityGrid->nCells();
+    size_t nbVoxels = _densityGrid->nCells();
 
     // For each voxel
-    for ( int i = 0 ; i < nbVoxels ; i++ )
+    for ( size_t i = 0 ; i < nbVoxels ; i++ )
     {
         // Compute the density index
         // Avoid division by 0

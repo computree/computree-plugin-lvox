@@ -6,7 +6,7 @@ LVOX_DistanceVisitor::LVOX_DistanceVisitor(CT_Grid3D<double> *grid)
   _grid = grid;
 }
 
-void LVOX_DistanceVisitor::visit(const int &index, const CT_Beam *beam)
+void LVOX_DistanceVisitor::visit(const size_t &index, const CT_Beam *beam)
 {
     QVector3D bot, top, nearInter, farInter;
     bool ok = _grid->getCellCoordinates(index, bot, top);

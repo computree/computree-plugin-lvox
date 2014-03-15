@@ -29,12 +29,9 @@ void LVOX_ComputeHitsThread::run()
     {
         size_t index;
         const CT_Point &point = pointCloudIndex->constTAt(i, index);
-        int indice = _grilleHits->indexAtXYZ(point.x, point.y, point.z);
+        size_t indice;
 
-        if (indice < 0)
-        {
-            qDebug() << "Le point "<< i << " de la scene n'est pas dans la grille";
-        } else
+        if (_grilleHits->indexAtXYZ(point.x, point.y, point.z, indice))
         {
             // Hits Computing
             _grilleHits->addValueAtIndex(indice, 1);
@@ -63,6 +60,9 @@ void LVOX_ComputeHitsThread::run()
                     _grilleOut->addValueAtIndex(indice, distanceOut);
                 }
             }
+        } else
+        {
+            qDebug() << "Le point "<< i << " de la scene n'est pas dans la grille";
         }
 
         if (i % progressStep == 0)
@@ -77,8 +77,8 @@ void LVOX_ComputeHitsThread::run()
     if (_computeDistance)
     {
         // Convert sums into means
-        int ncells = _grilleHits->nCells();
-        for (int i = 0 ; i < ncells ; i++)
+        size_t ncells = _grilleHits->nCells();
+        for (size_t i = 0 ; i < ncells ; i++)
         {
             double value = _grilleHits->valueAtIndex(i);
             int na = _grilleHits->NA();

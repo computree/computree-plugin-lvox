@@ -221,7 +221,8 @@ void LVOX_StepCombineDensityGrids::compute()
     if (_mode == sumNiSumNtNb && (!use_nt || !use_nb || !use_ni)) {qDebug() << "Configuration non prévue !"; return;}
 
     float xmin, ymin, zmin, res, NAd;
-    int xdim, ydim, zdim, NAi, NAt, NAb;
+    size_t xdim, ydim, zdim;
+    int NAi, NAt, NAb;
     bool firstGrid = true;
 
     QVector<const CT_Grid3D<int>*> InGrids_hits;
@@ -344,13 +345,14 @@ void LVOX_StepCombineDensityGrids::compute()
     if (use_nt) {in_nt = InGrids_theorical.at(0);}
     if (use_nb) {in_nb = InGrids_before.at(0);}
 
-    for (int xx = 0 ; xx < xdim ; xx++)
+    for (size_t xx = 0 ; xx < xdim ; xx++)
     {
-        for (int yy = 0 ; yy < ydim ; yy++)
+        for (size_t yy = 0 ; yy < ydim ; yy++)
         {
-            for (int zz = 0 ; zz < zdim ; zz++)
+            for (size_t zz = 0 ; zz < zdim ; zz++)
             {
-                int index = in_d->index(xx, yy, zz);
+                size_t index;
+                in_d->index(xx, yy, zz, index);
                 itemOut_density->setValueAtIndex(index, in_d->valueAtIndex(index));
                 if (use_ni) {itemOut_hits->setValueAtIndex(index, in_ni->valueAtIndex(index));}
                 if (use_nt) {itemOut_theorical->setValueAtIndex(index, in_nt->valueAtIndex(index));}
@@ -360,20 +362,21 @@ void LVOX_StepCombineDensityGrids::compute()
     }
 
     // Compare with others grids
-    for (int i = 1 ; i < InGrids_density.size() ; i++)
+    for (size_t i = 1 ; i < InGrids_density.size() ; i++)
     {
         in_d = InGrids_density.at(i);
         if (use_ni) {in_ni = InGrids_hits.at(i);}
         if (use_nt) {in_nt = InGrids_theorical.at(i);}
         if (use_nb) {in_nb = InGrids_before.at(i);}
 
-        for (int xx = 0 ; xx < xdim ; xx++)
+        for (size_t xx = 0 ; xx < xdim ; xx++)
         {
-            for (int yy = 0 ; yy < ydim ; yy++)
+            for (size_t yy = 0 ; yy < ydim ; yy++)
             {
-                for (int zz = 0 ; zz < zdim ; zz++)
+                for (size_t zz = 0 ; zz < zdim ; zz++)
                 {
-                    int index = in_d->index(xx, yy, zz);
+                    size_t index;
+                    in_d->index(xx, yy, zz, index);
                     bool replace = false;
 
                     if (_mode == maxDensity) {

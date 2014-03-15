@@ -45,7 +45,7 @@ void LVOX_ComputeBeforeThread::run()
     CT_Beam beam(NULL, NULL);
     QVector3D origin, direction;
 
-    int progressStep = n_points / 20;
+    size_t progressStep = n_points / 20;
 
     for (size_t i = 0 ; i < n_points; i++)
     {

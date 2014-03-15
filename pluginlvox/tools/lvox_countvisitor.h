@@ -10,7 +10,7 @@ public:
 
     LVOX_CountVisitor(CT_Grid3D<int> *grid);
 
-    virtual void visit(const int &index, const CT_Beam *beam);
+    virtual void visit(const size_t &index, const CT_Beam *beam);
 
 private:
     CT_Grid3D<int>*     _grid;
