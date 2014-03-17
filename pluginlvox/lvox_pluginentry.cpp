@@ -32,7 +32,6 @@
 LVOX_PluginEntry::LVOX_PluginEntry()
 {
     _stepPluginManager = new LVOX_StepPluginManager();
-    _stepPluginManager->init();
 }
 
 LVOX_PluginEntry::~LVOX_PluginEntry()
