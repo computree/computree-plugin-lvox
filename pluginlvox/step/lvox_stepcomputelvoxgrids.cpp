@@ -384,8 +384,12 @@ void LVOX_StepComputeLvoxGrids::compute()
     for (int i = 0 ; i < size ; ++i)
     {
         baseThreads.at(i)->wait();
-        disconnect(baseThreads.at(i), SIGNAL(progressChanged()), this, SLOT(updateProgress()));
         updateProgress();
+    }
+
+    for (int i = 0 ; i < size ; ++i)
+    {
+        disconnect(baseThreads.at(i), SIGNAL(progressChanged()), this, SLOT(updateProgress()));
     }
 
     size = densityThreads.size();
@@ -399,8 +403,12 @@ void LVOX_StepComputeLvoxGrids::compute()
     for (int i = 0 ; i < size ; ++i)
     {
         densityThreads.at(i)->wait();
-        disconnect(densityThreads.at(i), SIGNAL(progressChanged()), this, SLOT(updateProgress()));
         updateProgress();
+    }
+
+    for (int i = 0 ; i < size ; ++i)
+    {
+        disconnect(densityThreads.at(i), SIGNAL(progressChanged()), this, SLOT(updateProgress()));
     }
 
     qDeleteAll(_threadList);

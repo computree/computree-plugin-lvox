@@ -38,6 +38,8 @@ public:
     LVOX_StepPluginManager();
     ~LVOX_StepPluginManager();
 
+    QString getPluginURL() {return QString("http://rdinnovation.onf.fr:8080/projects/plugin-lvox");}
+
 protected:
 
     bool loadGenericsStep();
