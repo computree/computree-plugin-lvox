@@ -79,3 +79,8 @@ bool LVOX_StepPluginManager::loadActions()
 {
     return true;
 }
+
+bool LVOX_StepPluginManager::loadExporters()
+{
+    return true;
+}
