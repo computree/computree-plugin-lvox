@@ -436,4 +436,9 @@ void LVOX_StepCombineDensityGrids::compute()
         }
     }
 
+    if (itemOut_hits!=NULL) {itemOut_hits->computeMinMax();}
+    if (itemOut_theorical!=NULL) {itemOut_theorical->computeMinMax();}
+    if (itemOut_before!=NULL) {itemOut_before->computeMinMax();}
+    if (itemOut_density!=NULL) {itemOut_density->computeMinMax();}
+
 }
