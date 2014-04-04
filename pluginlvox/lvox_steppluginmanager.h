@@ -47,6 +47,7 @@ protected:
     bool loadCanBeAddedFirstStep();
     bool loadActions();
     bool loadExporters();
+    bool loadReaders();
 };
 
 #endif // LVOX_STEP_PLUGIN_MANAGER_H

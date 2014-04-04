@@ -84,3 +84,8 @@ bool LVOX_StepPluginManager::loadExporters()
 {
     return true;
 }
+
+bool LVOX_StepPluginManager::loadReaders()
+{
+    return true;
+}
