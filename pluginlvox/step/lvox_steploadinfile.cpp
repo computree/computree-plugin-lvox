@@ -171,8 +171,8 @@ void LVOX_StepLoadInFile::compute()
 
             if (reader.readFile())
             {
-                CT_Scene* scene = (CT_Scene*) reader.takeFirstItemDrawableOfType(DEF_CT_Reader_ASCRGB_sceneOut, resultOut_individualScenes, itemOutModel_individualScene);
-                CT_PointsAttributesColor* colors = (CT_PointsAttributesColor*) reader.takeFirstItemDrawableOfType(DEF_CT_Reader_ASCRGB_colorOut, resultOut_individualScenes, itemOutModel_individualSceneColor);
+                CT_Scene* scene = (CT_Scene*) reader.takeFirstItemDrawableOfModel(DEF_CT_Reader_ASCRGB_sceneOut, resultOut_individualScenes, itemOutModel_individualScene);
+                CT_PointsAttributesColor* colors = (CT_PointsAttributesColor*) reader.takeFirstItemDrawableOfModel(DEF_CT_Reader_ASCRGB_colorOut, resultOut_individualScenes, itemOutModel_individualSceneColor);
 
                 if (scene != NULL)
                 {
