@@ -16,11 +16,14 @@
 #include "ct_itemdrawable/ct_scanner.h"
 #include "ct_itemdrawable/ct_scene.h"
 #include "ct_itemdrawable/ct_pointsattributescolor.h"
+#include "ct_itemdrawable/ct_pointsattributesscalartemplated.h"
 #include "ct_global/ct_context.h"
 
 #include <limits>
 
 #include "ct_reader/ct_reader_ascrgb.h"
+#include "ct_reader/ct_reader_xyb.h"
+
 #include "qfile.h"
 #include "qtextstream.h"
 #include "qfileinfo.h"
@@ -31,6 +34,7 @@
 #define DEF_groupOut_g "g"
 #define DEF_itemOut_individualScene "sce"
 #define DEF_itemOut_individualSceneColor "col"
+#define DEF_itemOut_individualSceneIntensity "int"
 #define DEF_itemOut_scanner "sca"
 #define DEF_resultOut_mergedScene "rmsce"
 #define DEF_groupOut_gm "gm"
@@ -80,12 +84,17 @@ void LVOX_StepLoadInFile::createOutResultModelListProtected()
                                                                                                              new CT_PointsAttributesColor(),
                                                                                                              tr("IndividualSceneColors"));
 
+    CT_OutStandardItemDrawableModel *itemOutModel_individualSceneIntensity = new CT_OutStandardItemDrawableModel(DEF_itemOut_individualSceneIntensity,
+                                                                                                             new CT_PointsAttributesScalarTemplated<quint16>(),
+                                                                                                             tr("IndividualSceneIntensity"));
+
     CT_OutStandardItemDrawableModel *itemOutModel_scanner = new CT_OutStandardItemDrawableModel(DEF_itemOut_scanner,
                                                                                                 new CT_Scanner(),
                                                                                                 tr("ScanPosition"));
 
     groupOutModel_individualScenes->addItem(itemOutModel_individualScene);
     groupOutModel_individualScenes->addItem(itemOutModel_individualSceneColor);
+    groupOutModel_individualScenes->addItem(itemOutModel_individualSceneIntensity);
     groupOutModel_individualScenes->addItem(itemOutModel_scanner);
 
     CT_OutResultModelGroup *resultOut_individualScenes = new CT_OutResultModelGroup(DEF_resultOut_individualScenes,
@@ -127,6 +136,7 @@ void LVOX_StepLoadInFile::compute()
     CT_OutStandardGroupModel* groupOutModel_individualScenes = (CT_OutStandardGroupModel*)getOutModelForCreation(resultOut_individualScenes, DEF_groupOut_g);
     CT_OutStandardItemDrawableModel* itemOutModel_individualScene = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_individualScenes, DEF_itemOut_individualScene);
     CT_OutStandardItemDrawableModel* itemOutModel_individualSceneColor = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_individualScenes, DEF_itemOut_individualSceneColor);
+    CT_OutStandardItemDrawableModel* itemOutModel_individualSceneIntensity = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_individualScenes, DEF_itemOut_individualSceneIntensity);
     CT_OutStandardItemDrawableModel* itemOutModel_scanner = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_individualScenes, DEF_itemOut_scanner);
 
     CT_ResultGroup* resultOut_mergedScene = outResultList.at(1);
@@ -158,57 +168,70 @@ void LVOX_StepLoadInFile::compute()
     {
         it.next();
 
-        CT_Scanner* scanner = it.value();
+        QFileInfo fileInfo(it.key());
 
-        CT_Reader_ASCRGB reader;
-
-        if (reader.setFilePath(it.key()))
+        if (fileInfo.exists())
         {
+            CT_Scanner* scanner = it.value();
 
-            if (_radius >0) {reader.setRadiusFilter(_radius);}
+            QString extension = fileInfo.completeSuffix();
+            CT_AbstractReader *reader;
 
-            reader.init();
-
-            if (reader.readFile())
+            if (extension == "asc" || extension == "xyz")
             {
-                CT_Scene* scene = (CT_Scene*) reader.takeFirstItemDrawableOfModel(DEF_CT_Reader_ASCRGB_sceneOut, resultOut_individualScenes, itemOutModel_individualScene);
-                CT_PointsAttributesColor* colors = (CT_PointsAttributesColor*) reader.takeFirstItemDrawableOfModel(DEF_CT_Reader_ASCRGB_colorOut, resultOut_individualScenes, itemOutModel_individualSceneColor);
+                reader = new CT_Reader_ASCRGB();
+                if (_radius >0) {((CT_Reader_ASCRGB*) reader)->setRadiusFilter(_radius);}
+            } else if (extension == "xyb")
+            {
+                reader = new CT_Reader_XYB();
+                if (_radius >0) {((CT_Reader_XYB*) reader)->setRadiusFilter(_radius);}
+            }
 
-                if (scene != NULL)
+            if (reader->setFilePath(it.key()))
+            {
+
+                reader->init();
+
+                if (reader->readFile())
                 {
+                    CT_Scene* scene = (CT_Scene*) reader->takeFirstItemDrawableOfType(CT_Scene::staticGetType(), resultOut_individualScenes, itemOutModel_individualScene);
+                    // Colors are only obtained if ASCRGB
+                    CT_PointsAttributesColor* colors = (CT_PointsAttributesColor*) reader->takeFirstItemDrawableOfType(CT_PointsAttributesColor::staticGetType(), resultOut_individualScenes, itemOutModel_individualSceneColor);
+                    // Intensity is only obtained if XYB
+                    CT_PointsAttributesScalarTemplated<quint16>* intensity = (CT_PointsAttributesScalarTemplated<quint16>*) reader->takeFirstItemDrawableOfType(CT_PointsAttributesScalarTemplated<quint16>::staticGetType(), resultOut_individualScenes, itemOutModel_individualSceneIntensity);
 
-                    CT_StandardItemGroup* groupOut_individualScene = new CT_StandardItemGroup(groupOutModel_individualScenes, resultOut_individualScenes);
+                    if (scene != NULL)
+                    {
 
-                    individualScenes.append(scene->getPointCloudIndexRegistered());
+                        CT_StandardItemGroup* groupOut_individualScene = new CT_StandardItemGroup(groupOutModel_individualScenes, resultOut_individualScenes);
 
-                    QVector3D min, max;
-                    scene->getBoundingBox(min, max);
-                    if (min.x() < xmin) {xmin = min.x();}
-                    if (max.x() > xmax) {xmax = max.x();}
-                    if (min.y() < ymin) {ymin = min.y();}
-                    if (max.y() > ymax) {ymax = max.y();}
-                    if (min.z() < zmin) {zmin = min.z();}
-                    if (max.z() > zmax) {zmax = max.z();}
+                        individualScenes.append(scene->getPointCloudIndexRegistered());
 
-                    /* A rétablir quand les problèmes de bounding box seront résolus dans CT_Scene
-                if (scene->xMax()>xmax) {xmax = scene->xMax();}
-                if (scene->yMin()<ymin) {ymin = scene->yMin();}
-                if (scene->yMax()>ymax) {ymax = scene->yMax();}
-                if (scene->zMin()<zmin) {zmin = scene->zMin();}
-                if (scene->zMax()>zmax) {zmax = scene->zMax();}
-                */
+                        QVector3D min, max;
+                        scene->getBoundingBox(min, max);
+                        if (min.x() < xmin) {xmin = min.x();}
+                        if (max.x() > xmax) {xmax = max.x();}
+                        if (min.y() < ymin) {ymin = min.y();}
+                        if (max.y() > ymax) {ymax = max.y();}
+                        if (min.z() < zmin) {zmin = min.z();}
+                        if (max.z() > zmax) {zmax = max.z();}
 
-                    groupOut_individualScene->addItemDrawable(scene);
+                        groupOut_individualScene->addItemDrawable(scene);
 
-                    if (colors != NULL) {groupOut_individualScene->addItemDrawable(colors);}
+                        if (scanner != NULL) {groupOut_individualScene->addItemDrawable(scanner);}
 
-                    if (scanner != NULL) {groupOut_individualScene->addItemDrawable(scanner);}
 
-                    resultOut_individualScenes->addGroup(groupOut_individualScene);
-                }
+                        if (colors != NULL) {groupOut_individualScene->addItemDrawable(colors);}
+                        if (intensity != NULL) {groupOut_individualScene->addItemDrawable(intensity);}
 
+                        resultOut_individualScenes->addGroup(groupOut_individualScene);
+                    }
+
+                } else {delete scanner;}
             } else {delete scanner;}
-        } else {delete scanner;}
+
+            delete reader;
+        }
 
         baseProgress += progressIncrement;
         setProgress(baseProgress);
