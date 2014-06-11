@@ -325,7 +325,7 @@ void LVOX_StepComputeLvoxGrids::compute()
         const CT_Scanner* scanner =it.value().second;
 
         // Declaring the output grids
-        CT_Grid3D<int>*      hitGrid = new CT_Grid3D<int>(itemOutModel_hits, outResult, xMin, yMin, zMin, xMax, yMax, zMax, _res, -1, 0, true);
+        CT_Grid3D<int>*      hitGrid = CT_Grid3D<int>::createGrid3DFromXYZCoords(itemOutModel_hits, outResult, xMin, yMin, zMin, xMax, yMax, zMax, _res, -1, 0);
         CT_Grid3D<int>*      theoriticalGrid = new CT_Grid3D<int>(itemOutModel_theo, outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
         CT_Grid3D<int>*      beforeGrid = new CT_Grid3D<int>(itemOutModel_bef, outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
         CT_Grid3D<double>*   density = new CT_Grid3D<double>(itemOutModel_density, outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
