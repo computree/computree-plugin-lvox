@@ -177,15 +177,21 @@ void LVOX_StepLoadInFile::compute()
             QString extension = fileInfo.completeSuffix();
             CT_AbstractReader *reader;
 
-            if (extension == "asc" || extension == "xyz")
+            if (extension == "asc" || extension == "xyz" || extension == "xyz.asc")
             {
                 reader = new CT_Reader_ASCRGB();
+                PS_LOG->addMessage(LogInterface::trace, LogInterface::step, QObject::tr("File reader created"));
                 if (_radius >0) {((CT_Reader_ASCRGB*) reader)->setRadiusFilter(_radius);}
             } else if (extension == "xyb")
             {
                 reader = new CT_Reader_XYB();
                 if (_radius >0) {((CT_Reader_XYB*) reader)->setRadiusFilter(_radius);}
+            } else
+            {
+                PS_LOG->addMessage(LogInterface::trace, LogInterface::step, QObject::tr("Wrong file extension"));
+                break;
             }
+
 
             if (reader->setFilePath(it.key()))
             {
