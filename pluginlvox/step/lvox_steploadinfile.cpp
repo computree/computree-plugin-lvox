@@ -64,58 +64,25 @@ CT_VirtualAbstractStep* LVOX_StepLoadInFile::createNewInstance(CT_StepInitialize
 // Creation and affiliation of IN models
 void LVOX_StepLoadInFile::createInResultModelListProtected()
 {
-    CT_InResultModelNotNeedInputResult *resultModel = new CT_InResultModelNotNeedInputResult();
-    addInResultModel(resultModel);
+    setNotNeedInputResult();
 }
 
 // Creation and affiliation of OUT models
 void LVOX_StepLoadInFile::createOutResultModelListProtected()
 {
+    CT_OutResultModelGroup *resultModel = createNewOutResultModel(DEF_resultOut_individualScenes, tr("IndividualScenes"));
 
-    CT_OutStandardGroupModel *groupOutModel_individualScenes = new CT_OutStandardGroupModel(DEF_groupOut_g,
-                                                                                            new CT_StandardItemGroup(),
-                                                                                            tr("g"));
+    resultModel->setRootGroup(DEF_groupOut_g);
+    resultModel->addItemModel(DEF_groupOut_g, DEF_itemOut_individualScene, new CT_Scene(), tr("IndividualScene"));
+    resultModel->addItemModel(DEF_groupOut_g, DEF_itemOut_individualSceneColor, new CT_PointsAttributesColor(), tr("IndividualSceneColors"));
+    resultModel->addItemModel(DEF_groupOut_g, DEF_itemOut_individualSceneIntensity, new CT_PointsAttributesScalarTemplated<quint16>(), tr("IndividualSceneIntensity"));
+    resultModel->addItemModel(DEF_groupOut_g, DEF_itemOut_scanner, new CT_Scanner(), tr("ScanPosition"));
 
-    CT_OutStandardItemDrawableModel *itemOutModel_individualScene = new CT_OutStandardItemDrawableModel(DEF_itemOut_individualScene,
-                                                                                                        new CT_Scene(),
-                                                                                                        tr("IndividualScene"));
 
-    CT_OutStandardItemDrawableModel *itemOutModel_individualSceneColor = new CT_OutStandardItemDrawableModel(DEF_itemOut_individualSceneColor,
-                                                                                                             new CT_PointsAttributesColor(),
-                                                                                                             tr("IndividualSceneColors"));
+    CT_OutResultModelGroup *resultMergedModel = createNewOutResultModel(DEF_resultOut_mergedScene, tr("MergedScene"));
 
-    CT_OutStandardItemDrawableModel *itemOutModel_individualSceneIntensity = new CT_OutStandardItemDrawableModel(DEF_itemOut_individualSceneIntensity,
-                                                                                                             new CT_PointsAttributesScalarTemplated<quint16>(),
-                                                                                                             tr("IndividualSceneIntensity"));
-
-    CT_OutStandardItemDrawableModel *itemOutModel_scanner = new CT_OutStandardItemDrawableModel(DEF_itemOut_scanner,
-                                                                                                new CT_Scanner(),
-                                                                                                tr("ScanPosition"));
-
-    groupOutModel_individualScenes->addItem(itemOutModel_individualScene);
-    groupOutModel_individualScenes->addItem(itemOutModel_individualSceneColor);
-    groupOutModel_individualScenes->addItem(itemOutModel_individualSceneIntensity);
-    groupOutModel_individualScenes->addItem(itemOutModel_scanner);
-
-    CT_OutResultModelGroup *resultOut_individualScenes = new CT_OutResultModelGroup(DEF_resultOut_individualScenes,
-                                                                                    groupOutModel_individualScenes,
-                                                                                    tr("IndividualScenes"));
-    addOutResultModel(resultOut_individualScenes);
-
-    CT_OutStandardGroupModel *groupOutModel_mergedScene = new CT_OutStandardGroupModel(DEF_groupOut_gm,
-                                                                                       new CT_StandardItemGroup(),
-                                                                                       tr("gm"));
-
-    CT_OutStandardItemDrawableModel *itemOutModel_mergedScene = new CT_OutStandardItemDrawableModel(DEF_itemOut_mergedScene,
-                                                                                                    new CT_Scene(),
-                                                                                                    tr("MergedScene"));
-
-    groupOutModel_mergedScene->addItem(itemOutModel_mergedScene);
-
-    CT_OutResultModelGroup *resultOutModel_mergedScene = new CT_OutResultModelGroup(DEF_resultOut_mergedScene,
-                                                                                    groupOutModel_mergedScene,
-                                                                                    tr("MergedScene"));
-    addOutResultModel(resultOutModel_mergedScene);
+    resultMergedModel->setRootGroup(DEF_groupOut_gm);
+    resultMergedModel->addItemModel(DEF_groupOut_gm, DEF_itemOut_mergedScene, new CT_Scene(), tr("MergedScene"));
 }
 
 // Semi-automatic creation of step parameters DialogBox
@@ -133,19 +100,15 @@ void LVOX_StepLoadInFile::compute()
     QList<CT_ResultGroup*> outResultList = getOutResultList();
 
     CT_ResultGroup* resultOut_individualScenes = outResultList.at(0);
-    CT_OutStandardGroupModel* groupOutModel_individualScenes = (CT_OutStandardGroupModel*)getOutModelForCreation(resultOut_individualScenes, DEF_groupOut_g);
     CT_OutStandardItemDrawableModel* itemOutModel_individualScene = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_individualScenes, DEF_itemOut_individualScene);
     CT_OutStandardItemDrawableModel* itemOutModel_individualSceneColor = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_individualScenes, DEF_itemOut_individualSceneColor);
     CT_OutStandardItemDrawableModel* itemOutModel_individualSceneIntensity = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_individualScenes, DEF_itemOut_individualSceneIntensity);
-    CT_OutStandardItemDrawableModel* itemOutModel_scanner = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_individualScenes, DEF_itemOut_scanner);
 
     CT_ResultGroup* resultOut_mergedScene = outResultList.at(1);
-    CT_OutStandardGroupModel* groupOutModel_mergedScene = (CT_OutStandardGroupModel*)getOutModelForCreation(resultOut_mergedScene, DEF_groupOut_gm);
-    CT_OutStandardItemDrawableModel* itemOutModel_mergedScene = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_mergedScene, DEF_itemOut_mergedScene);
 
     if (!_radiusFiltered) {_radius = 0;}
 
-    QMap<QString, CT_Scanner*> scansMap = readInFile(_fileName.first(), itemOutModel_scanner, resultOut_individualScenes);
+    QMap<QString, CT_Scanner*> scansMap = readInFile(_fileName.first(), resultOut_individualScenes);
 
     if (scansMap.size()<=0) {return;}
 
@@ -209,7 +172,7 @@ void LVOX_StepLoadInFile::compute()
                     if (scene != NULL)
                     {
 
-                        CT_StandardItemGroup* groupOut_individualScene = new CT_StandardItemGroup(groupOutModel_individualScenes, resultOut_individualScenes);
+                        CT_StandardItemGroup* groupOut_individualScene = new CT_StandardItemGroup(DEF_groupOut_g, resultOut_individualScenes);
 
                         individualScenes.append(scene->getPointCloudIndexRegistered());
 
@@ -244,9 +207,9 @@ void LVOX_StepLoadInFile::compute()
     }
 
 
-    CT_StandardItemGroup* groupOut_mergedScene = new CT_StandardItemGroup(groupOutModel_mergedScene, resultOut_mergedScene);
+    CT_StandardItemGroup* groupOut_mergedScene = new CT_StandardItemGroup(DEF_groupOut_gm, resultOut_mergedScene);
 
-    CT_Scene *mergedScene = new CT_Scene(itemOutModel_mergedScene, resultOut_mergedScene);
+    CT_Scene *mergedScene = new CT_Scene(DEF_itemOut_mergedScene, resultOut_mergedScene);
     mergedScene->setPointCloudIndexRegistered(PS_REPOSITORY->mergePointCloudContiguous(individualScenes));
     mergedScene->setBoundingBox(xmin,ymin,zmin,xmax,ymax,zmax);
 
@@ -256,7 +219,7 @@ void LVOX_StepLoadInFile::compute()
     setProgress(100);
 }
 
-QMap<QString, CT_Scanner*> LVOX_StepLoadInFile::readInFile(QString filename, CT_OutStandardItemDrawableModel* model, Result* result)
+QMap<QString, CT_Scanner*> LVOX_StepLoadInFile::readInFile(QString filename, Result* result)
 {
     QMap<QString, CT_Scanner*> map;
 
@@ -310,7 +273,7 @@ QMap<QString, CT_Scanner*> LVOX_StepLoadInFile::readInFile(QString filename, CT_
                         QString completeFileName = QString("%1/%2").arg(path).arg(scanFileName);
                         if(QFile::exists(completeFileName))
                         {
-                            CT_Scanner *scanner = new CT_Scanner(model, result, scanID++, QVector3D(x, y, z),QVector3D(0,0,1), hFov, vFov, resolution, resolution, initTheta, initPhi,  clockWise, true);
+                            CT_Scanner *scanner = new CT_Scanner(DEF_itemOut_scanner, result, scanID++, QVector3D(x, y, z),QVector3D(0,0,1), hFov, vFov, resolution, resolution, initTheta, initPhi,  clockWise, true);
                             map.insert(completeFileName, scanner);
                         }
                     }

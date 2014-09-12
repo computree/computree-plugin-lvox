@@ -62,48 +62,21 @@ CT_VirtualAbstractStep* LVOX_StepCombineDensityGrids::createNewInstance(CT_StepI
 // Creation and affiliation of IN models
 void LVOX_StepCombineDensityGrids::createInResultModelListProtected()
 {
+    CT_InResultModelGroup *resultModel = createNewInResultModel(DEF_resultIn_grids, tr("Grilles"));
 
-    CT_InStandardGroupModel *groupInModel_grids = new CT_InStandardGroupModel(DEF_groupIn_grids,
-                                                                              "Group");
+    resultModel->setZeroOrMoreRootGroup();
+    resultModel->addGroupModel("", DEF_groupIn_grids);
 
-    CT_InStandardItemDrawableModel *itemInModel_hits = new CT_InStandardItemDrawableModel(DEF_itemIn_hits,
-                                                                                          CT_Grid3D<int>::staticGetType(),
-                                                                                          tr("hits"),
-                                                                                          tr(""),
-                                                                                          CT_InStandardItemDrawableModel::C_ChooseOneIfMultiple,
-                                                                                          CT_InStandardItemDrawableModel::F_IsOptional);
+    resultModel->addItemModel(DEF_groupIn_grids, DEF_itemIn_hits, CT_Grid3D<int>::staticGetType(), tr("hits"), "",
+                              CT_InStandardItemDrawableModel::C_ChooseOneIfMultiple, CT_InStandardItemDrawableModel::F_IsOptional);
 
-    CT_InStandardItemDrawableModel *itemInModel_theorical = new CT_InStandardItemDrawableModel(DEF_itemIn_theorical,
-                                                                                               CT_Grid3D<int>::staticGetType(),
-                                                                                               tr("theorical"),
-                                                                                               tr(""),
-                                                                                               CT_InStandardItemDrawableModel::C_ChooseOneIfMultiple,
-                                                                                               CT_InStandardItemDrawableModel::F_IsOptional);
+    resultModel->addItemModel(DEF_groupIn_grids, DEF_itemIn_theorical, CT_Grid3D<int>::staticGetType(), tr("theorical"), "",
+                              CT_InStandardItemDrawableModel::C_ChooseOneIfMultiple, CT_InStandardItemDrawableModel::F_IsOptional);
 
-    CT_InStandardItemDrawableModel *itemInModel_before = new CT_InStandardItemDrawableModel(DEF_itemIn_before,
-                                                                                            CT_Grid3D<int>::staticGetType(),
-                                                                                            tr("before"),
-                                                                                            tr(""),
-                                                                                            CT_InStandardItemDrawableModel::C_ChooseOneIfMultiple,
-                                                                                            CT_InStandardItemDrawableModel::F_IsOptional);
+    resultModel->addItemModel(DEF_groupIn_grids, DEF_itemIn_before, CT_Grid3D<int>::staticGetType(), tr("before"), "",
+                              CT_InStandardItemDrawableModel::C_ChooseOneIfMultiple, CT_InStandardItemDrawableModel::F_IsOptional);
 
-    CT_InStandardItemDrawableModel *itemInModel_density = new CT_InStandardItemDrawableModel(DEF_itemIn_density,
-                                                                                             CT_Grid3D<double>::staticGetType(),
-                                                                                             tr("density"));
-
-    groupInModel_grids->addItem(itemInModel_hits);
-    groupInModel_grids->addItem(itemInModel_theorical);
-    groupInModel_grids->addItem(itemInModel_before);
-    groupInModel_grids->addItem(itemInModel_density);
-
-
-    CT_InResultModelGroup *resultInModel_grids = new CT_InResultModelGroup(DEF_resultIn_grids,
-                                                                           groupInModel_grids,
-                                                                           tr(""),
-                                                                           tr(""),
-                                                                           false);
-
-    addInResultModel(resultInModel_grids);
+    resultModel->addItemModel(DEF_groupIn_grids, DEF_itemIn_density, CT_Grid3D<double>::staticGetType(), tr("density"));
 }
 
 // Creation and affiliation of OUT models
@@ -115,42 +88,16 @@ void LVOX_StepCombineDensityGrids::createOutResultModelListProtected()
     else if (_mode == maxNi)    {modeString = "max(ni)";}
     else if (_mode == sumNiSumNtNb)    {modeString = "sum(ni)/sum(nt-nb)";}
 
-    CT_OutStandardGroupModel *groupOutModel_grids = new CT_OutStandardGroupModel(DEF_groupOut_grids,
-                                                                                 new CT_StandardItemGroup(),
-                                                                                 tr("grids"));
+    CT_OutResultModelGroup *resultModel = createNewOutResultModel(DEF_resultOut_grids, tr("Grilles combinées"));
 
-    CT_OutStandardItemDrawableModel *itemOutModel_hits = new CT_OutStandardItemDrawableModel(DEF_itemOut_hits,
-                                                                                             new CT_Grid3D<int>,
-                                                                                             tr("hits"));
+    resultModel->setRootGroup(DEF_groupOut_grids, new CT_StandardItemGroup(), tr("Grilles"));
+    resultModel->addItemModel(DEF_groupOut_grids, DEF_itemOut_hits, new CT_Grid3D<int>(), tr("hits"));
+    resultModel->addItemModel(DEF_groupOut_grids, DEF_itemOut_theorical, new CT_Grid3D<int>(), tr("theorical"));
+    resultModel->addItemModel(DEF_groupOut_grids, DEF_itemOut_before, new CT_Grid3D<int>(), tr("before"));
+    resultModel->addItemModel(DEF_groupOut_grids, DEF_itemOut_density, new CT_Grid3D<double>(), tr("density - %1").arg(modeString));
+    resultModel->addItemModel(DEF_groupOut_grids, DEF_itemOut_scanId, new CT_Grid3D<int>(), tr("scanId"));
 
-    CT_OutStandardItemDrawableModel *itemOutModel_theorical = new CT_OutStandardItemDrawableModel(DEF_itemOut_theorical,
-                                                                                                  new CT_Grid3D<int>,
-                                                                                                  tr("theorical"));
-
-    CT_OutStandardItemDrawableModel *itemOutModel_before = new CT_OutStandardItemDrawableModel(DEF_itemOut_before,
-                                                                                               new CT_Grid3D<int>,
-                                                                                               tr("before"));
-
-    CT_OutStandardItemDrawableModel *itemOutModel_density = new CT_OutStandardItemDrawableModel(DEF_itemOut_density,
-                                                                                                new CT_Grid3D<double>,
-                                                                                                tr("density - %1").arg(modeString));
-
-    CT_OutStandardItemDrawableModel *itemOutModel_scanId = new CT_OutStandardItemDrawableModel(DEF_itemOut_scanId,
-                                                                                               new CT_Grid3D<int>,
-                                                                                               tr("scanId"));
-
-    groupOutModel_grids->addItem(itemOutModel_hits);
-    groupOutModel_grids->addItem(itemOutModel_theorical);
-    groupOutModel_grids->addItem(itemOutModel_before);
-    groupOutModel_grids->addItem(itemOutModel_density);
-    groupOutModel_grids->addItem(itemOutModel_scanId);
-
-    CT_OutResultModelGroup *resultOutModel_grids = new CT_OutResultModelGroup(DEF_resultOut_grids,
-                                                                              groupOutModel_grids,
-                                                                              tr("grids"),
-                                                                              tr(""));
     setMaximumTurn(1);
-    addOutResultModel(resultOutModel_grids);
 }
 
 // Semi-automatic creation of step parameters DialogBox
@@ -202,13 +149,11 @@ void LVOX_StepCombineDensityGrids::createPostConfigurationDialog()
 
 void LVOX_StepCombineDensityGrids::compute()
 {
-    CT_ResultGroup* resultIn_grids = getInputResultsForModel(DEF_resultIn_grids).first();
+    CT_ResultGroup* resultIn_grids = getInputResults().first();
 
-    CT_InAbstractGroupModel* groupInModel_grids = (CT_InAbstractGroupModel*)getInModelForResearch(resultIn_grids, DEF_groupIn_grids);
     CT_InAbstractItemDrawableModel* itemInModel_hits = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_grids, DEF_itemIn_hits);
     CT_InAbstractItemDrawableModel* itemInModel_theorical = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_grids, DEF_itemIn_theorical);
     CT_InAbstractItemDrawableModel* itemInModel_before = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_grids, DEF_itemIn_before);
-    CT_InAbstractItemDrawableModel* itemInModel_density = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_grids, DEF_itemIn_density);
 
     bool use_ni = (itemInModel_hits->getPossibilitiesSavedChecked().size() > 0);
     bool use_nt = (itemInModel_theorical->getPossibilitiesSavedChecked().size() > 0);
@@ -232,19 +177,20 @@ void LVOX_StepCombineDensityGrids::compute()
 
     // Iterating on groups situated at the root of the result (corresponding to DEF_groupIn_grids)
     // => Create grids lists, and retrieve grids characteristics
-    for ( CT_AbstractItemGroup *groupIn_grids = resultIn_grids->beginGroup(groupInModel_grids)
-          ; groupIn_grids != NULL  && !isStopped()
-          ; groupIn_grids = resultIn_grids->nextGroup() )
+    CT_ResultGroupIterator itGrp(resultIn_grids, this, DEF_groupIn_grids);
+    while (itGrp.hasNext() && !isStopped())
     {
+        CT_AbstractItemGroup *groupIn_grids = (CT_AbstractItemGroup*) itGrp.next();
+
         const CT_Grid3D<int>* itemIn_hits;
         const CT_Grid3D<int>* itemIn_theorical;
         const CT_Grid3D<int>* itemIn_before;
         const CT_Grid3D<double>* itemIn_density;
 
-        if (use_ni) {itemIn_hits = (const CT_Grid3D<int>*) groupIn_grids->findFirstItem(itemInModel_hits);}
-        if (use_nt) {itemIn_theorical = (const CT_Grid3D<int>*) groupIn_grids->findFirstItem(itemInModel_theorical);}
-        if (use_nb) {itemIn_before = (const CT_Grid3D<int>*) groupIn_grids->findFirstItem(itemInModel_before);}
-        itemIn_density = (const CT_Grid3D<double>*) groupIn_grids->findFirstItem(itemInModel_density);
+        if (use_ni) {itemIn_hits = (const CT_Grid3D<int>*) groupIn_grids->firstItemByINModelName(this, DEF_itemOut_hits);}
+        if (use_nt) {itemIn_theorical = (const CT_Grid3D<int>*) groupIn_grids->firstItemByINModelName(this, DEF_itemIn_theorical);}
+        if (use_nb) {itemIn_before = (const CT_Grid3D<int>*) groupIn_grids->firstItemByINModelName(this, DEF_itemIn_before);}
+        itemIn_density = (const CT_Grid3D<double>*) groupIn_grids->firstItemByINModelName(this, DEF_itemIn_density);
 
         if (itemIn_density!=NULL)
         {
@@ -289,45 +235,40 @@ void LVOX_StepCombineDensityGrids::compute()
             qDebug() << "Grille de densité manquante ! Le traitement continue avec les autres.";
         }
     }
+
     if (InGrids_density.size() <=0) {qDebug() << "Aucune Grille !"; return;}
 
     // Create combined out grids, considering optional input grids
     QList<CT_ResultGroup*> outResultList = getOutResultList();
     CT_ResultGroup* resultOut_grids = outResultList.at(0);
 
-    CT_OutStandardGroupModel* groupOutModel_grids = (CT_OutStandardGroupModel*)getOutModelForCreation(resultOut_grids, DEF_groupOut_grids);
-    CT_StandardItemGroup* groupOut_grids = new CT_StandardItemGroup(groupOutModel_grids, resultOut_grids);
+    CT_StandardItemGroup* groupOut_grids = new CT_StandardItemGroup(DEF_groupOut_grids, resultOut_grids);
 
     CT_Grid3D<int>* itemOut_hits = NULL;
     if (use_ni)
     {
-        CT_OutStandardItemDrawableModel* itemOutModel_hits = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_grids, DEF_itemOut_hits);
-        itemOut_hits = new CT_Grid3D<int>(itemOutModel_hits, resultOut_grids, xmin, ymin, zmin, xdim, ydim, zdim, res, NAi, NAi);
+        itemOut_hits = new CT_Grid3D<int>(DEF_itemOut_hits, resultOut_grids, xmin, ymin, zmin, xdim, ydim, zdim, res, NAi, NAi);
         groupOut_grids->addItemDrawable(itemOut_hits);
     }
 
     CT_Grid3D<int>* itemOut_theorical = NULL;
     if (use_nt)
     {
-        CT_OutStandardItemDrawableModel* itemOutModel_theorical = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_grids, DEF_itemOut_theorical);
-        itemOut_theorical = new CT_Grid3D<int>(itemOutModel_theorical, resultOut_grids, xmin, ymin, zmin, xdim, ydim, zdim, res, NAt, NAt);
+        itemOut_theorical = new CT_Grid3D<int>(DEF_itemOut_theorical, resultOut_grids, xmin, ymin, zmin, xdim, ydim, zdim, res, NAt, NAt);
         groupOut_grids->addItemDrawable(itemOut_theorical);
     }
 
     CT_Grid3D<int>* itemOut_before = NULL;
     if (use_nb)
     {
-        CT_OutStandardItemDrawableModel* itemOutModel_before = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_grids, DEF_itemOut_before);
-        itemOut_before = new CT_Grid3D<int>(itemOutModel_before, resultOut_grids, xmin, ymin, zmin, xdim, ydim, zdim, res, NAb, NAb);
+        itemOut_before = new CT_Grid3D<int>(DEF_itemOut_before, resultOut_grids, xmin, ymin, zmin, xdim, ydim, zdim, res, NAb, NAb);
         groupOut_grids->addItemDrawable(itemOut_before);
     }
 
-    CT_OutStandardItemDrawableModel* itemOutModel_density = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_grids, DEF_itemOut_density);
-    CT_Grid3D<double>* itemOut_density = new CT_Grid3D<double>(itemOutModel_density, resultOut_grids, xmin, ymin, zmin, xdim, ydim, zdim, res, NAd, NAd);
+    CT_Grid3D<double>* itemOut_density = new CT_Grid3D<double>(DEF_itemOut_density, resultOut_grids, xmin, ymin, zmin, xdim, ydim, zdim, res, NAd, NAd);
     groupOut_grids->addItemDrawable(itemOut_density);
 
-    CT_OutStandardItemDrawableModel* itemOutModel_scanId = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_grids, DEF_itemOut_scanId);
-    CT_Grid3D<int>* itemOut_scanId = new CT_Grid3D<int>(itemOutModel_scanId, resultOut_grids, xmin, ymin, zmin, xdim, ydim, zdim, res, -1, -1);
+    CT_Grid3D<int>* itemOut_scanId = new CT_Grid3D<int>(DEF_itemOut_scanId, resultOut_grids, xmin, ymin, zmin, xdim, ydim, zdim, res, -1, -1);
     groupOut_grids->addItemDrawable(itemOut_scanId);
 
     resultOut_grids->addGroup(groupOut_grids);
@@ -362,7 +303,7 @@ void LVOX_StepCombineDensityGrids::compute()
     }
 
     // Compare with others grids
-    for (size_t i = 1 ; i < InGrids_density.size() ; i++)
+    for (int i = 1 ; i < InGrids_density.size() ; i++)
     {
         in_d = InGrids_density.at(i);
         if (use_ni) {in_ni = InGrids_hits.at(i);}
@@ -383,16 +324,16 @@ void LVOX_StepCombineDensityGrids::compute()
                         replace = (in_d->valueAtIndex(index) > itemOut_density->valueAtIndex(index));
                     } else if (_mode == maxNt_Nb) {
                         replace = ((in_nt->valueAtIndex(index) - in_nb->valueAtIndex(index)) > (itemOut_theorical->valueAtIndex(index) - itemOut_before->valueAtIndex(index)));
-                    } else if (_mode = maxNi) {
+                    } else if (_mode == maxNi) {
                         replace = (in_ni->valueAtIndex(index) > itemOut_hits->valueAtIndex(index));
-                    } else if (_mode = sumNiSumNtNb) {
+                    } else if (_mode == sumNiSumNtNb) {
                         replace = false;
 
                         itemOut_hits->addValueAtIndex(index, in_ni->valueAtIndex(index));
                         itemOut_theorical->addValueAtIndex(index, in_nt->valueAtIndex(index));
                         itemOut_before->addValueAtIndex(index, in_nb->valueAtIndex(index));
 
-                        if (i == InGrids_density.size() - 1)
+                        if (i == (InGrids_density.size() - 1))
                         {                            
                             int ni = itemOut_hits->valueAtIndex(index);
                             int nt = itemOut_theorical->valueAtIndex(index);

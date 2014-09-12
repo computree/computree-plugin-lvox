@@ -87,7 +87,7 @@ protected:
 
 private:
 
-    QMap<QString, CT_Scanner*>  readInFile(QString filename, CT_OutStandardItemDrawableModel *model, Result *result);
+    QMap<QString, CT_Scanner*>  readInFile(QString filename, Result *result);
 
     // Step parameters
     QStringList _fileName;          /*!< Name of .in file */
