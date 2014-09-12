@@ -2,7 +2,6 @@
 #define LVOX_STEPLOADINFILE_H
 
 #include "ct_step/abstract/ct_abstractstepcanbeaddedfirst.h"
-#include "ct_itemdrawable/model/outModel/ct_outstandarditemdrawablemodel.h"
 #include "ct_itemdrawable/ct_scanner.h"
 
 /*!
@@ -87,7 +86,7 @@ protected:
 
 private:
 
-    QMap<QString, CT_Scanner*>  readInFile(QString filename, Result *result);
+    QMap<QString, CT_Scanner*>  readInFile(QString filename, const CT_AbstractResult *result);
 
     // Step parameters
     QStringList _fileName;          /*!< Name of .in file */

@@ -91,7 +91,7 @@ void LVOX_StepComputeLvoxGrids::createInResultModelListProtected()
     CT_InResultModelGroupToCopy *resultModel = createNewInResultModelForCopy(DEF_SearchInResult, tr("Scène(s)"));
 
     resultModel->setZeroOrMoreRootGroup();
-    resultModel->addGroupModel("", DEF_SearchInGroup, tr("Scan"));
+    resultModel->addGroupModel("", DEF_SearchInGroup, CT_AbstractItemGroup::staticGetType(), tr("Scan"));
     resultModel->addItemModel(DEF_SearchInGroup, DEF_SearchInScene, CT_Scene::staticGetType(), tr("Scène"));
     resultModel->addItemModel(DEF_SearchInGroup, DEF_SearchInScan, CT_Scanner::staticGetType(), tr("Scanner"));
 

@@ -3,6 +3,7 @@
 #include "ct_itemdrawable/tools/gridtools/ct_grid3dwootraversalalgorithm.h"
 #include "tools/lvox_distancevisitor.h"
 #include "tools/lvox_countvisitor.h"
+#include "ct_pointcloudindex/abstract/ct_abstractpointcloudindex.h"
 
 LVOX_ComputeBeforeThread::LVOX_ComputeBeforeThread(const CT_Scanner *scanner,
                                                    CT_Grid3D<int> *outputBeforeGrid,
@@ -21,7 +22,7 @@ void LVOX_ComputeBeforeThread::run()
 {
     qDebug() << "Début de LVOX_ComputeBeforeThread / ScanId=" << _scanner->getScanID();
     const CT_AbstractPointCloudIndex *pointCloudIndex = _scene->getPointCloudIndex();
-    size_t n_points = pointCloudIndex->indexSize();
+    size_t n_points = pointCloudIndex->size();
 
     QVector3D bot, top;
     _outputBeforeGrid->getMinCoordinates(bot);

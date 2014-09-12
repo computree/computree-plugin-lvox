@@ -49,7 +49,7 @@ public:
     ~LVOX_PluginEntry();
 
     QString getVersion() const;
-    PluginInterface* getPlugin();
+    CT_AbstractStepPlugin* getPlugin() const;
 
 private:
     LVOX_StepPluginManager *_stepPluginManager;

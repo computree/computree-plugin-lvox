@@ -1,4 +1,5 @@
-include(../../pluginsharedv2/shared.pri)
+CT_PREFIX = ../../computreev3
+include($${CT_PREFIX}/shared.pri)
 include($${PLUGIN_SHARED_DIR}/include.pri)
 
 contains ( QT_VERSION, "^5.*" ) {
@@ -33,7 +34,8 @@ SOURCES += \
     tools/lvox_computedensitythread.cpp \
     step/lvox_stepcombinedensitygrids.cpp
 
-TRANSLATIONS    = plug_lvoxv2_en.ts
+TRANSLATIONS += languages/pluginlvoxv2_en.ts \
+                languages/pluginlvoxv2_fr.ts
 
 INCLUDEPATH += .
 INCLUDEPATH += ./step

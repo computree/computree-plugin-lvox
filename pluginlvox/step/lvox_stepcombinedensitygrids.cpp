@@ -1,25 +1,16 @@
 #include "lvox_stepcombinedensitygrids.h"
 
-// Inclusion of in models
-#include "ct_itemdrawable/model/inModel/ct_instandardgroupmodel.h"
-#include "ct_itemdrawable/model/inModel/ct_instandarditemdrawablemodel.h"
+#include "ct_view/ct_stepconfigurabledialog.h"
 #include "ct_result/model/inModel/ct_inresultmodelgroup.h"
-
-// Inclusion of out models
-#include "ct_itemdrawable/model/outModel/ct_outstandardgroupmodel.h"
-#include "ct_itemdrawable/model/outModel/ct_outstandardgroupmodel.h"
-#include "ct_itemdrawable/model/outModel/ct_outstandarditemdrawablemodel.h"
 #include "ct_result/model/outModel/ct_outresultmodelgroup.h"
+#include "ct_turn/inTurn/tools/ct_inturnmanager.h"
 
 // Inclusion of standard result class
 #include "ct_result/ct_resultgroup.h"
-#include "ct_result/model/inModel/tools/ct_inturnmanager.h"
 
 // Inclusion of used ItemDrawable classes
 #include "ct_itemdrawable/ct_grid3d.h"
 #include "qdebug.h"
-
-#include "ct_result/model/inModel/tools/ct_inturnmanager.h"
 
 // Alias for indexing in models
 #define DEF_resultIn_grids "rgrids"
@@ -68,13 +59,13 @@ void LVOX_StepCombineDensityGrids::createInResultModelListProtected()
     resultModel->addGroupModel("", DEF_groupIn_grids);
 
     resultModel->addItemModel(DEF_groupIn_grids, DEF_itemIn_hits, CT_Grid3D<int>::staticGetType(), tr("hits"), "",
-                              CT_InStandardItemDrawableModel::C_ChooseOneIfMultiple, CT_InStandardItemDrawableModel::F_IsOptional);
+                              CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
 
     resultModel->addItemModel(DEF_groupIn_grids, DEF_itemIn_theorical, CT_Grid3D<int>::staticGetType(), tr("theorical"), "",
-                              CT_InStandardItemDrawableModel::C_ChooseOneIfMultiple, CT_InStandardItemDrawableModel::F_IsOptional);
+                              CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
 
     resultModel->addItemModel(DEF_groupIn_grids, DEF_itemIn_before, CT_Grid3D<int>::staticGetType(), tr("before"), "",
-                              CT_InStandardItemDrawableModel::C_ChooseOneIfMultiple, CT_InStandardItemDrawableModel::F_IsOptional);
+                              CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
 
     resultModel->addItemModel(DEF_groupIn_grids, DEF_itemIn_density, CT_Grid3D<double>::staticGetType(), tr("density"));
 }

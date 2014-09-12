@@ -44,7 +44,7 @@ QString LVOX_PluginEntry::getVersion() const
     return "2.0";
 }
 
-PluginInterface* LVOX_PluginEntry::getPlugin()
+CT_AbstractStepPlugin* LVOX_PluginEntry::getPlugin() const
 {
     return _stepPluginManager;
 }

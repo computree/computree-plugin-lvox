@@ -1,12 +1,7 @@
 #include "lvox_steploadinfile.h"
 
-// Inclusion of in models
-#include "ct_result/model/inModel/ct_inresultmodelnotneedinputresult.h"
-
-// Inclusion of out models
-#include "ct_itemdrawable/model/outModel/ct_outstandardgroupmodel.h"
-#include "ct_itemdrawable/model/outModel/ct_outstandardgroupmodel.h"
-#include "ct_itemdrawable/model/outModel/ct_outstandarditemdrawablemodel.h"
+#include "ct_view/ct_stepconfigurabledialog.h"
+#include "ct_result/model/inModel/ct_inresultmodelgroup.h"
 #include "ct_result/model/outModel/ct_outresultmodelgroup.h"
 
 // Inclusion of standard result class
@@ -219,7 +214,7 @@ void LVOX_StepLoadInFile::compute()
     setProgress(100);
 }
 
-QMap<QString, CT_Scanner*> LVOX_StepLoadInFile::readInFile(QString filename, Result* result)
+QMap<QString, CT_Scanner*> LVOX_StepLoadInFile::readInFile(QString filename, const CT_AbstractResult *result)
 {
     QMap<QString, CT_Scanner*> map;
 

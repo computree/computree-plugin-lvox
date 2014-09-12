@@ -1,4 +1,5 @@
 #include "lvox_computehitsthread.h"
+#include "ct_pointcloudindex/abstract/ct_abstractpointcloudindex.h"
 
 LVOX_ComputeHitsThread::LVOX_ComputeHitsThread(const CT_Scanner *scanner,
                                                CT_Grid3D<int> *grilleHits,
@@ -19,7 +20,7 @@ void LVOX_ComputeHitsThread::run()
 {
     qDebug() << "Début de LVOX_ComputeHitsThread / ScanId=" << _scanner->getScanID();
     const CT_AbstractPointCloudIndex *pointCloudIndex = _scene->getPointCloudIndex();
-    size_t n_points = pointCloudIndex->indexSize();
+    size_t n_points = pointCloudIndex->size();
     QVector3D scanPos = _scanner->getPosition();
     float res = _grilleHits->resolution();
 
