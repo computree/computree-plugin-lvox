@@ -6,6 +6,6 @@ DESTDIR="`pwd`/../../ComputreeInstall"
 cd "$THISDIR"
 
 # Generate translations
-lrelease pluginonfensamv2.pro
+lrelease *.pro
 mkdir -p $DESTDIR/languages
 cp languages/*.qm $DESTDIR/languages

@@ -6,7 +6,7 @@ set /p PWD= < PWD
 set DESTDIR=%PWD%\..\..\ComputreeInstall
 
 echo "Generating Translations"
-lrelease pluginonfensamv2.pro
+lrelease *.pro
 mkdir %DESTDIR%\languages 
 copy languages\*.qm %DESTDIR%\languages
 
