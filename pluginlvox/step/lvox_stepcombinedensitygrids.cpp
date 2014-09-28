@@ -4,6 +4,8 @@
 #include "ct_result/model/inModel/ct_inresultmodelgroup.h"
 #include "ct_result/model/outModel/ct_outresultmodelgroup.h"
 #include "ct_turn/inTurn/tools/ct_inturnmanager.h"
+#include "ct_model/tools/ct_modelsearchhelper.h"
+#include "ct_model/inModel/tools/ct_instdmodelpossibility.h"
 
 // Inclusion of standard result class
 #include "ct_result/ct_resultgroup.h"
@@ -100,11 +102,13 @@ void LVOX_StepCombineDensityGrids::createPostConfigurationDialog()
 
     // Gets in models to test the presence of optional grids
     CT_InResultModelGroup* resultIn_model = (CT_InResultModelGroup*) man->getInResultModel(DEF_resultIn_grids);
-    CT_OutAbstractResultModel *resultOut_model = resultIn_model->getPossibilitiesSavedChecked().first()->outModel();
+    CT_OutAbstractResultModel *resultOut_model = (CT_OutAbstractResultModel*) resultIn_model->getPossibilitiesSavedSelected().first()->outModel();
 
-    CT_InAbstractItemDrawableModel* itemInModel_hits = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultOut_model, DEF_itemIn_hits);
-    CT_InAbstractItemDrawableModel* itemInModel_theorical = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultOut_model, DEF_itemIn_theorical);
-    CT_InAbstractItemDrawableModel* itemInModel_before = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultOut_model, DEF_itemIn_before);
+    //CT_ResultGroup* resultIn_grids = getInputResults().first();
+
+    CT_InAbstractSingularItemModel *itemInModel_hits = (CT_InAbstractSingularItemModel*)PS_MODELS->searchModel(DEF_itemIn_hits, resultOut_model, this);
+    CT_InAbstractSingularItemModel *itemInModel_theorical = (CT_InAbstractSingularItemModel*)PS_MODELS->searchModel(DEF_itemIn_theorical, resultOut_model, this);
+    CT_InAbstractSingularItemModel *itemInModel_before = (CT_InAbstractSingularItemModel*)PS_MODELS->searchModel(DEF_itemIn_before, resultOut_model, this);
 
     CT_StepConfigurableDialog *configDialog = newStandardPostConfigurationDialog();
 
@@ -114,21 +118,21 @@ void LVOX_StepCombineDensityGrids::createPostConfigurationDialog()
     configDialog->addText("Mode de combinaison", "des grilles de densité :","");
     configDialog->addExcludeValue("max (densité)", "", "", bg_mode, maxDensity);
 
-    if (itemInModel_theorical->getPossibilitiesSavedChecked().size() > 0 && itemInModel_before->getPossibilitiesSavedChecked().size() > 0)
+    if (itemInModel_theorical->isAtLeastOnePossibilitySelected() && itemInModel_before->isAtLeastOnePossibilitySelected())
     {
         configDialog->addExcludeValue("max (nt - nb)", "", "", bg_mode, maxNt_Nb);
     } else {
         configDialog->addText("max (nt - nb)", "Non disponible : ", "grille(s) nt/nb manquante(s)");
     }
 
-    if (itemInModel_hits->getPossibilitiesSavedChecked().size() > 0)
+    if (itemInModel_hits->isAtLeastOnePossibilitySelected())
     {
         configDialog->addExcludeValue("max (ni)", "", "", bg_mode, maxNi);
     } else {
         configDialog->addText("max (ni)", "Non disponible : ", "grille ni manquante");
     }
 
-    if (itemInModel_hits->getPossibilitiesSavedChecked().size() > 0 && itemInModel_theorical->getPossibilitiesSavedChecked().size() > 0 && itemInModel_before->getPossibilitiesSavedChecked().size() > 0)
+    if (itemInModel_hits->isAtLeastOnePossibilitySelected() && itemInModel_theorical->isAtLeastOnePossibilitySelected() && itemInModel_before->isAtLeastOnePossibilitySelected())
     {
         configDialog->addExcludeValue("sum(ni) / sum(nt - nb)", "", "", bg_mode, sumNiSumNtNb);
         configDialog->addInt(tr("    -> (nt - nb) minimum"),tr(""),-100000,100000, _effectiveRayThresh );
@@ -142,13 +146,13 @@ void LVOX_StepCombineDensityGrids::compute()
 {
     CT_ResultGroup* resultIn_grids = getInputResults().first();
 
-    CT_InAbstractItemDrawableModel* itemInModel_hits = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_grids, DEF_itemIn_hits);
-    CT_InAbstractItemDrawableModel* itemInModel_theorical = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_grids, DEF_itemIn_theorical);
-    CT_InAbstractItemDrawableModel* itemInModel_before = (CT_InAbstractItemDrawableModel*)getInModelForResearch(resultIn_grids, DEF_itemIn_before);
+    CT_InAbstractSingularItemModel *itemInModel_hits = (CT_InAbstractSingularItemModel*)PS_MODELS->searchModel(DEF_itemIn_hits, resultIn_grids, this);
+    CT_InAbstractSingularItemModel *itemInModel_theorical = (CT_InAbstractSingularItemModel*)PS_MODELS->searchModel(DEF_itemIn_theorical, resultIn_grids, this);
+    CT_InAbstractSingularItemModel *itemInModel_before = (CT_InAbstractSingularItemModel*)PS_MODELS->searchModel(DEF_itemIn_before, resultIn_grids, this);
 
-    bool use_ni = (itemInModel_hits->getPossibilitiesSavedChecked().size() > 0);
-    bool use_nt = (itemInModel_theorical->getPossibilitiesSavedChecked().size() > 0);
-    bool use_nb = (itemInModel_before->getPossibilitiesSavedChecked().size() > 0);
+    bool use_ni = itemInModel_hits->isAtLeastOnePossibilitySelected();
+    bool use_nt = itemInModel_theorical->isAtLeastOnePossibilitySelected();
+    bool use_nb = itemInModel_before->isAtLeastOnePossibilitySelected();
 
     // coherence control between models and _mode parameter
     if (_mode < 0 || _mode > 2) {qDebug() << "Configuration non prévue !"; return;}

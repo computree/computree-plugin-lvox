@@ -13,6 +13,7 @@
 #include "ct_itemdrawable/ct_pointsattributescolor.h"
 #include "ct_itemdrawable/ct_pointsattributesscalartemplated.h"
 #include "ct_global/ct_context.h"
+#include "ct_model/tools/ct_modelsearchhelper.h"
 
 #include <limits>
 
@@ -95,9 +96,9 @@ void LVOX_StepLoadInFile::compute()
     QList<CT_ResultGroup*> outResultList = getOutResultList();
 
     CT_ResultGroup* resultOut_individualScenes = outResultList.at(0);
-    CT_OutStandardItemDrawableModel* itemOutModel_individualScene = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_individualScenes, DEF_itemOut_individualScene);
-    CT_OutStandardItemDrawableModel* itemOutModel_individualSceneColor = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_individualScenes, DEF_itemOut_individualSceneColor);
-    CT_OutStandardItemDrawableModel* itemOutModel_individualSceneIntensity = (CT_OutStandardItemDrawableModel*)getOutModelForCreation(resultOut_individualScenes, DEF_itemOut_individualSceneIntensity);
+    CT_OutAbstractSingularItemModel *itemOutModel_individualScene = (CT_OutAbstractSingularItemModel*)PS_MODELS->searchModel(DEF_itemOut_individualScene, resultOut_individualScenes, this);
+    CT_OutAbstractSingularItemModel *itemOutModel_individualSceneColor = (CT_OutAbstractSingularItemModel*)PS_MODELS->searchModel(DEF_itemOut_individualSceneColor, resultOut_individualScenes, this);
+    CT_OutAbstractSingularItemModel *itemOutModel_individualSceneIntensity = (CT_OutAbstractSingularItemModel*)PS_MODELS->searchModel(DEF_itemOut_individualSceneIntensity, resultOut_individualScenes, this);
 
     CT_ResultGroup* resultOut_mergedScene = outResultList.at(1);
 
