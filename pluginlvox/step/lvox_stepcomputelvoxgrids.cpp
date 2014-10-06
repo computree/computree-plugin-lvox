@@ -77,7 +77,7 @@ LVOX_StepComputeLvoxGrids::LVOX_StepComputeLvoxGrids(CT_StepInitializeData &data
 QString LVOX_StepComputeLvoxGrids::getStepDescription() const
 {
     // Gives the descrption to print in the GUI
-    return tr("Discretise l'espace en voxels et calcule un indice de denste par voxel et les distances associees");
+    return tr("Calcul de grilles 3D densités corrigées");
 }
 
 CT_VirtualAbstractStep* LVOX_StepComputeLvoxGrids::createNewInstance(CT_StepInitializeData &dataInit)
