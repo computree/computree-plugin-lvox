@@ -95,13 +95,6 @@ void LVOX_StepComputeLvoxGrids::createInResultModelListProtected()
     resultModel->addItemModel(DEF_SearchInGroup, DEF_SearchInScene, CT_Scene::staticGetType(), tr("Scène"));
     resultModel->addItemModel(DEF_SearchInGroup, DEF_SearchInScan, CT_Scanner::staticGetType(), tr("Scanner"));
 
-
-    CT_InResultModelGroup *resultRefGridModel = createNewInResultModel(DEF_SearchInResultRefGrid, tr("Grille de référence"), tr("OPTIONNEL"), true);
-
-    resultRefGridModel->setZeroOrMoreRootGroup();
-    resultRefGridModel->addGroupModel("", DEF_SearchInGroupRefGrid, tr("Grille de référence"));
-    resultRefGridModel->addItemModel(DEF_SearchInGroupRefGrid, DEF_SearchInRefGrid, CT_AbstractGrid3D::staticGetType(), tr("Grille de référence"));
-    resultRefGridModel->setMinimumNumberOfPossibilityThatMustBeSelectedForOneTurn(0);
 }
 
 void LVOX_StepComputeLvoxGrids::createOutResultModelListProtected()
