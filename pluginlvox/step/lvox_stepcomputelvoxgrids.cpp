@@ -59,19 +59,19 @@
 #define DEF_SearchInScan   "sca"
 #define DEF_SearchInGroup   "gr"
 
-#define DEF_SearchInResultRefGrid "rg"
-#define DEF_SearchInGroupRefGrid   "ggrd"
-#define DEF_SearchInRefGrid   "grd"
-
 LVOX_StepComputeLvoxGrids::LVOX_StepComputeLvoxGrids(CT_StepInitializeData &dataInit) : CT_AbstractStep(dataInit)
 {
     //********************************************//
     //              Attributes of LVox            //
     //********************************************//
     _res = 0.5;
-    _useRefGridResolution = true;
     _effectiveRayThresh = 10;
     _computeDistances = false;
+
+    _gridMode = 1;
+    _xBase = 0;
+    _yBase = 0;
+    _zBase = 0;
 }
 
 QString LVOX_StepComputeLvoxGrids::getStepDescription() const
@@ -126,33 +126,26 @@ void LVOX_StepComputeLvoxGrids::createPostConfigurationDialog()
     //********************************************//
     //              Attributes of LVox            //
     //********************************************//
-    configDialog->addBool(tr("Use reference grid resolution"), tr("(if reference grid has been specified...)"), tr(""), _useRefGridResolution);
-    configDialog->addDouble(tr("If not : resolution of the grids"),tr("meters"),0.0001,10000,2, _res );
+    configDialog->addDouble(tr("Resolution of the grids"),tr("meters"),0.0001,10000,2, _res );
     configDialog->addInt(tr("Minimum number of effective ray in a voxel to take it into account"),tr(""),-100000,100000, _effectiveRayThresh );
     configDialog->addBool(tr("Compute Distances"), tr(""), tr(""), _computeDistances);
+
+    configDialog->addEmpty();
+
+    configDialog->addText(tr("Reference for (minX, minY, minZ) corner of the grid :"),"", "");
+
+    CT_ButtonGroup &bg_gridMode = configDialog->addButtonGroup(_gridMode);
+    configDialog->addExcludeValue("", "", tr("Bounding box of the scene"), bg_gridMode, 0);
+    configDialog->addExcludeValue("", "", tr("Relative to folowing coordinates:"), bg_gridMode, 1);
+
+    configDialog->addDouble(tr("X coordinate:"), "", -std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 4, _xBase);
+    configDialog->addDouble(tr("Y coordinate:"), "", -std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 4, _yBase);
+    configDialog->addDouble(tr("Z coordinate:"), "", -std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 4, _zBase);
 
 }
 
 void LVOX_StepComputeLvoxGrids::compute()
 {   
-    bool refGridSpecified = false;
-    CT_AbstractGrid3D* refGrid = NULL;
-
-    // Gets the optionnal reference grid
-    QList<CT_ResultGroup*> inResultsList = getInputResultsForModel(DEF_SearchInResultRefGrid);
-
-    if (inResultsList.size() > 0)
-    {
-        CT_ResultGroup* inResult_RefGrid = inResultsList.first();
-        CT_ResultItemIterator itRefGrid(inResult_RefGrid, this, DEF_SearchInRefGrid);
-
-        if (itRefGrid.hasNext())
-        {
-            refGrid = (CT_AbstractGrid3D*) itRefGrid.next();
-            refGridSpecified = true;
-        }
-    }
-
     // Gets the out result
     CT_ResultGroup* outResult = getOutResultList().first();
 
@@ -203,41 +196,23 @@ void LVOX_StepComputeLvoxGrids::compute()
         }
     }
 
-
-    // If specified, use the reference grid resolution
-    if (refGridSpecified && _useRefGridResolution)
+    if (_gridMode == 1)
     {
-        _res = refGrid->resolution();
-    }
+        float xMinScenes = xMin;
+        float yMinScenes = yMin;
+        float zMinScenes = zMin;
 
-    // Synchronize (x,y) of the grid to refGrid (if specified)
-    if (refGridSpecified)
-    {
-        if (refGrid->minX() <= xMin) {xMin = refGrid->minX();}
-        else {
-            float newMinX = refGrid->minX();
+        xMin = _xBase;
+        yMin = _yBase;
+        zMin = _zBase;
 
-            while (newMinX > xMin){newMinX = newMinX - _res;}
-            xMin = newMinX;
-        }
+        while (xMin < xMinScenes) {xMin += _res;};
+        while (yMin < yMinScenes) {yMin += _res;};
+        while (zMin < zMinScenes) {zMin += _res;};
 
-        if (refGrid->minY() <= yMin) {yMin = refGrid->minY();}
-        else {
-            float newMinY = refGrid->minY();
-            while (newMinY > yMin){newMinY = newMinY - _res;}
-            yMin = newMinY;
-        }
-
-        if (refGrid->minZ() <= zMin) {zMin = refGrid->minZ();}
-        else {
-            float newMinZ = refGrid->minZ();
-            while (newMinZ > zMin) {newMinZ = newMinZ - _res;}
-            zMin = newMinZ;
-        }
-
-        if (refGrid->maxX() > xMax) {xMax = refGrid->maxX();}
-        if (refGrid->maxY() > yMax) {yMax = refGrid->maxY();}
-        if (refGrid->maxZ() > zMax) {zMax = refGrid->maxZ();}
+        while (xMin > xMinScenes) {xMin -= _res;};
+        while (yMin > yMinScenes) {yMin -= _res;};
+        while (zMin > zMinScenes) {zMin -= _res;};
     }
 
     QMapIterator<CT_AbstractItemGroup*, QPair<const CT_Scene*, const CT_Scanner*> > it(pointsOfView);
@@ -265,7 +240,7 @@ void LVOX_StepComputeLvoxGrids::compute()
         group->addItemDrawable(density);
 
         if (_computeDistances)
-        {                                   
+        {
             deltaInGrid = new CT_Grid3D<double>(_deltain_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
             deltaOutGrid = new CT_Grid3D<double>(_deltaout_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
             deltaTheoritical = new CT_Grid3D<double>(_deltatheo_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
