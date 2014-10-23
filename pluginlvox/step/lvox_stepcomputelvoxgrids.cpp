@@ -69,9 +69,13 @@ LVOX_StepComputeLvoxGrids::LVOX_StepComputeLvoxGrids(CT_StepInitializeData &data
     _computeDistances = false;
 
     _gridMode = 1;
-    _xBase = 0;
-    _yBase = 0;
-    _zBase = 0;
+    _xBase = 0.0;
+    _yBase = 0.0;
+    _zBase = 0.0;
+
+    _xDim = 0;
+    _yDim = 0;
+    _zDim = 0;
 }
 
 QString LVOX_StepComputeLvoxGrids::getStepDescription() const
@@ -135,12 +139,19 @@ void LVOX_StepComputeLvoxGrids::createPostConfigurationDialog()
     configDialog->addText(tr("Reference for (minX, minY, minZ) corner of the grid :"),"", "");
 
     CT_ButtonGroup &bg_gridMode = configDialog->addButtonGroup(_gridMode);
-    configDialog->addExcludeValue("", "", tr("Bounding box of the scene"), bg_gridMode, 0);
-    configDialog->addExcludeValue("", "", tr("Relative to folowing coordinates:"), bg_gridMode, 1);
+    configDialog->addExcludeValue("", "", tr("Default mode : Bounding box of the scene"), bg_gridMode, 0);
+    configDialog->addExcludeValue("", "", tr("Custom mode : Relative to folowing coordinates:"), bg_gridMode, 1);
+    configDialog->addExcludeValue("", "", tr("Custom mode : Relative to folowing coordinates + custom dimensions:"), bg_gridMode, 2);
+
 
     configDialog->addDouble(tr("X coordinate:"), "", -std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 4, _xBase);
     configDialog->addDouble(tr("Y coordinate:"), "", -std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 4, _yBase);
     configDialog->addDouble(tr("Z coordinate:"), "", -std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 4, _zBase);
+
+    configDialog->addInt(tr("X dimension:"), "", 1, 1000, _xDim);
+    configDialog->addInt(tr("Y dimension:"), "", 1, 1000, _yDim);
+    configDialog->addInt(tr("Z dimension:"), "", 1, 1000, _zDim);
+
 
 }
 
@@ -196,7 +207,7 @@ void LVOX_StepComputeLvoxGrids::compute()
         }
     }
 
-    if (_gridMode == 1)
+    if (_gridMode == 1 || _gridMode == 2)
     {
         float xMinScenes = xMin;
         float yMinScenes = yMin;
@@ -213,6 +224,12 @@ void LVOX_StepComputeLvoxGrids::compute()
         while (xMin > xMinScenes) {xMin -= _res;};
         while (yMin > yMinScenes) {yMin -= _res;};
         while (zMin > zMinScenes) {zMin -= _res;};
+
+        if( _gridMode == 2){
+            xMax = xMin + _res*_xDim;
+            yMax = yMin + _res*_yDim;
+            zMax = zMin + _res*_zDim;
+        }
     }
 
     QMapIterator<CT_AbstractItemGroup*, QPair<const CT_Scene*, const CT_Scanner*> > it(pointsOfView);

@@ -147,6 +147,9 @@ private:
     double          _yBase;
     double          _zBase;
 
+    int          _xDim;
+    int          _yDim;
+    int          _zDim;
 
 };
 
