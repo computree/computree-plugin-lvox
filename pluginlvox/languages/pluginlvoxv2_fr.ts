@@ -61,109 +61,157 @@
 <context>
     <name>LVOX_StepComputeLvoxGrids</name>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="80"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="84"/>
         <source>Calcul de grilles 3D densités corrigées</source>
         <translation>Calcul de grilles 3D densités corrigées</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="91"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="95"/>
         <source>Scène(s)</source>
         <translation>Scène(s)</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="94"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="98"/>
         <source>Scan</source>
         <translation>Scan</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="95"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="99"/>
         <source>Scène</source>
         <translation>Scène</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="96"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="100"/>
         <source>Scanner</source>
         <translation>Scanner</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="99"/>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="102"/>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="103"/>
         <source>Grille de référence</source>
-        <translation>Grille de référence</translation>
+        <translation type="vanished">Grille de référence</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="99"/>
         <source>OPTIONNEL</source>
-        <translation>OPTIONNEL</translation>
+        <translation type="vanished">OPTIONNEL</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="114"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="111"/>
         <source>Hits</source>
         <translation>hits (retours)</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="115"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="112"/>
         <source>Theorical</source>
         <translation>theorical (théoriques)</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="116"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="113"/>
         <source>Before</source>
         <translation>before (intercéptés avant)</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="117"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="114"/>
         <source>Density</source>
         <translation>densité</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="121"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="118"/>
         <source>DeltaIn</source>
         <translation>DeltaIn</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="122"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="119"/>
         <source>DeltaOut</source>
         <translation>DeltaOut</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="123"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="120"/>
         <source>DeltaTheorical</source>
         <translation>DeltaTheorical</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="124"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="121"/>
         <source>DeltaBefore</source>
         <translation>DeltaBefore</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="136"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="139"/>
+        <source>Reference for (minX, minY, minZ) corner of the grid :</source>
+        <translation>Référence pour la coordonnée (minX, minY, minZ) de la grille :</translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="142"/>
+        <source>Default mode : Bounding box of the scene</source>
+        <translation>Mode par défaut: Boite englobante de la scène</translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="143"/>
+        <source>Custom mode : Relative to folowing coordinates:</source>
+        <translation>Mode personnalisé : relatif aux coordonnées suivantes:</translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="144"/>
+        <source>Custom mode : Relative to folowing coordinates + custom dimensions:</source>
+        <translation>Mode personnalisé : Relatif aux coordonnées ET utilisant les dimensions suivantes :</translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="147"/>
+        <source>X coordinate:</source>
+        <translation>Coordonnée X :</translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="148"/>
+        <source>Y coordinate:</source>
+        <translation>Coordonnée Y :</translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="149"/>
+        <source>Z coordinate:</source>
+        <translation>Coordonnée Z :</translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="151"/>
+        <source>X dimension:</source>
+        <translation>Dimension X :</translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="152"/>
+        <source>Y dimension:</source>
+        <translation>Dimension Y :</translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="153"/>
+        <source>Z dimension:</source>
+        <translation>Dimension Z :</translation>
+    </message>
+    <message>
         <source>Use reference grid resolution</source>
-        <translation>Utiliser la résolution de la grille de référence</translation>
+        <translation type="vanished">Utiliser la résolution de la grille de référence</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="136"/>
         <source>(if reference grid has been specified...)</source>
-        <translation>(si une grille de référence a été séléctionnée)</translation>
+        <translation type="vanished">(si une grille de référence a été séléctionnée)</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="137"/>
         <source>If not : resolution of the grids</source>
-        <translation>Sinon : résolution des grilles</translation>
+        <translation type="vanished">Sinon : résolution des grilles</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="137"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="133"/>
         <source>meters</source>
         <translation>mètres</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="138"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="133"/>
+        <source>Resolution of the grids</source>
+        <translation>Résolution des grilles</translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="134"/>
         <source>Minimum number of effective ray in a voxel to take it into account</source>
         <translation>Nombre minimum de rayons effectifs dans un voxel pour qu&apos;ils soient pris en compte</translation>
     </message>
     <message>
-        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="139"/>
+        <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="135"/>
         <source>Compute Distances</source>
         <translation>Calcul des distances</translation>
     </message>
