@@ -32,7 +32,7 @@ void LVOX_ComputeHitsThread::run()
         const CT_Point &point = pointCloudIndex->constTAt(i, index);
         size_t indice;
 
-        if (_grilleHits->indexAtXYZ(point.x, point.y, point.z, indice))
+        if (_grilleHits->indexAtXYZ(point(CT_Point::X), point(CT_Point::Y), point(CT_Point::Z), indice))
         {
             // Hits Computing
             _grilleHits->addValueAtIndex(indice, 1);
@@ -40,12 +40,12 @@ void LVOX_ComputeHitsThread::run()
             if (_computeDistance)
             {
                 // Distances Sum Computing
-                QVector3D direction (point.x - scanPos.x(),
-                                     point.y - scanPos.y(),
-                                     point.z - scanPos.z());
+                QVector3D direction (point(CT_Point::X) - scanPos.x(),
+                                     point(CT_Point::Y) - scanPos.y(),
+                                     point(CT_Point::Z) - scanPos.z());
 
                 QVector3D bottom, top, in, out;
-                _grilleHits->getCellBottomLeftCornerAtXYZ(point.x, point.y, point.z, bottom);
+                _grilleHits->getCellBottomLeftCornerAtXYZ(point(CT_Point::X), point(CT_Point::Y), point(CT_Point::Z), bottom);
                 top.setX(bottom.x() + res);
                 top.setY(bottom.y() + res);
                 top.setZ(bottom.z() + res);
@@ -54,8 +54,8 @@ void LVOX_ComputeHitsThread::run()
 
                 if (beam.intersect(bottom, top, in, out))
                 {
-                    double distanceIn = sqrt(pow(in.x()-point.x, 2) + pow(in.y()-point.y, 2) + pow(in.z()-point.z, 2));
-                    double distanceOut = sqrt(pow(out.x()-point.x, 2) + pow(out.y()-point.y, 2) + pow(out.z()-point.z, 2));
+                    double distanceIn = sqrt(pow(in.x()-point(CT_Point::X), 2) + pow(in.y()-point(CT_Point::Y), 2) + pow(in.z()-point(CT_Point::Z), 2));
+                    double distanceOut = sqrt(pow(out.x()-point(CT_Point::X), 2) + pow(out.y()-point(CT_Point::Y), 2) + pow(out.z()-point(CT_Point::Z), 2));
 
                     _grilleIn->addValueAtIndex(indice, distanceIn);
                     _grilleOut->addValueAtIndex(indice, distanceOut);
