@@ -3,8 +3,8 @@
 
 LVOX_ComputeHitsThread::LVOX_ComputeHitsThread(const CT_Scanner *scanner,
                                                CT_Grid3D<int> *grilleHits,
-                                               CT_Grid3D<double> *grilleIn,
-                                               CT_Grid3D<double> *grilleOut,
+                                               CT_Grid3D<float> *grilleIn,
+                                               CT_Grid3D<float> *grilleOut,
                                                const CT_Scene *scene,
                                                bool computeDistance) : CT_MonitoredQThread()
 {
@@ -54,8 +54,8 @@ void LVOX_ComputeHitsThread::run()
 
                 if (beam.intersect(bottom, top, in, out))
                 {
-                    double distanceIn = sqrt(pow(in.x()-point(CT_Point::X), 2) + pow(in.y()-point(CT_Point::Y), 2) + pow(in.z()-point(CT_Point::Z), 2));
-                    double distanceOut = sqrt(pow(out.x()-point(CT_Point::X), 2) + pow(out.y()-point(CT_Point::Y), 2) + pow(out.z()-point(CT_Point::Z), 2));
+                    float distanceIn = sqrt(pow(in.x()-point(CT_Point::X), 2) + pow(in.y()-point(CT_Point::Y), 2) + pow(in.z()-point(CT_Point::Z), 2));
+                    float distanceOut = sqrt(pow(out.x()-point(CT_Point::X), 2) + pow(out.y()-point(CT_Point::Y), 2) + pow(out.z()-point(CT_Point::Z), 2));
 
                     _grilleIn->addValueAtIndex(indice, distanceIn);
                     _grilleOut->addValueAtIndex(indice, distanceOut);
@@ -81,15 +81,15 @@ void LVOX_ComputeHitsThread::run()
         size_t ncells = _grilleHits->nCells();
         for (size_t i = 0 ; i < ncells ; i++)
         {
-            double value = _grilleHits->valueAtIndex(i);
+            float value = _grilleHits->valueAtIndex(i);
             int na = _grilleHits->NA();
             if (value==0 || value==na)
             {
                 _grilleIn->setValueAtIndex(i, _grilleIn->NA());
                 _grilleOut->setValueAtIndex(i, _grilleOut->NA());
             } else {
-                double invalue = _grilleIn->valueAtIndex(i) / value;
-                double outvalue = _grilleOut->valueAtIndex(i) / value;
+                float invalue = _grilleIn->valueAtIndex(i) / value;
+                float outvalue = _grilleOut->valueAtIndex(i) / value;
 
                 _grilleIn->setValueAtIndex(i, invalue);
                 _grilleOut->setValueAtIndex(i, outvalue);

@@ -109,16 +109,16 @@ void LVOX_StepComputeLvoxGrids::createOutResultModelListProtected()
     // in this result we add a CT_AffiliationID to the group named DEF_SearchInGroup. The name of the model of
     // the CT_AffiliationID will be generated automatically by the _outAffiliationIDModelName object.
     res->addItemModel(DEF_SearchInGroup, _hits_ModelName, new CT_Grid3D<int>(), tr("Hits"));
-    res->addItemModel(DEF_SearchInGroup, _theo_ModelName, new CT_Grid3D<int>(), tr("Theorical"));
+    res->addItemModel(DEF_SearchInGroup, _theo_ModelName, new CT_Grid3D<int>(), tr("Theoretical"));
     res->addItemModel(DEF_SearchInGroup, _bef_ModelName, new CT_Grid3D<int>(), tr("Before"));
-    res->addItemModel(DEF_SearchInGroup, _density_ModelName, new CT_Grid3D<double>(), tr("Density"));
+    res->addItemModel(DEF_SearchInGroup, _density_ModelName, new CT_Grid3D<float>(), tr("Density"));
 
     if (_computeDistances)
     {
-        res->addItemModel(DEF_SearchInGroup, _deltain_ModelName, new CT_Grid3D<double>(), tr("DeltaIn"));
-        res->addItemModel(DEF_SearchInGroup, _deltaout_ModelName, new CT_Grid3D<double>(), tr("DeltaOut"));
-        res->addItemModel(DEF_SearchInGroup, _deltatheo_ModelName, new CT_Grid3D<int>(), tr("DeltaTheorical"));
-        res->addItemModel(DEF_SearchInGroup, _deltabef_ModelName, new CT_Grid3D<int>(), tr("DeltaBefore"));
+        res->addItemModel(DEF_SearchInGroup, _deltain_ModelName, new CT_Grid3D<float>(), tr("DeltaIn"));
+        res->addItemModel(DEF_SearchInGroup, _deltaout_ModelName, new CT_Grid3D<float>(), tr("DeltaOut"));
+        res->addItemModel(DEF_SearchInGroup, _deltatheo_ModelName, new CT_Grid3D<float>(), tr("Deltatheoretical"));
+        res->addItemModel(DEF_SearchInGroup, _deltabef_ModelName, new CT_Grid3D<float>(), tr("DeltaBefore"));
 
     }
 }
@@ -131,7 +131,7 @@ void LVOX_StepComputeLvoxGrids::createPostConfigurationDialog()
     //              Attributes of LVox            //
     //********************************************//
     configDialog->addDouble(tr("Resolution of the grids"),tr("meters"),0.0001,10000,2, _res );
-    configDialog->addInt(tr("Minimum number of effective ray in a voxel to take it into account"),tr(""),-100000,100000, _effectiveRayThresh );
+    configDialog->addInt(tr("Minimum number of effective ray in a voxel to take it into account"),tr(""),0,100000, _effectiveRayThresh );
     configDialog->addBool(tr("Compute Distances"), tr(""), tr(""), _computeDistances);
 
     configDialog->addEmpty();
@@ -244,12 +244,12 @@ void LVOX_StepComputeLvoxGrids::compute()
         CT_Grid3D<int>*      hitGrid = CT_Grid3D<int>::createGrid3DFromXYZCoords(_hits_ModelName.completeName(), outResult, xMin, yMin, zMin, xMax, yMax, zMax, _res, -1, 0);
         CT_Grid3D<int>*      theoriticalGrid = new CT_Grid3D<int>(_theo_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
         CT_Grid3D<int>*      beforeGrid = new CT_Grid3D<int>(_bef_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-        CT_Grid3D<double>*   density = new CT_Grid3D<double>(_density_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+        CT_Grid3D<float>*   density = new CT_Grid3D<float>(_density_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
 
-        CT_Grid3D<double>*   deltaInGrid = NULL;
-        CT_Grid3D<double>*   deltaOutGrid = NULL;
-        CT_Grid3D<double>*   deltaTheoritical = NULL;
-        CT_Grid3D<double>*   deltaBefore = NULL;
+        CT_Grid3D<float>*   deltaInGrid = NULL;
+        CT_Grid3D<float>*   deltaOutGrid = NULL;
+        CT_Grid3D<float>*   deltaTheoritical = NULL;
+        CT_Grid3D<float>*   deltaBefore = NULL;
 
         group->addItemDrawable(hitGrid);
         group->addItemDrawable(theoriticalGrid);
@@ -258,10 +258,10 @@ void LVOX_StepComputeLvoxGrids::compute()
 
         if (_computeDistances)
         {
-            deltaInGrid = new CT_Grid3D<double>(_deltain_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-            deltaOutGrid = new CT_Grid3D<double>(_deltaout_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-            deltaTheoritical = new CT_Grid3D<double>(_deltatheo_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-            deltaBefore = new CT_Grid3D<double>(_deltabef_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            deltaInGrid = new CT_Grid3D<float>(_deltain_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            deltaOutGrid = new CT_Grid3D<float>(_deltaout_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            deltaTheoritical = new CT_Grid3D<float>(_deltatheo_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            deltaBefore = new CT_Grid3D<float>(_deltabef_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
 
             group->addItemDrawable(deltaInGrid);
             group->addItemDrawable(deltaOutGrid);
@@ -274,10 +274,10 @@ void LVOX_StepComputeLvoxGrids::compute()
         _threadList.append(hitsThread);
         baseThreads.append(hitsThread);
 
-        LVOX_ComputeTheoriticalsThread* theoricalThread = new LVOX_ComputeTheoriticalsThread(scanner, theoriticalGrid, deltaTheoritical, _computeDistances);
-        connect(theoricalThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
-        _threadList.append(theoricalThread);
-        baseThreads.append(theoricalThread);
+        LVOX_ComputeTheoriticalsThread* theoreticalThread = new LVOX_ComputeTheoriticalsThread(scanner, theoriticalGrid, deltaTheoritical, _computeDistances);
+        connect(theoreticalThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
+        _threadList.append(theoreticalThread);
+        baseThreads.append(theoreticalThread);
 
         LVOX_ComputeBeforeThread* beforeThread = new LVOX_ComputeBeforeThread(scanner, beforeGrid, deltaBefore, scene, _computeDistances);
         connect(beforeThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));

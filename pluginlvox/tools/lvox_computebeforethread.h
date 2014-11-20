@@ -13,7 +13,7 @@ class LVOX_ComputeBeforeThread : public CT_MonitoredQThread
 public:
     LVOX_ComputeBeforeThread(const CT_Scanner *scanner,
                              CT_Grid3D<int> *outputBeforeGrid,
-                             CT_Grid3D<double> *outputDeltaBeforeGrid,
+                             CT_Grid3D<float> *outputDeltaBeforeGrid,
                              const CT_Scene *scene,
                              bool computeDistance);
 
@@ -22,7 +22,7 @@ public:
 private:
     const CT_Scanner*   _scanner;
     CT_Grid3D<int>*     _outputBeforeGrid;
-    CT_Grid3D<double>*  _outputDeltaBeforeGrid;
+    CT_Grid3D<float>*  _outputDeltaBeforeGrid;
     const CT_Scene*     _scene;
     bool                _computeDistance;
 };

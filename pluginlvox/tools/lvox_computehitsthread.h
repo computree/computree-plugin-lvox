@@ -26,8 +26,8 @@ class LVOX_ComputeHitsThread : public CT_MonitoredQThread
 public:
     LVOX_ComputeHitsThread(const CT_Scanner *scanner,
                            CT_Grid3D<int> *grilleHits,
-                           CT_Grid3D<double> *grilleIn,
-                           CT_Grid3D<double> *grilleOut,
+                           CT_Grid3D<float> *grilleIn,
+                           CT_Grid3D<float> *grilleOut,
                            const CT_Scene *scene,
                            bool computeDistance);
 
@@ -36,8 +36,8 @@ public:
 private:
     const CT_Scanner*   _scanner;
     CT_Grid3D<int>*     _grilleHits;
-    CT_Grid3D<double>*  _grilleIn;
-    CT_Grid3D<double>*  _grilleOut;
+    CT_Grid3D<float>*  _grilleIn;
+    CT_Grid3D<float>*  _grilleOut;
     const CT_Scene*     _scene;
     bool                _computeDistance;
 };

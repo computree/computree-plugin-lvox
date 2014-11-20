@@ -44,10 +44,11 @@ public:
 
     enum combinaisonMode
     {
-        maxDensity = 0,
-        maxNt_Nb = 1,
-        maxNi = 2,
-        sumNiSumNtNb = 3
+        maxDensity,
+        maxNt_Nb,
+        maxNt_Nb_div_Nt,
+        maxNi,
+        sumNiSumNtNb
     };
 
     /*! \brief Step constructor
@@ -101,6 +102,7 @@ private:
     // Step parameters
     int    _mode;
     int    _effectiveRayThresh;
+    bool   _UseOnlyNotEmptyCellsIf_maxNt_Nb_div_Nt_selected;
 
 };
 

@@ -7,7 +7,7 @@
 
 LVOX_ComputeTheoriticalsThread::LVOX_ComputeTheoriticalsThread(const CT_Scanner *scanner,
                                                                CT_Grid3D<int> *outputTheoriticalGrid,
-                                                               CT_Grid3D<double> *outputDeltaTheoriticalGrid,
+                                                               CT_Grid3D<float> *outputDeltaTheoriticalGrid,
                                                                bool computeDistance) : CT_MonitoredQThread()
 {
     _scanner = scanner;

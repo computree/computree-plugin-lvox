@@ -1,7 +1,7 @@
 #include "lvox_distancevisitor.h"
 
 
-LVOX_DistanceVisitor::LVOX_DistanceVisitor(CT_Grid3D<double> *grid)
+LVOX_DistanceVisitor::LVOX_DistanceVisitor(CT_Grid3D<float> *grid)
 {
   _grid = grid;
 }

@@ -1,6 +1,6 @@
 #include "lvox_computedensitythread.h"
 
-LVOX_ComputeDensityThread::LVOX_ComputeDensityThread(CT_Grid3D<double> *densityGrid,
+LVOX_ComputeDensityThread::LVOX_ComputeDensityThread(CT_Grid3D<float> *densityGrid,
                                                      CT_Grid3D<int> *hitsGrid,
                                                      CT_Grid3D<int> *theoriticalGrid,
                                                      CT_Grid3D<int> *beforeGrid,
@@ -23,28 +23,29 @@ void LVOX_ComputeDensityThread::run()
     {
         // Compute the density index
         // Avoid division by 0
-        if ( _theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i) == 0 )
+        if ( (_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i)) == 0 )
         {
             _densityGrid->setValueAtIndex(i, -1);
         }
-
         // If there is an error (nb > nt)
-        else if ( _theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i) < 0 )
+        else if ( (_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i)) < 0 )
         {
             _densityGrid->setValueAtIndex(i, -2);
         }
-
         // If there is not enough information
-        else if ( _theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i) < _effectiveRayThresh )
+        else if ( (_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i)) < _effectiveRayThresh )
         {
             _densityGrid->setValueAtIndex(i, -3);
         }
-
-
         // Normal case
         else
         {
-            _densityGrid->setValueAtIndex(i, (double)(_hitsGrid->valueAtIndex(i)) / (double)(_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i) ) );
+            _densityGrid->setValueAtIndex(i, (float)(_hitsGrid->valueAtIndex(i)) / (float)(_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i) ) );
+        }
+
+        if (_hitsGrid->valueAtIndex(i) > (_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i)))
+        {
+            _densityGrid->setValueAtIndex(i, -4);
         }
     }
 

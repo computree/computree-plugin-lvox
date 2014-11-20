@@ -7,7 +7,7 @@
 
 LVOX_ComputeBeforeThread::LVOX_ComputeBeforeThread(const CT_Scanner *scanner,
                                                    CT_Grid3D<int> *outputBeforeGrid,
-                                                   CT_Grid3D<double> *outputDeltaBeforeGrid,
+                                                   CT_Grid3D<float> *outputDeltaBeforeGrid,
                                                    const CT_Scene *scene,
                                                    bool computeDistance) : CT_MonitoredQThread()
 {
@@ -90,7 +90,7 @@ void LVOX_ComputeBeforeThread::run()
                 _outputDeltaBeforeGrid->setValueAtIndex(i,-1);
             } else
             {
-                _outputDeltaBeforeGrid->setValueAtIndex(i, _outputDeltaBeforeGrid->valueAtIndex(i)/(double)_outputBeforeGrid->valueAtIndex(i));
+                _outputDeltaBeforeGrid->setValueAtIndex(i, _outputDeltaBeforeGrid->valueAtIndex(i)/(float)_outputBeforeGrid->valueAtIndex(i));
             }
         }
         _outputDeltaBeforeGrid->computeMinMax();
