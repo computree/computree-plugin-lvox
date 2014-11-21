@@ -133,9 +133,11 @@ float LVOX_StepComputePAD::computePAD(float density, float res, float D_Nt_mean,
 {
     if (density <= 0) {return density;}
 
+    //return -std::log(1-density)/(D_Nt_mean*0.5);
+
     float deltaD_deltaH = 0.07162 * (1 - std::exp(-9.536*(res/D_Nt_mean - 1)));
     float deltaD = deltaD_deltaH*res;
     float D_Nt_mean_deltaH = D_Nt_mean / res;
 
-    return (D_Nt_mean_deltaH - std::sqrt(D_Nt_mean_deltaH*D_Nt_mean_deltaH + 4*deltaD_deltaH*std::log(density))) / (2*deltaD*gFunction);
+    return (D_Nt_mean_deltaH - std::sqrt(D_Nt_mean_deltaH*D_Nt_mean_deltaH + 4*deltaD_deltaH*std::log(1-density))) / (2*deltaD*gFunction);
 }
