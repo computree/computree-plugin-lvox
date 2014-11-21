@@ -81,7 +81,7 @@ void LVOX_ComputeTheoriticalsThread::run()
                 _outputDeltaTheoriticalGrid->setValueAtIndex(i,-1);
             } else
             {
-                _outputDeltaTheoriticalGrid->setValueAtIndex(i, _outputDeltaTheoriticalGrid->valueAtIndex(i)/_outputTheoriticalGrid->valueAtIndex(i));
+                _outputDeltaTheoriticalGrid->setValueAtIndex(i, _outputDeltaTheoriticalGrid->valueAtIndex(i)/(float)_outputTheoriticalGrid->valueAtIndex(i));
             }
         }
         _outputDeltaTheoriticalGrid->computeMinMax();

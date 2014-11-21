@@ -288,10 +288,10 @@ void LVOX_StepCombineDensityGrids::compute()
         groupOut_grids->addItemDrawable(itemOut_before);
     }
 
-    CT_Grid3D<int>* itemOut_deltaT = NULL;
+    CT_Grid3D<float>* itemOut_deltaT = NULL;
     if (use_deltaT)
     {
-        itemOut_deltaT = new CT_Grid3D<int>(DEF_itemOut_deltaT, resultOut_grids, xmin, ymin, zmin, xdim, ydim, zdim, res, NAdelta, NAdelta);
+        itemOut_deltaT = new CT_Grid3D<float>(DEF_itemOut_deltaT, resultOut_grids, xmin, ymin, zmin, xdim, ydim, zdim, res, NAdelta, NAdelta);
         groupOut_grids->addItemDrawable(itemOut_deltaT);
     }
 
@@ -330,7 +330,7 @@ void LVOX_StepCombineDensityGrids::compute()
                 if (use_ni) {itemOut_hits->setValueAtIndex(index, in_ni->valueAtIndex(index));}
                 if (use_nt) {itemOut_theoretical->setValueAtIndex(index, in_nt->valueAtIndex(index));}
                 if (use_nb) {itemOut_before->setValueAtIndex(index, in_nb->valueAtIndex(index));}
-                if (use_deltaT) {itemOut_deltaT->setValueAtIndex(index, in_deltaT->valueAtIndex(index)*in_nt->valueAtIndex(index));}
+                if (use_deltaT) {itemOut_deltaT->setValueAtIndex(index, in_deltaT->valueAtIndex(index)*(float)in_nt->valueAtIndex(index));}
                 itemOut_scanId->setValueAtIndex(index, 0);
             }
         }
@@ -379,7 +379,7 @@ void LVOX_StepCombineDensityGrids::compute()
                         itemOut_hits->addValueAtIndex(index, in_ni->valueAtIndex(index));
                         itemOut_theoretical->addValueAtIndex(index, in_nt->valueAtIndex(index));
                         itemOut_before->addValueAtIndex(index, in_nb->valueAtIndex(index));
-                        itemOut_deltaT->addValueAtIndex(index, in_deltaT->valueAtIndex(index)*in_nt->valueAtIndex(index));
+                        itemOut_deltaT->addValueAtIndex(index, in_deltaT->valueAtIndex(index)*(float)in_nt->valueAtIndex(index));
 
                         if (i == (InGrids_density.size() - 1))
                         {                            
@@ -412,7 +412,6 @@ void LVOX_StepCombineDensityGrids::compute()
                             {
                                 float density = (float) ni / ((float) ntMnb);
                                 itemOut_density->setValueAtIndex(index, density);
-                                itemOut_deltaT->setValueAtIndex(index, itemOut_deltaT->valueAtIndex(index)/nt);
                             }
                         }
                     }
@@ -423,14 +422,32 @@ void LVOX_StepCombineDensityGrids::compute()
                         if (use_ni) {itemOut_hits->setValueAtIndex(index, in_ni->valueAtIndex(index));}
                         if (use_nt) {itemOut_theoretical->setValueAtIndex(index, in_nt->valueAtIndex(index));}
                         if (use_nb) {itemOut_before->setValueAtIndex(index, in_nb->valueAtIndex(index));}
-                        if (use_deltaT) {itemOut_deltaT->setValueAtIndex(index, in_deltaT->valueAtIndex(index) / (float)in_nb->valueAtIndex(index));}
+                        if (use_deltaT) {itemOut_deltaT->setValueAtIndex(index, in_deltaT->valueAtIndex(index) * (float)in_nt->valueAtIndex(index));}
                         itemOut_scanId->setValueAtIndex(index, i);
 
                     }
                 }
             }
         }
+
     }
+
+    if (use_deltaT)
+    {
+        for (size_t xx = 0 ; xx < xdim ; xx++)
+        {
+            for (size_t yy = 0 ; yy < ydim ; yy++)
+            {
+                for (size_t zz = 0 ; zz < zdim ; zz++)
+                {
+                    size_t index;
+                    itemOut_deltaT->index(xx, yy, zz, index);
+                    itemOut_deltaT->setValueAtIndex(index, itemOut_deltaT->valueAtIndex(index) / (float)itemOut_theoretical->valueAtIndex(index));
+                }
+            }
+        }
+    }
+
 
     if (itemOut_hits!=NULL) {itemOut_hits->computeMinMax();}
     if (itemOut_theoretical!=NULL) {itemOut_theoretical->computeMinMax();}

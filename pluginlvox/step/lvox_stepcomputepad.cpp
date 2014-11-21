@@ -123,7 +123,7 @@ void LVOX_StepComputePAD::compute()
                 }
             }
 
-            if (itemOut_PAD!=NULL) {itemOut_PAD->computeMinMax();}
+            itemOut_PAD->computeMinMax();
         }
     }
 
@@ -133,9 +133,9 @@ float LVOX_StepComputePAD::computePAD(float density, float res, float D_Nt_mean,
 {
     if (density <= 0) {return density;}
 
-    float deltaD_deltaH = 0.07162 * (1 - expf(-9.536*(res/D_Nt_mean - 1)));
+    float deltaD_deltaH = 0.07162 * (1 - std::exp(-9.536*(res/D_Nt_mean - 1)));
     float deltaD = deltaD_deltaH*res;
     float D_Nt_mean_deltaH = D_Nt_mean / res;
 
-    return (D_Nt_mean_deltaH - std::sqrtf(D_Nt_mean_deltaH*D_Nt_mean_deltaH + 4*deltaD_deltaH*std::logf(density))) / (2*deltaD*gFunction);
+    return (D_Nt_mean_deltaH - std::sqrt(D_Nt_mean_deltaH*D_Nt_mean_deltaH + 4*deltaD_deltaH*std::log(density))) / (2*deltaD*gFunction);
 }
