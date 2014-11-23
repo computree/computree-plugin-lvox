@@ -24,7 +24,7 @@ void LVOX_ComputeHitsThread::run()
     QVector3D scanPos = _scanner->getPosition();
     float res = _grilleHits->resolution();
 
-    int progressStep = n_points / 20;
+    size_t progressStep = n_points / 20;
 
     for (size_t i = 0 ; i < n_points; i++)
     {
