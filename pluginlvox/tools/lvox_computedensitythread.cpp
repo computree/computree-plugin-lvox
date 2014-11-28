@@ -4,13 +4,15 @@ LVOX_ComputeDensityThread::LVOX_ComputeDensityThread(CT_Grid3D<float> *densityGr
                                                      CT_Grid3D<int> *hitsGrid,
                                                      CT_Grid3D<int> *theoriticalGrid,
                                                      CT_Grid3D<int> *beforeGrid,
-                                                     int effectiveRayThresh) : CT_MonitoredQThread()
+                                                     int effectiveRayThresh,
+                                                     bool naForExcessiveHits) : CT_MonitoredQThread()
 {
     _densityGrid = densityGrid;
     _hitsGrid = hitsGrid;
     _theoriticalGrid = theoriticalGrid;
     _beforeGrid = beforeGrid;
     _effectiveRayThresh = effectiveRayThresh;
+    _naForExcessiveHits = naForExcessiveHits;
 }
 
 void LVOX_ComputeDensityThread::run()
@@ -45,7 +47,13 @@ void LVOX_ComputeDensityThread::run()
 
         if (_hitsGrid->valueAtIndex(i) > (_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i)))
         {
-            _densityGrid->setValueAtIndex(i, -4);
+            if (_naForExcessiveHits)
+            {
+                _densityGrid->setValueAtIndex(i, -4);
+
+            } else {
+                _densityGrid->setValueAtIndex(i, 1);
+            }
         }
     }
 
@@ -53,3 +61,4 @@ void LVOX_ComputeDensityThread::run()
     _densityGrid->computeMinMax();
     qDebug() << "Fin de LVOX_ComputeDensityThread";
 }
+

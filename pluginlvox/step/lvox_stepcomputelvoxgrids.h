@@ -142,6 +142,7 @@ private:
     double          _res;                   /*!< size of a voxel*/
     int             _effectiveRayThresh;    /*!< minimum number of effective ray (Nt-Nb) in the voxel to calculate a density*/
     bool            _computeDistances;
+    bool            _naForExcessiveHits;
     int             _gridMode;
     double          _xBase;
     double          _yBase;

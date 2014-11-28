@@ -158,7 +158,7 @@ void LVOX_StepCombineDensityGrids::createPostConfigurationDialog()
         configDialog->addInt(tr("    -> (nt - nb) minimum"),"",-100000,100000, _effectiveRayThresh );
     } else {
         configDialog->addText(tr("sum(ni) / sum(nt - nb)"), tr("Non disponible : "), tr("grille(s) ni/nt/nb manquante(s)"));
-    }    
+    }
 }
 
 void LVOX_StepCombineDensityGrids::compute()
@@ -382,7 +382,7 @@ void LVOX_StepCombineDensityGrids::compute()
                         itemOut_deltaT->addValueAtIndex(index, in_deltaT->valueAtIndex(index)*(float)in_nt->valueAtIndex(index));
 
                         if (i == (InGrids_density.size() - 1))
-                        {                            
+                        {
                             int ni = itemOut_hits->valueAtIndex(index);
                             int nt = itemOut_theoretical->valueAtIndex(index);
                             int nb = itemOut_before->valueAtIndex(index);
@@ -413,6 +413,12 @@ void LVOX_StepCombineDensityGrids::compute()
                                 float density = (float) ni / ((float) ntMnb);
                                 itemOut_density->setValueAtIndex(index, density);
                             }
+
+                            if (ni > (nt - nb))
+                            {
+                                itemOut_density->setValueAtIndex(i, 1);
+                            }
+
                         }
                     }
 

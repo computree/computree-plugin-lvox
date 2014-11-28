@@ -67,6 +67,7 @@ LVOX_StepComputeLvoxGrids::LVOX_StepComputeLvoxGrids(CT_StepInitializeData &data
     _res = 0.5;
     _effectiveRayThresh = 10;
     _computeDistances = false;
+    _naForExcessiveHits  = false;
 
     _gridMode = 1;
     _xBase = 0.0;
@@ -133,6 +134,7 @@ void LVOX_StepComputeLvoxGrids::createPostConfigurationDialog()
     configDialog->addDouble(tr("Resolution of the grids"),tr("meters"),0.0001,10000,2, _res );
     configDialog->addInt(tr("Minimum number of effective ray in a voxel to take it into account"),tr(""),0,100000, _effectiveRayThresh );
     configDialog->addBool(tr("Compute Distances"), tr(""), tr(""), _computeDistances);
+    configDialog->addBool(tr("Na value (-4) if hits > theoretical"), tr(""), tr(""), _naForExcessiveHits);
 
     configDialog->addEmpty();
 
@@ -284,7 +286,7 @@ void LVOX_StepComputeLvoxGrids::compute()
         _threadList.append(beforeThread);
         baseThreads.append(beforeThread);
 
-        LVOX_ComputeDensityThread* densityThread = new LVOX_ComputeDensityThread(density, hitGrid, theoriticalGrid, beforeGrid, _effectiveRayThresh);
+        LVOX_ComputeDensityThread* densityThread = new LVOX_ComputeDensityThread(density, hitGrid, theoriticalGrid, beforeGrid, _effectiveRayThresh, _naForExcessiveHits);
         connect(densityThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
         _threadList.append(densityThread);
         densityThreads.append(densityThread);

@@ -12,7 +12,7 @@ public:
                               CT_Grid3D<int> *hitsGrid,
                               CT_Grid3D<int> *theoriticalGrid,
                               CT_Grid3D<int> *beforeGrid,
-                              int effectiveRayThresh);
+                              int effectiveRayThresh, bool naForExcessiveHits);
 
     void run();
 
@@ -22,6 +22,7 @@ private:
     CT_Grid3D<int>*     _theoriticalGrid;
     CT_Grid3D<int>*     _beforeGrid;
     int                 _effectiveRayThresh;
+    bool                _naForExcessiveHits;
 };
 
 #endif // LVOX_COMPUTEDENSITYTHREAD_H
