@@ -45,17 +45,17 @@ void LVOX_ComputeDensityThread::run()
             _densityGrid->setValueAtIndex(i, (float)(_hitsGrid->valueAtIndex(i)) / (float)(_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i) ) );
         }
 
-        if (_hitsGrid->valueAtIndex(i) > (_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i)))
-        {
-            if (_naForExcessiveHits)
-            {
-                _densityGrid->setValueAtIndex(i, -4);
-
-            } else {
-                _densityGrid->setValueAtIndex(i, 1);
-            }
-        }
-    }
+  //      if (_hitsGrid->valueAtIndex(i) > (_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i)))
+  //      {
+  //          if (_naForExcessiveHits)
+  //          {
+  //              _densityGrid->setValueAtIndex(i, -4);
+  //
+  //          } else {
+  //              _densityGrid->setValueAtIndex(i, 1);
+  //         }
+  //      }
+   }
 
     // Don't forget to calculate min and max in order to visualize it as a colored map
     _densityGrid->computeMinMax();
