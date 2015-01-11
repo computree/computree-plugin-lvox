@@ -189,7 +189,7 @@ void LVOX_StepComputeLvoxGrids::compute()
         {
             pointsOfView.insert(group, QPair<const CT_Scene*, const CT_Scanner*>(scene, scanner));
 
-            QVector3D min, max;
+            Eigen::Vector3d min, max;
             scene->getBoundingBox(min, max);
 
             if (min.x() < xMin) {xMin = min.x();}

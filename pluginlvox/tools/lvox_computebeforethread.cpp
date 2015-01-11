@@ -24,7 +24,7 @@ void LVOX_ComputeBeforeThread::run()
     const CT_AbstractPointCloudIndex *pointCloudIndex = _scene->getPointCloudIndex();
     size_t n_points = pointCloudIndex->size();
 
-    QVector3D bot, top;
+    Eigen::Vector3d bot, top;
     _outputBeforeGrid->getMinCoordinates(bot);
     _outputBeforeGrid->getMaxCoordinates(top);
 
@@ -44,7 +44,6 @@ void LVOX_ComputeBeforeThread::run()
     CT_Grid3DWooTraversalAlgorithm algo(_outputBeforeGrid, false, list);
 
     CT_Beam beam(NULL, NULL);
-    QVector3D origin, direction;
 
     size_t progressStep = n_points / 20;
 
@@ -53,17 +52,11 @@ void LVOX_ComputeBeforeThread::run()
         size_t index;
         const CT_Point &point = pointCloudIndex->constTAt(i, index);
 
-        direction.setX(point(CT_Point::X) - _scanner->getPosition().x());
-        direction.setY(point(CT_Point::Y) - _scanner->getPosition().y());
-        direction.setZ(point(CT_Point::Z) - _scanner->getPosition().z());
-
-        origin.setX(point(CT_Point::X));
-        origin.setY(point(CT_Point::Y));
-        origin.setZ(point(CT_Point::Z));
+        Eigen::Vector3d doublePoint(point(0), point(1), point(2));
 
         // Get the next ray
-        beam.setOrigin(origin);
-        beam.setDirection(direction);
+        beam.setOrigin(doublePoint);
+        beam.setDirection(doublePoint - _scanner->getPosition());
 
         if (beam.intersect(bot, top))
         {

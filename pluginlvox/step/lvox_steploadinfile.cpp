@@ -108,13 +108,13 @@ void LVOX_StepLoadInFile::compute()
 
     if (scansMap.size()<=0) {return;}
 
-    float xmin = std::numeric_limits<float>::max();
-    float ymin = std::numeric_limits<float>::max();
-    float zmin = std::numeric_limits<float>::max();
+    double xmin = std::numeric_limits<double>::max();
+    double ymin = std::numeric_limits<double>::max();
+    double zmin = std::numeric_limits<double>::max();
 
-    float xmax = -std::numeric_limits<float>::max();
-    float ymax = -std::numeric_limits<float>::max();
-    float zmax = -std::numeric_limits<float>::max();
+    double xmax = -std::numeric_limits<double>::max();
+    double ymax = -std::numeric_limits<double>::max();
+    double zmax = -std::numeric_limits<double>::max();
 
     QList<CT_ABSTRACT_PCIR> individualScenes;
 
@@ -172,14 +172,14 @@ void LVOX_StepLoadInFile::compute()
 
                         individualScenes.append(scene->getPointCloudIndexRegistered());
 
-                        QVector3D min, max;
+                        Eigen::Vector3d min, max;
                         scene->getBoundingBox(min, max);
-                        if (min.x() < xmin) {xmin = min.x();}
-                        if (max.x() > xmax) {xmax = max.x();}
-                        if (min.y() < ymin) {ymin = min.y();}
-                        if (max.y() > ymax) {ymax = max.y();}
-                        if (min.z() < zmin) {zmin = min.z();}
-                        if (max.z() > zmax) {zmax = max.z();}
+                        if (min(0) < xmin) {xmin = min(0);}
+                        if (max(0) > xmax) {xmax = max(0);}
+                        if (min(1) < ymin) {ymin = min(1);}
+                        if (max(1) > ymax) {ymax = max(1);}
+                        if (min(2) < zmin) {zmin = min(2);}
+                        if (max(2) > zmax) {zmax = max(2);}
 
                         groupOut_individualScene->addItemDrawable(scene);
 
@@ -248,14 +248,14 @@ QMap<QString, CT_Scanner*> LVOX_StepLoadInFile::readInFile(QString filename, con
                     bool okThetaDeb = false;
                     bool okThetaFin = false;
 
-                    float x = values.at(2).toFloat(&okX);
-                    float y = values.at(3).toFloat(&okY);
-                    float z = values.at(4).toFloat(&okZ);
-                    float res = values.at(5).toFloat(&okRes);
-                    float thetaDeb = values.at(6).toFloat(&okThetaDeb);
-                    float thetaFin = values.at(7).toFloat(&okThetaFin);
-                    float phiDeb = values.at(8).toFloat(&okPhiDeb);
-                    float phiFin = values.at(9).toFloat(&okPhiFin);
+                    double x = values.at(2).toDouble(&okX);
+                    double y = values.at(3).toDouble(&okY);
+                    double z = values.at(4).toDouble(&okZ);
+                    double res = values.at(5).toDouble(&okRes);
+                    double thetaDeb = values.at(6).toDouble(&okThetaDeb);
+                    double thetaFin = values.at(7).toDouble(&okThetaFin);
+                    double phiDeb = values.at(8).toDouble(&okPhiDeb);
+                    double phiFin = values.at(9).toDouble(&okPhiFin);
 
                     if (okX && okY && okZ && okRes && okPhiDeb && okPhiFin && okThetaDeb && okThetaFin)
                     {
@@ -269,7 +269,7 @@ QMap<QString, CT_Scanner*> LVOX_StepLoadInFile::readInFile(QString filename, con
                         QString completeFileName = QString("%1/%2").arg(path).arg(scanFileName);
                         if(QFile::exists(completeFileName))
                         {
-                            CT_Scanner *scanner = new CT_Scanner(DEF_itemOut_scanner, result, scanID++, QVector3D(x, y, z),QVector3D(0,0,1), hFov, vFov, resolution, resolution, initTheta, initPhi,  clockWise, true);
+                            CT_Scanner *scanner = new CT_Scanner(DEF_itemOut_scanner, result, scanID++, Eigen::Vector3d(x, y, z),Eigen::Vector3d(0,0,1), hFov, vFov, resolution, resolution, initTheta, initPhi,  clockWise, true);
                             map.insert(completeFileName, scanner);
                         }
                     }

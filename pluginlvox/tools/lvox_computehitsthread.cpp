@@ -21,8 +21,8 @@ void LVOX_ComputeHitsThread::run()
     qDebug() << "Début de LVOX_ComputeHitsThread / ScanId=" << _scanner->getScanID();
     const CT_AbstractPointCloudIndex *pointCloudIndex = _scene->getPointCloudIndex();
     size_t n_points = pointCloudIndex->size();
-    QVector3D scanPos = _scanner->getPosition();
-    float res = _grilleHits->resolution();
+    Eigen::Vector3d scanPos = _scanner->getPosition();
+    double res = _grilleHits->resolution();
 
     size_t progressStep = n_points / 20;
 
@@ -32,7 +32,7 @@ void LVOX_ComputeHitsThread::run()
         const CT_Point &point = pointCloudIndex->constTAt(i, index);
         size_t indice;
 
-        if (_grilleHits->indexAtXYZ(point(CT_Point::X), point(CT_Point::Y), point(CT_Point::Z), indice))
+        if (_grilleHits->indexAtXYZ(point(0), point(1), point(2), indice))
         {
             // Hits Computing
             _grilleHits->addValueAtIndex(indice, 1);
@@ -40,22 +40,22 @@ void LVOX_ComputeHitsThread::run()
             if (_computeDistance)
             {
                 // Distances Sum Computing
-                QVector3D direction (point(CT_Point::X) - scanPos.x(),
-                                     point(CT_Point::Y) - scanPos.y(),
-                                     point(CT_Point::Z) - scanPos.z());
+                Eigen::Vector3d direction ( point(0) - scanPos(0),
+                                            point(1) - scanPos(1),
+                                            point(2) - scanPos(2));
 
-                QVector3D bottom, top, in, out;
-                _grilleHits->getCellBottomLeftCornerAtXYZ(point(CT_Point::X), point(CT_Point::Y), point(CT_Point::Z), bottom);
-                top.setX(bottom.x() + res);
-                top.setY(bottom.y() + res);
-                top.setZ(bottom.z() + res);
+                Eigen::Vector3d bottom, top, in, out;
+                _grilleHits->getCellBottomLeftCornerAtXYZ(point(0), point(1), point(2), bottom);
+                top(0) = bottom(0) + res;
+                top(1) = bottom(1) + res;
+                top(2) = bottom(2) + res;
 
                 CT_Beam beam(NULL, NULL, scanPos, direction);
 
                 if (beam.intersect(bottom, top, in, out))
                 {
-                    float distanceIn = sqrt(pow(in.x()-point(CT_Point::X), 2) + pow(in.y()-point(CT_Point::Y), 2) + pow(in.z()-point(CT_Point::Z), 2));
-                    float distanceOut = sqrt(pow(out.x()-point(CT_Point::X), 2) + pow(out.y()-point(CT_Point::Y), 2) + pow(out.z()-point(CT_Point::Z), 2));
+                    float distanceIn = sqrt(pow(in(0)-point(0), 2) + pow(in(1)-point(1), 2) + pow(in(2)-point(2), 2));
+                    float distanceOut = sqrt(pow(out(0)-point(0), 2) + pow(out(1)-point(1), 2) + pow(out(2)-point(2), 2));
 
                     _grilleIn->addValueAtIndex(indice, distanceIn);
                     _grilleOut->addValueAtIndex(indice, distanceOut);

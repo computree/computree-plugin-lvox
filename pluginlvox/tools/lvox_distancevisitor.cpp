@@ -8,11 +8,11 @@ LVOX_DistanceVisitor::LVOX_DistanceVisitor(CT_Grid3D<float> *grid)
 
 void LVOX_DistanceVisitor::visit(const size_t &index, const CT_Beam *beam)
 {
-    QVector3D bot, top, nearInter, farInter;
+    Eigen::Vector3d bot, top, nearInter, farInter;
     bool ok = _grid->getCellCoordinates(index, bot, top);
 
     if (ok && beam->intersect(bot, top, nearInter, farInter))
     {
-        _grid->addValueAtIndex(index, sqrt(pow(nearInter.x()-farInter.x(), 2) + pow(nearInter.y()-farInter.y(), 2) + pow(nearInter.z()-farInter.z(), 2)));
+        _grid->addValueAtIndex(index, sqrt(pow(nearInter(0) - farInter(0), 2) + pow(nearInter(1) - farInter(1), 2) + pow(nearInter(2) - farInter(2), 2)));
     }
 }
