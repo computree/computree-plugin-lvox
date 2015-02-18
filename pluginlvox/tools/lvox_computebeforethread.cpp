@@ -4,6 +4,7 @@
 #include "tools/lvox_distancevisitor.h"
 #include "tools/lvox_countvisitor.h"
 #include "ct_pointcloudindex/abstract/ct_abstractpointcloudindex.h"
+#include "ct_iterator/ct_pointiterator.h"
 
 LVOX_ComputeBeforeThread::LVOX_ComputeBeforeThread(const CT_Scanner *scanner,
                                                    CT_Grid3D<int> *outputBeforeGrid,
@@ -46,17 +47,17 @@ void LVOX_ComputeBeforeThread::run()
     CT_Beam beam(NULL, NULL);
 
     size_t progressStep = n_points / 20;
+    size_t i = 0;
 
-    for (size_t i = 0 ; i < n_points; i++)
+    CT_PointIterator itP(pointCloudIndex);
+    while (itP.hasNext())
     {
-        size_t index;
-        const CT_Point &point = pointCloudIndex->constTAt(i, index);
-
-        Eigen::Vector3d doublePoint(point(0), point(1), point(2));
+        ++i;
+        const CT_Point &point = itP.next().currentPoint();
 
         // Get the next ray
-        beam.setOrigin(doublePoint);
-        beam.setDirection(doublePoint - _scanner->getPosition());
+        beam.setOrigin(point);
+        beam.setDirection(point - _scanner->getPosition());
 
         if (beam.intersect(bot, top))
         {

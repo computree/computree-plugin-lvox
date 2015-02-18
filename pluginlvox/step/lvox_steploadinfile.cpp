@@ -116,7 +116,7 @@ void LVOX_StepLoadInFile::compute()
     double ymax = -std::numeric_limits<double>::max();
     double zmax = -std::numeric_limits<double>::max();
 
-    QList<CT_ABSTRACT_PCIR> individualScenes;
+    QList<CT_PCIR> individualScenes;
 
     int baseProgress = 0;
     int progressIncrement = 100/scansMap.size();
@@ -205,8 +205,7 @@ void LVOX_StepLoadInFile::compute()
 
     CT_StandardItemGroup* groupOut_mergedScene = new CT_StandardItemGroup(DEF_groupOut_gm, resultOut_mergedScene);
 
-    CT_Scene *mergedScene = new CT_Scene(DEF_itemOut_mergedScene, resultOut_mergedScene);
-    mergedScene->setPointCloudIndexRegistered(PS_REPOSITORY->mergePointCloudContiguous(individualScenes));
+    CT_Scene *mergedScene = new CT_Scene(DEF_itemOut_mergedScene, resultOut_mergedScene, PS_REPOSITORY->mergePointCloudContiguous(individualScenes));
     mergedScene->setBoundingBox(xmin,ymin,zmin,xmax,ymax,zmax);
 
     groupOut_mergedScene->addItemDrawable(mergedScene);

@@ -1,6 +1,8 @@
 #include "lvox_computehitsthread.h"
 #include "ct_pointcloudindex/abstract/ct_abstractpointcloudindex.h"
 
+#include "ct_iterator/ct_pointiterator.h"
+
 LVOX_ComputeHitsThread::LVOX_ComputeHitsThread(const CT_Scanner *scanner,
                                                CT_Grid3D<int> *grilleHits,
                                                CT_Grid3D<float> *grilleIn,
@@ -25,13 +27,15 @@ void LVOX_ComputeHitsThread::run()
     double res = _grilleHits->resolution();
 
     size_t progressStep = n_points / 20;
+    size_t i = 0;
 
-    for (size_t i = 0 ; i < n_points; i++)
+    CT_PointIterator itP(pointCloudIndex);
+    while (itP.hasNext())
     {
-        size_t index;
-        const CT_Point &point = pointCloudIndex->constTAt(i, index);
-        size_t indice;
+        ++i;
+        const CT_Point &point = itP.next().currentPoint();
 
+        size_t indice;
         if (_grilleHits->indexAtXYZ(point(0), point(1), point(2), indice))
         {
             // Hits Computing
