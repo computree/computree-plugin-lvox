@@ -36,9 +36,17 @@
 #include "step/lvox_stepcombinedensitygrids.h"
 #include "step/lvox_stepcomputepad.h"
 #include "step/lvox_stepinterpolatedensitygrid.h"
+#include "step/lvox_stepcomputeprofile.h"
+
+#include "ct_global/ct_context.h"
+#include "ct_categories/ct_stdcategory.h"
 
 LVOX_StepPluginManager::LVOX_StepPluginManager() : CT_AbstractStepPlugin()
 {
+    PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory("LVOX_GRD_NI", QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Ni"));
+    PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory("LVOX_GRD_NB", QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Nb"));
+    PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory("LVOX_GRD_NT", QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Nt"));
+    PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory("LVOX_GRD_DENSITY", QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Density"));
 }
 
 LVOX_StepPluginManager::~LVOX_StepPluginManager()
@@ -56,6 +64,7 @@ bool LVOX_StepPluginManager::loadGenericsStep()
     sep->addStep( new LVOX_StepComputeLvoxGrids(*createNewStepInitializeData(NULL)) );
     sep->addStep( new LVOX_StepCombineDensityGrids(*createNewStepInitializeData(NULL)) );
     sep->addStep( new LVOX_StepInterpolateDensityGrids(*createNewStepInitializeData(NULL)) );
+    sep->addStep( new LVOX_StepComputeProfile(*createNewStepInitializeData(NULL)) );
     sep->addStep( new LVOX_StepComputePAD(*createNewStepInitializeData(NULL)) );
 
 	

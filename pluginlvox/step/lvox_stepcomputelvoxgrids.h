@@ -133,6 +133,12 @@ private:
     CT_AutoRenameModels _hits_ModelName;
     CT_AutoRenameModels _density_ModelName;
 
+    CT_AutoRenameModels _NiFlag_ModelName;
+    CT_AutoRenameModels _NbFlag_ModelName;
+    CT_AutoRenameModels _NtFlag_ModelName;
+    CT_AutoRenameModels _DensityFlag_ModelName;
+
+
     QList<CT_MonitoredQThread*>     _threadList;
 
 //********************************************//

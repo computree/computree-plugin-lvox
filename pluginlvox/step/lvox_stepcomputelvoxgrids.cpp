@@ -70,13 +70,13 @@ LVOX_StepComputeLvoxGrids::LVOX_StepComputeLvoxGrids(CT_StepInitializeData &data
     _naForExcessiveHits  = false;
 
     _gridMode = 1;
-    _xBase = 0.0;
-    _yBase = 0.0;
-    _zBase = 0.0;
+    _xBase = -20.0;
+    _yBase = -20.0;
+    _zBase = -10.0;
 
-    _xDim = 0;
-    _yDim = 0;
-    _zDim = 0;
+    _xDim = 80;
+    _yDim = 80;
+    _zDim = 80;
 }
 
 QString LVOX_StepComputeLvoxGrids::getStepDescription() const
@@ -110,9 +110,17 @@ void LVOX_StepComputeLvoxGrids::createOutResultModelListProtected()
     // in this result we add a CT_AffiliationID to the group named DEF_SearchInGroup. The name of the model of
     // the CT_AffiliationID will be generated automatically by the _outAffiliationIDModelName object.
     res->addItemModel(DEF_SearchInGroup, _hits_ModelName, new CT_Grid3D<int>(), tr("Hits"));
+    res->addItemAttributeModel(_hits_ModelName, _NiFlag_ModelName, new CT_StdItemAttributeT<bool>("LVOX_GRD_NI"), tr("isNi"));
+
     res->addItemModel(DEF_SearchInGroup, _theo_ModelName, new CT_Grid3D<int>(), tr("Theoretical"));
+    res->addItemAttributeModel(_theo_ModelName, _NtFlag_ModelName, new CT_StdItemAttributeT<bool>("LVOX_GRD_NT"), tr("isNt"));
+
     res->addItemModel(DEF_SearchInGroup, _bef_ModelName, new CT_Grid3D<int>(), tr("Before"));
+    res->addItemAttributeModel(_bef_ModelName, _NbFlag_ModelName, new CT_StdItemAttributeT<bool>("LVOX_GRD_NB"), tr("isNb"));
+
     res->addItemModel(DEF_SearchInGroup, _density_ModelName, new CT_Grid3D<float>(), tr("Density"));
+    res->addItemAttributeModel(_density_ModelName, _DensityFlag_ModelName, new CT_StdItemAttributeT<bool>("LVOX_GRD_DENSITY"), tr("isDensity"));
+
 
     if (_computeDistances)
     {
@@ -168,12 +176,27 @@ void LVOX_StepComputeLvoxGrids::compute()
     QMap<CT_AbstractItemGroup*, QPair<const CT_Scene*, const CT_Scanner*> > pointsOfView;
 
     // Global limits of generated grids
-    float xMin = std::numeric_limits<float>::max();
-    float yMin = std::numeric_limits<float>::max();
-    float zMin = std::numeric_limits<float>::max();
-    float xMax = -std::numeric_limits<float>::max();
-    float yMax = -std::numeric_limits<float>::max();
-    float zMax = -std::numeric_limits<float>::max();
+    double xMin = std::numeric_limits<double>::max();
+    double yMin = std::numeric_limits<double>::max();
+    double zMin = std::numeric_limits<double>::max();
+    double xMax = -std::numeric_limits<double>::max();
+    double yMax = -std::numeric_limits<double>::max();
+    double zMax = -std::numeric_limits<double>::max();
+
+    double xMinScene = std::numeric_limits<double>::max();
+    double yMinScene = std::numeric_limits<double>::max();
+    double zMinScene = std::numeric_limits<double>::max();
+    double xMaxScene = -std::numeric_limits<double>::max();
+    double yMaxScene = -std::numeric_limits<double>::max();
+    double zMaxScene = -std::numeric_limits<double>::max();
+
+    double xMinScanner = std::numeric_limits<double>::max();
+    double yMinScanner = std::numeric_limits<double>::max();
+    double zMinScanner = std::numeric_limits<double>::max();
+    double xMaxScanner = -std::numeric_limits<double>::max();
+    double yMaxScanner = -std::numeric_limits<double>::max();
+    double zMaxScanner = -std::numeric_limits<double>::max();
+
 
 
     // on va rechercher tous les groupes contenant des nuages de points (qui ont été choisi par l'utilisateur)
@@ -192,47 +215,89 @@ void LVOX_StepComputeLvoxGrids::compute()
             Eigen::Vector3d min, max;
             scene->getBoundingBox(min, max);
 
-            if (min.x() < xMin) {xMin = min.x();}
-            if (min.y() < yMin) {yMin = min.y();}
-            if (min.z() < zMin) {zMin = min.z();}
-            if (max.x() > xMax) {xMax = max.x();}
-            if (max.y() > yMax) {yMax = max.y();}
-            if (max.z() > zMax) {zMax = max.z();}
+            if (min.x() < xMinScene) {xMinScene = min.x();}
+            if (min.y() < yMinScene) {yMinScene = min.y();}
+            if (min.z() < zMinScene) {zMinScene = min.z();}
+            if (max.x() > xMaxScene) {xMaxScene = max.x();}
+            if (max.y() > yMaxScene) {yMaxScene = max.y();}
+            if (max.z() > zMaxScene) {zMaxScene = max.z();}
 
-            if (scanner->getCenterX() < xMin) {xMin = scanner->getCenterX();}
-            if (scanner->getCenterY() < yMin) {yMin = scanner->getCenterY();}
-            if (scanner->getCenterZ() < zMin) {zMin = scanner->getCenterZ();}
+            if (scanner->getCenterX() < xMinScanner) {xMinScanner = scanner->getCenterX();}
+            if (scanner->getCenterY() < yMinScanner) {yMinScanner = scanner->getCenterY();}
+            if (scanner->getCenterZ() < zMinScanner) {zMinScanner = scanner->getCenterZ();}
 
-            if (scanner->getCenterX() > xMax) {xMax = scanner->getCenterX();}
-            if (scanner->getCenterY() > yMax) {yMax = scanner->getCenterY();}
-            if (scanner->getCenterZ() > zMax) {zMax = scanner->getCenterZ();}
+            if (scanner->getCenterX() > xMaxScanner) {xMaxScanner = scanner->getCenterX();}
+            if (scanner->getCenterY() > yMaxScanner) {yMaxScanner = scanner->getCenterY();}
+            if (scanner->getCenterZ() > zMaxScanner) {zMaxScanner = scanner->getCenterZ();}
         }
     }
 
-    if (_gridMode == 1 || _gridMode == 2)
-    {
-        float xMinScenes = xMin;
-        float yMinScenes = yMin;
-        float zMinScenes = zMin;
+    if (_gridMode == 0) {
+
+        xMin = std::min(xMinScene, xMinScanner);
+        yMin = std::min(yMinScene, yMinScanner);
+        zMin = std::min(zMinScene, zMinScanner);
+
+        xMax = std::max(xMaxScene, xMaxScanner);
+        yMax = std::max(yMaxScene, yMaxScanner);
+        zMax = std::max(zMaxScene, zMaxScanner);
+
+    } else if (_gridMode == 1) {
+
+        double xMinAdjusted = std::min(xMinScene, xMinScanner);
+        double yMinAdjusted = std::min(yMinScene, yMinScanner);
+        double zMinAdjusted = std::min(zMinScene, zMinScanner);
+
+        double xMaxAdjusted = std::max(xMaxScene, xMaxScanner);
+        double yMaxAdjusted = std::max(yMaxScene, yMaxScanner);
+        double zMaxAdjusted = std::max(zMaxScene, zMaxScanner);
 
         xMin = _xBase;
         yMin = _yBase;
         zMin = _zBase;
 
-        while (xMin < xMinScenes) {xMin += _res;};
-        while (yMin < yMinScenes) {yMin += _res;};
-        while (zMin < zMinScenes) {zMin += _res;};
+        while (xMin < xMinAdjusted) {xMin += _res;}
+        while (yMin < yMinAdjusted) {yMin += _res;}
+        while (zMin < zMinAdjusted) {zMin += _res;}
 
-        while (xMin > xMinScenes) {xMin -= _res;};
-        while (yMin > yMinScenes) {yMin -= _res;};
-        while (zMin > zMinScenes) {zMin -= _res;};
+        while (xMin > xMinAdjusted) {xMin -= _res;}
+        while (yMin > yMinAdjusted) {yMin -= _res;}
+        while (zMin > zMinAdjusted) {zMin -= _res;}
 
-        if( _gridMode == 2){
-            xMax = xMin + _res*_xDim;
-            yMax = yMin + _res*_yDim;
-            zMax = zMin + _res*_zDim;
+        xMax = xMin + _res;
+        yMax = yMin + _res;
+        zMax = zMin + _res;
+
+        while (xMax < xMaxAdjusted) {xMax += _res;}
+        while (yMax < yMaxAdjusted) {yMax += _res;}
+        while (zMax < zMaxAdjusted) {zMax += _res;}
+
+    } else {
+
+        xMin = _xBase;
+        yMin = _yBase;
+        zMin = _zBase;
+
+        xMax = xMin + _res*_xDim;
+        yMax = yMin + _res*_yDim;
+        zMax = zMin + _res*_zDim;
+
+        bool enlarged = false;
+
+        while (xMin > xMinScanner) {xMin -= _res; enlarged = true;}
+        while (yMin > yMinScanner) {yMin -= _res; enlarged = true;}
+        while (zMin > zMinScanner) {zMin -= _res; enlarged = true;}
+
+        while (xMax < xMaxScanner) {xMax += _res; enlarged = true;}
+        while (yMax < yMaxScanner) {yMax += _res; enlarged = true;}
+        while (zMax < zMaxScanner) {zMax += _res; enlarged = true;}
+
+        if (enlarged)
+        {
+            PS_LOG->addMessage(LogInterface::warning, LogInterface::step, tr("Dimensions spécifiées ne contenant pas les positions de scans : la grille a du être élargie !"));
         }
     }
+
 
     QMapIterator<CT_AbstractItemGroup*, QPair<const CT_Scene*, const CT_Scanner*> > it(pointsOfView);
     while (it.hasNext() && !isStopped())
@@ -247,6 +312,12 @@ void LVOX_StepComputeLvoxGrids::compute()
         CT_Grid3D<int>*      theoriticalGrid = new CT_Grid3D<int>(_theo_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
         CT_Grid3D<int>*      beforeGrid = new CT_Grid3D<int>(_bef_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
         CT_Grid3D<float>*   density = new CT_Grid3D<float>(_density_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+
+        hitGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NiFlag_ModelName.completeName(), "LVOX_GRD_NI", outResult, true));
+        theoriticalGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NtFlag_ModelName.completeName(), "LVOX_GRD_NT", outResult, true));
+        beforeGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NbFlag_ModelName.completeName(), "LVOX_GRD_NB", outResult, true));
+        density->addItemAttribute(new CT_StdItemAttributeT<bool>(_DensityFlag_ModelName.completeName(), "LVOX_GRD_DENSITY", outResult, true));
+
 
         CT_Grid3D<float>*   deltaInGrid = NULL;
         CT_Grid3D<float>*   deltaOutGrid = NULL;

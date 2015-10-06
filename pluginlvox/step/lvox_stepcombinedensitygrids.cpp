@@ -23,6 +23,11 @@
 #define DEF_itemIn_density "density"
 #define DEF_itemIn_deltaTheoritical "deltaTheoritical"
 
+#define DEF_inATTisNi "isNi"
+#define DEF_inATTisNt "isNt"
+#define DEF_inATTisNb "isNb"
+#define DEF_inATTisDensity "isDensity"
+
 // Alias for indexing out models
 #define DEF_resultOut_grids "rgrids"
 #define DEF_groupOut_grids "grids"
@@ -67,19 +72,22 @@ void LVOX_StepCombineDensityGrids::createInResultModelListProtected()
 
     resultModel->addItemModel(DEF_groupIn_grids, DEF_itemIn_hits, CT_Grid3D<int>::staticGetType(), tr("hits"), "",
                               CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
+    resultModel->addItemAttributeModel(DEF_itemIn_hits, DEF_inATTisNi, QList<QString>() << "LVOX_GRD_NI", CT_AbstractCategory::ANY, tr("isNi"), "", CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
+
 
     resultModel->addItemModel(DEF_groupIn_grids, DEF_itemIn_theoretical, CT_Grid3D<int>::staticGetType(), tr("theoretical"), "",
                               CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
+    resultModel->addItemAttributeModel(DEF_itemIn_theoretical, DEF_inATTisNt, QList<QString>() << "LVOX_GRD_NT", CT_AbstractCategory::ANY, tr("isNt"), "", CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
 
     resultModel->addItemModel(DEF_groupIn_grids, DEF_itemIn_before, CT_Grid3D<int>::staticGetType(), tr("before"), "",
                               CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
+    resultModel->addItemAttributeModel(DEF_itemIn_before, DEF_inATTisNb, QList<QString>() << "LVOX_GRD_NB", CT_AbstractCategory::ANY, tr("isNb"), "", CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
+
+    resultModel->addItemModel(DEF_groupIn_grids, DEF_itemIn_density, CT_Grid3D<float>::staticGetType(), tr("density"));
+    resultModel->addItemAttributeModel(DEF_itemIn_density, DEF_inATTisDensity, QList<QString>() << "LVOX_GRD_DENSITY", CT_AbstractCategory::ANY, tr("isDensity"), "", CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
 
     resultModel->addItemModel(DEF_groupIn_grids, DEF_itemIn_deltaTheoritical, CT_Grid3D<float>::staticGetType(), tr("delta th."), "",
                               CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
-
-    resultModel->addItemModel(DEF_groupIn_grids, DEF_itemIn_density, CT_Grid3D<float>::staticGetType(), tr("density"));
-
-
 }
 
 // Creation and affiliation of OUT models
@@ -181,7 +189,7 @@ void LVOX_StepCombineDensityGrids::compute()
     if (_mode == maxNi && !use_ni) {qDebug() << "Configuration non prévue !"; return;}
     if (_mode == sumNiSumNtNb && (!use_nt || !use_nb || !use_ni)) {qDebug() << "Configuration non prévue !"; return;}
 
-    float xmin, ymin, zmin, res, NAd;
+    double xmin, ymin, zmin, res, NAd;
     size_t xdim, ydim, zdim;
     int NAi, NAt, NAb, NAdelta;
     bool firstGrid = true;

@@ -47,6 +47,8 @@ void LVOX_ComputeTheoriticalsThread::run()
 
     int progressStep = nHorizontalRays / 20;
 
+    qDebug() << "nHorizontalRays=" << nHorizontalRays;
+    qDebug() << "nVerticalRays=" << nVerticalRays;
     // For all theoritical rays of the scanner
     for ( int i = 0 ; i < nHorizontalRays ; i++ )
     {

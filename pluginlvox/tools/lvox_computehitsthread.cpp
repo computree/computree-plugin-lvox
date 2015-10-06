@@ -29,6 +29,7 @@ void LVOX_ComputeHitsThread::run()
     size_t progressStep = n_points / 20;
     size_t i = 0;
 
+    size_t nbOutPoints = 0;
     CT_PointIterator itP(pointCloudIndex);
     while (itP.hasNext())
     {
@@ -67,7 +68,7 @@ void LVOX_ComputeHitsThread::run()
             }
         } else
         {
-            qDebug() << "Le point "<< i << " de la scene n'est pas dans la grille";
+            nbOutPoints++;
         }
 
         if (i % progressStep == 0)
@@ -75,6 +76,11 @@ void LVOX_ComputeHitsThread::run()
             _progress = 100*i/n_points;
             emit progressChanged();
         }
+    }
+
+    if (nbOutPoints > 0)
+    {
+        qDebug() << QString("%1 points des scènes d'entrées ne sont pas dans la grille").arg(nbOutPoints);
     }
 
     _grilleHits->computeMinMax();
