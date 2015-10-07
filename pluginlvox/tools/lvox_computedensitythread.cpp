@@ -4,15 +4,13 @@ LVOX_ComputeDensityThread::LVOX_ComputeDensityThread(CT_Grid3D<float> *densityGr
                                                      CT_Grid3D<int> *hitsGrid,
                                                      CT_Grid3D<int> *theoriticalGrid,
                                                      CT_Grid3D<int> *beforeGrid,
-                                                     int effectiveRayThresh,
-                                                     bool naForExcessiveHits) : CT_MonitoredQThread()
+                                                     int effectiveRayThresh) : CT_MonitoredQThread()
 {
     _densityGrid = densityGrid;
     _hitsGrid = hitsGrid;
     _theoriticalGrid = theoriticalGrid;
     _beforeGrid = beforeGrid;
     _effectiveRayThresh = effectiveRayThresh;
-    _naForExcessiveHits = naForExcessiveHits;
 }
 
 void LVOX_ComputeDensityThread::run()
@@ -38,23 +36,17 @@ void LVOX_ComputeDensityThread::run()
         else if ( (_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i)) < _effectiveRayThresh )
         {
             _densityGrid->setValueAtIndex(i, -3);
-        }
+        // Excessive Ni
+        } else if (_hitsGrid->valueAtIndex(i) > (_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i)))
+        {
+            _densityGrid->setValueAtIndex(i, 1);
         // Normal case
-        else
+        }else
         {
             _densityGrid->setValueAtIndex(i, (float)(_hitsGrid->valueAtIndex(i)) / (float)(_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i) ) );
         }
 
-  //      if (_hitsGrid->valueAtIndex(i) > (_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i)))
-  //      {
-  //          if (_naForExcessiveHits)
-  //          {
-  //              _densityGrid->setValueAtIndex(i, -4);
-  //
-  //          } else {
-  //              _densityGrid->setValueAtIndex(i, 1);
-  //         }
-  //      }
+
    }
 
     // Don't forget to calculate min and max in order to visualize it as a colored map
