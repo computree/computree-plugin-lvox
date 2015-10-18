@@ -55,36 +55,25 @@ LVOX_StepPluginManager::~LVOX_StepPluginManager()
 
 bool LVOX_StepPluginManager::loadGenericsStep()
 {
-    CT_StepSeparator *sep = addNewSeparator(new CT_StepSeparator());
 
-    // Steps with single scan input
+    addNewVoxelsStep<LVOX_StepLoadInFile>(QObject::tr("LVOX"));
+    addNewVoxelsStep<LVOX_StepComputeLvoxGrids>(QObject::tr("LVOX"));
+    addNewVoxelsStep<LVOX_StepCombineDensityGrids>(QObject::tr("LVOX"));
+    addNewVoxelsStep<LVOX_StepInterpolateDensityGrids>(QObject::tr("LVOX"));
+    addNewVoxelsStep<LVOX_StepComputeProfile>(QObject::tr("LVOX"));
+    addNewVoxelsStep<LVOX_StepComputePAD>(QObject::tr("LVOX"));
 
-    sep = addNewSeparator(new CT_StepSeparator());
-    sep->addStep(new LVOX_StepLoadInFile(*createNewStepInitializeData(NULL)));
-    sep->addStep( new LVOX_StepComputeLvoxGrids(*createNewStepInitializeData(NULL)) );
-    sep->addStep( new LVOX_StepCombineDensityGrids(*createNewStepInitializeData(NULL)) );
-    sep->addStep( new LVOX_StepInterpolateDensityGrids(*createNewStepInitializeData(NULL)) );
-    sep->addStep( new LVOX_StepComputeProfile(*createNewStepInitializeData(NULL)) );
-    sep->addStep( new LVOX_StepComputePAD(*createNewStepInitializeData(NULL)) );
-
-	
     return true;
 }
 
 bool LVOX_StepPluginManager::loadOpenFileStep()
 {
-//    CT_StepLoadFileSeparator *sep = addNewSeparator(new CT_StepLoadFileSeparator("Lvox File (IN)"));
-//    sep->addStep( new StepLoadLVoxInputFiles(*createNewStepInitializeData(NULL)) );
 
     return true;
 }
 
 bool LVOX_StepPluginManager::loadCanBeAddedFirstStep()
 {
-    CT_StepCanBeAddedFirstSeparator *sep = addNewSeparator(new CT_StepCanBeAddedFirstSeparator());
-
-    sep->addStep(new LVOX_StepLoadInFile(*createNewStepInitializeData(NULL)));
-
     return true;
 }
 
