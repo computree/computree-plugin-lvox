@@ -29,7 +29,7 @@ LVOX_StepInterpolateDensityGrids::LVOX_StepInterpolateDensityGrids(CT_StepInitia
 // Step description (tooltip of contextual menu)
 QString LVOX_StepInterpolateDensityGrids::getStepDescription() const
 {
-    return tr("Interpolation de voxels de densité");
+    return tr("4- Interpoler les grilles LVOX de densité");
 }
 
 // Step copy method

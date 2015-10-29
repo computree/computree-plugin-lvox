@@ -46,7 +46,7 @@ LVOX_StepLoadInFile::LVOX_StepLoadInFile(CT_StepInitializeData &dataInit) : CT_A
 // Step description (tooltip of contextual menu)
 QString LVOX_StepLoadInFile::getStepDescription() const
 {
-    return tr("Charger fichier .in LVOX");
+    return tr("1- Charger un fichier .in LVOX");
 }
 
 // Step copy method
