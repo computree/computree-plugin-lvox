@@ -46,7 +46,7 @@ LVOX_StepLoadInFile::LVOX_StepLoadInFile(CT_StepInitializeData &dataInit) : CT_A
 // Step description (tooltip of contextual menu)
 QString LVOX_StepLoadInFile::getStepDescription() const
 {
-    return tr("Chargement de nuages de points / fichier .in");
+    return tr("Charger fichier .in LVOX");
 }
 
 // Step copy method
@@ -86,9 +86,9 @@ void LVOX_StepLoadInFile::createPostConfigurationDialog()
 {
     CT_StepConfigurableDialog *configDialog = newStandardPostConfigurationDialog();
 
-    configDialog->addFileChoice("Choisir le fichier .in", CT_FileChoiceButton::OneExistingFile, "Fichier in (*.in)", _fileName);
-    configDialog->addBool("Extraire une placette de rayon fixé", "", "", _radiusFiltered);
-    configDialog->addDouble("Rayon de la placette", "m", 0.1, 1000, 2, _radius, 0);
+    configDialog->addFileChoice(tr("Choisir le fichier .in"), CT_FileChoiceButton::OneExistingFile, "Fichier in (*.in)", _fileName);
+    configDialog->addBool(tr("Extraire une placette de rayon fixé"), "", "", _radiusFiltered);
+    configDialog->addDouble(tr("Rayon de la placette"), "m", 0.1, 1000, 2, _radius, 0);
 }
 
 void LVOX_StepLoadInFile::compute()

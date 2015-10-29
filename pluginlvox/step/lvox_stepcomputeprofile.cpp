@@ -29,7 +29,7 @@ LVOX_StepComputeProfile::LVOX_StepComputeProfile(CT_StepInitializeData &dataInit
 // Step description (tooltip of contextual menu)
 QString LVOX_StepComputeProfile::getStepDescription() const
 {
-    return tr("Creation d'un profil // Grille 3D");
+    return tr("Profil vertical de voxels");
 }
 
 // Step copy method

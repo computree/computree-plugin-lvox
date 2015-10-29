@@ -35,7 +35,7 @@ LVOX_StepComputePAD::LVOX_StepComputePAD(CT_StepInitializeData &dataInit) : CT_A
 // Step description (tooltip of contextual menu)
 QString LVOX_StepComputePAD::getStepDescription() const
 {
-    return tr("Calcul d'une grille Plant Area Density");
+    return tr("Calcul de voxels Plant Area Density");
 }
 
 // Step copy method

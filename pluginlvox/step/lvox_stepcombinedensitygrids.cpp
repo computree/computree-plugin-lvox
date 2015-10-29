@@ -51,7 +51,7 @@ LVOX_StepCombineDensityGrids::LVOX_StepCombineDensityGrids(CT_StepInitializeData
 // Step description (tooltip of contextual menu)
 QString LVOX_StepCombineDensityGrids::getStepDescription() const
 {
-    return tr("Combinaison de grilles 3D de différentes points de vues");
+    return tr("Combinaison multi-points de vues de voxels LVOX");
 }
 
 // Step copy method
