@@ -27,7 +27,7 @@
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="78"/>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="107"/>
         <source>theoretical</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="82"/>
@@ -38,7 +38,7 @@
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="89"/>
         <source>delta th.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="86"/>
@@ -48,27 +48,27 @@
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="54"/>
         <source>3- Combiner les grilles LVOX des différents points de vues</source>
-        <translation type="unfinished"></translation>
+        <translation>3- Combine LVOX grids from differents points of views</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="75"/>
         <source>isNi</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="80"/>
         <source>isNt</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="84"/>
         <source>isNb</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="87"/>
         <source>isDensity</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="103"/>
@@ -83,7 +83,7 @@
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="110"/>
         <source>delta theoretical</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="111"/>
@@ -93,23 +93,23 @@
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="138"/>
         <source>Mode de combinaison</source>
-        <translation type="unfinished"></translation>
+        <translation>Combining mode</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="138"/>
         <source>des grilles de densité :</source>
-        <translation type="unfinished"></translation>
+        <translation>of density grids:</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="139"/>
         <source>max (densité)</source>
-        <translation type="unfinished"></translation>
+        <translation>max (density)</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="143"/>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="145"/>
         <source>max (nt - nb)</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="145"/>
@@ -117,41 +117,41 @@
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="160"/>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="168"/>
         <source>Non disponible : </source>
-        <translation type="unfinished"></translation>
+        <translation>Not available:</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="145"/>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="153"/>
         <source>grille(s) nt/nb manquante(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>nt/nb grid(s) missing</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="150"/>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="153"/>
         <source>max (nt - nb)/nt</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="151"/>
         <source>    -&gt; Ignorer les cas à densité nulle</source>
-        <translation type="unfinished"></translation>
+        <translation>-&gt; Ingnore null density cases</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="158"/>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="160"/>
         <source>max (ni)</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="160"/>
         <source>grille ni manquante</source>
-        <translation type="unfinished"></translation>
+        <translation>ni grid missing</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="165"/>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="168"/>
         <source>sum(ni) / sum(nt - nb)</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="166"/>
@@ -161,27 +161,27 @@
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="168"/>
         <source>grille(s) ni/nt/nb manquante(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>ni/nt/nb grid(s) missing</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="224"/>
         <source>Grille ni manquante !</source>
-        <translation type="unfinished"></translation>
+        <translation>ni grid missing !</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="225"/>
         <source>Grille nt manquante !</source>
-        <translation type="unfinished"></translation>
+        <translation>nt grid missing !</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="226"/>
         <source>Grille nb manquante !</source>
-        <translation type="unfinished"></translation>
+        <translation>nb grid missing !</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcombinedensitygrids.cpp" line="227"/>
         <source>Grille delta theorique manquante !</source>
-        <translation type="unfinished"></translation>
+        <translation>Delta th grid missing !</translation>
     </message>
 </context>
 <context>
@@ -254,12 +254,12 @@
     <message>
         <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="114"/>
         <source>Theoretical</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="128"/>
         <source>Deltatheoretical</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="129"/>
@@ -269,27 +269,27 @@
     <message>
         <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="84"/>
         <source>2- Calculer les grilles LVOX</source>
-        <translation type="unfinished"></translation>
+        <translation>2- Compute LVOX grids</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="112"/>
         <source>isNi</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="115"/>
         <source>isNt</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="118"/>
         <source>isNb</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="121"/>
         <source>isDensity</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="147"/>
@@ -344,7 +344,7 @@
     <message>
         <location filename="../step/lvox_stepcomputelvoxgrids.cpp" line="295"/>
         <source>Dimensions spécifiées ne contenant pas les positions de scans : la grille a du être élargie !</source>
-        <translation type="unfinished"></translation>
+        <translation>Specified dimension do not contains scan positions: the grid has been enlarged !</translation>
     </message>
     <message>
         <source>Use reference grid resolution</source>
@@ -384,33 +384,33 @@
     <message>
         <location filename="../step/lvox_stepcomputepad.cpp" line="38"/>
         <source>6- Calculer grille Plant Area Density</source>
-        <translation type="unfinished"></translation>
+        <translation>6- Compute Plant Area Density grid</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputepad.cpp" line="52"/>
         <location filename="../step/lvox_stepcomputepad.cpp" line="66"/>
         <source>Grilles</source>
-        <translation type="unfinished">Grids</translation>
+        <translation>Grids</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputepad.cpp" line="57"/>
         <source>delta th.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputepad.cpp" line="58"/>
         <source>density</source>
-        <translation type="unfinished">density</translation>
+        <translation>density</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputepad.cpp" line="64"/>
         <source>Grilles combinées</source>
-        <translation type="unfinished">Combined grids</translation>
+        <translation>Combined grids</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputepad.cpp" line="67"/>
         <source>PAD</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -418,27 +418,27 @@
     <message>
         <location filename="../step/lvox_stepcomputeprofile.cpp" line="32"/>
         <source>5- Créer un Profil Vertical à partir de Voxels</source>
-        <translation type="unfinished"></translation>
+        <translation>5- Create a vertical profile from Voxels</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputeprofile.cpp" line="46"/>
         <source>Grilles</source>
-        <translation type="unfinished">Grids</translation>
+        <translation>Grids</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputeprofile.cpp" line="50"/>
         <source>Grille 3D</source>
-        <translation type="unfinished"></translation>
+        <translation>3D grid</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputeprofile.cpp" line="57"/>
         <source>Profil</source>
-        <translation type="unfinished"></translation>
+        <translation>Profile</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepcomputeprofile.cpp" line="65"/>
         <source>Ne prendre en compte que les valeurs &gt; à</source>
-        <translation type="unfinished"></translation>
+        <translation>Use only values &gt; to</translation>
     </message>
 </context>
 <context>
@@ -446,32 +446,32 @@
     <message>
         <location filename="../step/lvox_stepinterpolatedensitygrid.cpp" line="32"/>
         <source>4- Interpoler les grilles LVOX de densité</source>
-        <translation type="unfinished"></translation>
+        <translation>4- Interpolate LVOX density grids </translation>
     </message>
     <message>
         <location filename="../step/lvox_stepinterpolatedensitygrid.cpp" line="46"/>
         <source>Grilles</source>
-        <translation type="unfinished">Grids</translation>
+        <translation>Grids</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepinterpolatedensitygrid.cpp" line="50"/>
         <source>hits</source>
-        <translation type="unfinished">hits</translation>
+        <translation>hits</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepinterpolatedensitygrid.cpp" line="51"/>
         <source>density</source>
-        <translation type="unfinished">density</translation>
+        <translation>density</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepinterpolatedensitygrid.cpp" line="58"/>
         <source>density (interpolated)</source>
-        <translation type="unfinished"></translation>
+        <translation>density (interpolée)</translation>
     </message>
     <message>
         <location filename="../step/lvox_stepinterpolatedensitygrid.cpp" line="65"/>
         <source>Ni minimum pour utiliser la valeur moyenne (0 sinon)</source>
-        <translation type="unfinished"></translation>
+        <translation>Minimum Ni for use of mean value (0 in others cases)</translation>
     </message>
 </context>
 <context>
@@ -483,7 +483,7 @@
     <message>
         <location filename="../step/lvox_steploadinfile.cpp" line="49"/>
         <source>1- Charger un fichier .in LVOX</source>
-        <translation type="unfinished"></translation>
+        <translation>1- Load a .in LVOX file</translation>
     </message>
     <message>
         <location filename="../step/lvox_steploadinfile.cpp" line="69"/>
@@ -519,17 +519,17 @@
     <message>
         <location filename="../step/lvox_steploadinfile.cpp" line="89"/>
         <source>Choisir le fichier .in</source>
-        <translation type="unfinished"></translation>
+        <translation>Choose .in file</translation>
     </message>
     <message>
         <location filename="../step/lvox_steploadinfile.cpp" line="90"/>
         <source>Extraire une placette de rayon fixé</source>
-        <translation type="unfinished"></translation>
+        <translation>Extract a plot plot with specified radius</translation>
     </message>
     <message>
         <location filename="../step/lvox_steploadinfile.cpp" line="91"/>
         <source>Rayon de la placette</source>
-        <translation type="unfinished"></translation>
+        <translation>Plot radius</translation>
     </message>
 </context>
 <context>
@@ -552,7 +552,7 @@
         <location filename="../lvox_steppluginmanager.cpp" line="63"/>
         <location filename="../lvox_steppluginmanager.cpp" line="64"/>
         <source>LVOX</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 </TS>
