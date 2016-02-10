@@ -54,7 +54,11 @@ void LVOX_StepComputeProfile::createInResultModelListProtected()
 void LVOX_StepComputeProfile::createOutResultModelListProtected()
 {
     CT_OutResultModelGroupToCopyPossibilities *resultModel = createNewOutResultModelToCopy(DEF_resultIn_grids);
-    resultModel->addItemModel(DEF_groupIn_grids, _outProfile_ModelName, new CT_Profile<double>(), tr("Profil"));
+
+    if (resultModel != NULL)
+    {
+        resultModel->addItemModel(DEF_groupIn_grids, _outProfile_ModelName, new CT_Profile<double>(), tr("Profil"));
+    }
 }
 
 // Semi-automatic creation of step parameters DialogBox

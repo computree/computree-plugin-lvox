@@ -55,7 +55,10 @@ void LVOX_StepInterpolateDensityGrids::createInResultModelListProtected()
 void LVOX_StepInterpolateDensityGrids::createOutResultModelListProtected()
 {
     CT_OutResultModelGroupToCopyPossibilities *resultModel = createNewOutResultModelToCopy(DEF_resultIn_grids);
-    resultModel->addItemModel(DEF_groupIn_grids, _outGridDensity_ModelName, new CT_Grid3D<float>(), tr("density (interpolated)"));
+    if (resultModel != NULL)
+    {
+        resultModel->addItemModel(DEF_groupIn_grids, _outGridDensity_ModelName, new CT_Grid3D<float>(), tr("density (interpolated)"));
+    }
 }
 
 // Semi-automatic creation of step parameters DialogBox
