@@ -17,8 +17,8 @@
 
 #include <limits>
 
-#include "ct_reader/ct_reader_ascrgb.h"
-#include "ct_reader/ct_reader_xyb.h"
+#include "ctlibio/readers/ct_reader_ascrgb.h"
+#include "ctlibio/readers/ct_reader_xyb.h"
 
 #include "qfile.h"
 #include "qtextstream.h"
@@ -144,7 +144,7 @@ void LVOX_StepLoadInFile::compute()
             } else if (extension == "xyb")
             {
                 reader = new CT_Reader_XYB();
-                if (_radius >0) {((CT_Reader_XYB*) reader)->setRadiusFilter(_radius);}
+                if (_radius >0) {((CT_Reader_XYB*) reader)->setFilterRadius(_radius);}
             } else
             {
                 PS_LOG->addMessage(LogInterface::trace, LogInterface::step, QObject::tr("Wrong file extension"));

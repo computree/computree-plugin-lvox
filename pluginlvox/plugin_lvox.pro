@@ -1,6 +1,9 @@
+COMPUTREE += ctlibio
+
 CT_PREFIX = ../../computreev3
 include($${CT_PREFIX}/shared.pri)
 include($${PLUGIN_SHARED_DIR}/include.pri)
+include($${CT_PREFIX}/include_ct_library.pri)
 
 contains ( QT_VERSION, "^5.*" ) {
     LIBS += -lQt5Concurrent
