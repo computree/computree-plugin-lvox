@@ -91,7 +91,9 @@ private:
     // Step parameters
     QStringList _fileName;          /*!< Name of .in file */
     bool        _radiusFiltered;    /*!< If true, only points inside given radius would be kept */
-    double      _radius;            /*!<  */
+    double      _radius;
+    double      _zmin;
+    double      _zmax;
 
 };
 
