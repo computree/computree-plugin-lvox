@@ -154,6 +154,7 @@ void LVOX_StepComputeLvoxGrids::createPostConfigurationDialog()
     configDialog->addExcludeValue("", "", tr("Default mode : Bounding box of the scene"), bg_gridMode, 0);
     configDialog->addExcludeValue("", "", tr("Custom mode : Relative to folowing coordinates:"), bg_gridMode, 1);
     configDialog->addExcludeValue("", "", tr("Custom mode : Relative to folowing coordinates + custom dimensions:"), bg_gridMode, 2);
+    configDialog->addExcludeValue("", "", tr("Custom mode : centered on folowing coordinates + custom dimensions:"), bg_gridMode, 3);
 
 
     configDialog->addDouble(tr("X coordinate:"), "", -std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 4, _xBase);
@@ -274,7 +275,7 @@ void LVOX_StepComputeLvoxGrids::compute()
         while (yMax < yMaxAdjusted) {yMax += _res;}
         while (zMax < zMaxAdjusted) {zMax += _res;}
 
-    } else {
+    } else if (_gridMode == 2) {
 
         xMin = _xBase;
         yMin = _yBase;
@@ -298,8 +299,38 @@ void LVOX_StepComputeLvoxGrids::compute()
         {
             PS_LOG->addMessage(LogInterface::warning, LogInterface::step, tr("Dimensions spécifiées ne contenant pas les positions de scans : la grille a du être élargie !"));
         }
+    } else {
+
+        xMin = _xBase - _res*_xDim;
+        yMin = _yBase - _res*_yDim;
+        zMin = _zBase - _res*_zDim;
+
+        xMax = _xBase + _res*_xDim;
+        yMax = _yBase + _res*_yDim;
+        zMax = _zBase + _res*_zDim;
+
+        bool enlarged = false;
+
+        while (xMin > xMinScanner) {xMin -= _res; enlarged = true;}
+        while (yMin > yMinScanner) {yMin -= _res; enlarged = true;}
+        while (zMin > zMinScanner) {zMin -= _res; enlarged = true;}
+
+        while (xMax < xMaxScanner) {xMax += _res; enlarged = true;}
+        while (yMax < yMaxScanner) {yMax += _res; enlarged = true;}
+        while (zMax < zMaxScanner) {zMax += _res; enlarged = true;}
+
+        if (enlarged)
+        {
+            PS_LOG->addMessage(LogInterface::warning, LogInterface::step, tr("Dimensions spécifiées ne contenant pas les positions de scans : la grille a du être élargie !"));
+        }
     }
 
+    xMin -= _res;
+    yMin -= _res;
+    zMin -= _res;
+    xMax += _res;
+    yMax += _res;
+    zMax += _res;
 
     QMapIterator<CT_AbstractItemGroup*, QPair<const CT_Scene*, const CT_Scanner*> > it(pointsOfView);
     while (it.hasNext() && !isStopped())
@@ -310,7 +341,7 @@ void LVOX_StepComputeLvoxGrids::compute()
         const CT_Scanner* scanner =it.value().second;
 
         // Declaring the output grids
-        CT_Grid3D<int>*      hitGrid = CT_Grid3D<int>::createGrid3DFromXYZCoords(_hits_ModelName.completeName(), outResult, xMin, yMin, zMin, xMax, yMax, zMax, _res, -1, 0);
+        CT_Grid3D<int>*      hitGrid = CT_Grid3D<int>::createGrid3DFromXYZCoords(_hits_ModelName.completeName(), outResult, xMin, yMin, zMin, xMax, yMax, zMax, _res, -1, 0, true);
         CT_Grid3D<int>*      theoriticalGrid = new CT_Grid3D<int>(_theo_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
         CT_Grid3D<int>*      beforeGrid = new CT_Grid3D<int>(_bef_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
         CT_Grid3D<float>*   density = new CT_Grid3D<float>(_density_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
