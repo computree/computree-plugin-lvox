@@ -242,18 +242,18 @@ void LVOX_StepCombineDensityGrids::compute()
                 NAb = itemIn_before->NA();
                 NAdelta = itemIn_deltaT->NA();
             } else {
-                if (xmin != itemIn_density->minX()) {qDebug() << "xmin non homogène !"; return; }
-                if (ymin != itemIn_density->minY()) {qDebug() << "ymin non homogène !"; return; }
-                if (zmin != itemIn_density->minZ()) {qDebug() << "zmin non homogène !"; return; }
-                if (xdim != itemIn_density->xdim()) {qDebug() << "xdim non homogène !"; return; }
-                if (ydim != itemIn_density->ydim()) {qDebug() << "ydim non homogène !"; return; }
-                if (zdim != itemIn_density->zdim()) {qDebug() << "zdim non homogène !"; return; }
-                if (res != itemIn_density->resolution()) {qDebug() << "resolution non homogène !"; return; }
-                if (NAd != itemIn_density->NA()) {qDebug() << "NAd non homogène !"; return; }
-                if (NAi != itemIn_hits->NA()) {qDebug() << "NAi non homogène !"; return; }
-                if (NAt != itemIn_theoretical->NA()) {qDebug() << "NAt non homogène !"; return; }
-                if (NAb != itemIn_before->NA()) {qDebug() << "NAb non homogène !"; return; }
-                if (NAdelta != itemIn_deltaT->NA()) {qDebug() << "NAb non homogène !"; return; }
+//                if (xmin != itemIn_density->minX()) {qDebug() << "xmin non homogène !"; return; }
+//                if (ymin != itemIn_density->minY()) {qDebug() << "ymin non homogène !"; return; }
+//                if (zmin != itemIn_density->minZ()) {qDebug() << "zmin non homogène !"; return; }
+//                if (xdim != itemIn_density->xdim()) {qDebug() << "xdim non homogène !"; return; }
+//                if (ydim != itemIn_density->ydim()) {qDebug() << "ydim non homogène !"; return; }
+//                if (zdim != itemIn_density->zdim()) {qDebug() << "zdim non homogène !"; return; }
+//                if (res != itemIn_density->resolution()) {qDebug() << "resolution non homogène !"; return; }
+//                if (NAd != itemIn_density->NA()) {qDebug() << "NAd non homogène !"; return; }
+//                if (NAi != itemIn_hits->NA()) {qDebug() << "NAi non homogène !"; return; }
+//                if (NAt != itemIn_theoretical->NA()) {qDebug() << "NAt non homogène !"; return; }
+//                if (NAb != itemIn_before->NA()) {qDebug() << "NAb non homogène !"; return; }
+//                if (NAdelta != itemIn_deltaT->NA()) {qDebug() << "NAb non homogène !"; return; }
             }
 
             if (use_ni) {InGrids_hits.append(itemIn_hits);}
