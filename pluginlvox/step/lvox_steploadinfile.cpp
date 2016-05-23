@@ -159,7 +159,6 @@ void LVOX_StepLoadInFile::compute()
             if (reader->setFilePath(it.key()) && reader->readHeader() != NULL)
             {
                 reader->init();
-                reader->configure();
 
                 if (reader->readFile())
                 {
