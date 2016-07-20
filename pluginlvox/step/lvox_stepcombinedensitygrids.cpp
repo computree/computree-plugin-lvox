@@ -237,10 +237,10 @@ void LVOX_StepCombineDensityGrids::compute()
                 zdim = itemIn_density->zdim();
                 res = itemIn_density->resolution();
                 NAd = itemIn_density->NA();
-                NAi = itemIn_hits->NA();
-                NAt = itemIn_theoretical->NA();
-                NAb = itemIn_before->NA();
-                NAdelta = itemIn_deltaT->NA();
+                if (use_ni) {NAi = itemIn_hits->NA();}
+                if (use_nt) {NAt = itemIn_theoretical->NA();}
+                if (use_nb) {NAb = itemIn_before->NA();}
+                if (use_deltaT) {NAdelta = itemIn_deltaT->NA();}
             } else {
 //                if (xmin != itemIn_density->minX()) {qDebug() << "xmin non homogène !"; return; }
 //                if (ymin != itemIn_density->minY()) {qDebug() << "ymin non homogène !"; return; }
