@@ -8,10 +8,11 @@
 
 // Alias for indexing models
 #define DEF_in_res "result"
-#define DEF_in_grp_ndnt "group"
-#define DEF_in_nd "nb (before)"
+#define DEF_in_grp "group"
+#define DEF_in_nb "nb (before)"
 #define DEF_in_nt "nt (theoretical)"
-
+#define DEF_in_nb_att "isNb"
+#define DEF_in_nt_att "isNt"
 
 // Constructor : initialization of parameters
 LVOX_StepNdNtGrids::LVOX_StepNdNtGrids(CT_StepInitializeData &dataInit) : CT_AbstractStep(dataInit)
@@ -21,13 +22,13 @@ LVOX_StepNdNtGrids::LVOX_StepNdNtGrids(CT_StepInitializeData &dataInit) : CT_Abs
 // Step description (tooltip of contextual menu)
 QString LVOX_StepNdNtGrids::getStepDescription() const
 {
-    return tr("4.5 - Compute nd/nt grid");
+    return tr("4.5 - Compute nb/nt grid");
 }
 
 // Step detailled description
 QString LVOX_StepNdNtGrids::getStepDetailledDescription() const
 {
-    return tr("Compute nd/nt grid");
+    return tr("Compute nb/nt grid");
 }
 
 // Step URL
@@ -48,30 +49,28 @@ CT_VirtualAbstractStep* LVOX_StepNdNtGrids::createNewInstance(CT_StepInitializeD
 // Creation and affiliation of IN models
 void LVOX_StepNdNtGrids::createInResultModelListProtected()
 {
-    CT_InResultModelGroupToCopy *resultModel = createNewInResultModelForCopy(DEF_in_res, tr("Grilles"));
+    CT_InResultModelGroupToCopy* in_res = createNewInResultModelForCopy(DEF_in_res, tr("Grilles"));
 
-    resultModel->setZeroOrMoreRootGroup();
-    resultModel->addGroupModel("", DEF_in_grp_ndnt);
+    in_res->setZeroOrMoreRootGroup();
+    in_res->addGroupModel("", DEF_in_grp);
 
-    resultModel->addItemModel(DEF_in_grp_ndnt, DEF_in_nd, CT_Grid3D<int>::staticGetType(), tr("nb (before)"));
-//    resultModel->addItemAttributeModel(DEFin_nd, DEFin_nd, QList<QString>() << "LVOX_GRD_ND", CT_AbstractCategory::ANY, tr("before"),
-//        "", CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
+    in_res->addItemModel(DEF_in_grp, DEF_in_nb, CT_Grid3D<int>::staticGetType(), tr("nb (before)"));
+    in_res->addItemAttributeModel(DEF_in_nb, DEF_in_nb_att, QList<QString>() << "LVOX_GRD_NB", CT_AbstractCategory::ANY, tr("isNb"), "",
+                                  CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
 
-    resultModel->addItemModel(DEF_in_grp_ndnt, DEF_in_nt, CT_Grid3D<int>::staticGetType(), tr("nt (theoretical)"));
-//    resultModel->addItemAttributeModel(DEFin_nt, DEFin_nt, QList<QString>() << "LVOX_GRD_NT", CT_AbstractCategory::ANY, tr("theoretical"),
-//        "", CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
+    in_res->addItemModel(DEF_in_grp, DEF_in_nt, CT_Grid3D<int>::staticGetType(), tr("nt (theoretical)"));
+    in_res->addItemAttributeModel(DEF_in_nt, DEF_in_nt_att, QList<QString>() << "LVOX_GRD_NT", CT_AbstractCategory::ANY, tr("isNt"), "",
+                                  CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
 }
 
 // Creation and affiliation of OUT models
 void LVOX_StepNdNtGrids::createOutResultModelListProtected()
 {
     // create a new OUT result that is a copy of the IN result selected by the user
-    CT_OutResultModelGroupToCopyPossibilities *res = createNewOutResultModelToCopy(DEF_in_res);
-    if (res != NULL)
+    CT_OutResultModelGroupToCopyPossibilities* out_res = createNewOutResultModelToCopy(DEF_in_res);
+    if (out_res != NULL)
     {
-        res->addItemModel(DEF_in_grp_ndnt, _ndnt_ModelName, new CT_Grid3D<float>(), tr("ndovernt"));
-//        res->addItemAttributeModel(_ndnt_ModelName, _DensityFlag_ModelName,
-//                                   new CT_StdItemAttributeT<bool>("LVOX_GRD_DENSITY"), tr("isDensity"));
+        out_res->addItemModel(DEF_in_grp, _nbnt_ModelName, new CT_Grid3D<float>(), tr("nb/nt"));
     }
 }
 
@@ -83,38 +82,32 @@ void LVOX_StepNdNtGrids::createPostConfigurationDialog()
 
 void LVOX_StepNdNtGrids::compute()
 {
-    // Get the input
-//    CT_ResultGroup* in = getInputResults().first();
-
     // Get the out res
-    CT_ResultGroup* out = getOutResultList().first();
+    CT_ResultGroup* out_res = getOutResultList().first();
 
     // res browsing
-    CT_ResultGroupIterator it(out, this, DEF_in_grp_ndnt);
+    CT_ResultGroupIterator it(out_res, this, DEF_in_grp);
     while (it.hasNext() && !isStopped())
     {
-        CT_StandardItemGroup* group = (CT_StandardItemGroup*) it.next();
+        CT_StandardItemGroup* out_group = (CT_StandardItemGroup*) it.next();
 
-        const CT_Grid3D<int>* nd = (CT_Grid3D<int>*) group->firstItemByINModelName(this, DEF_in_nd);
-        const CT_Grid3D<int>* nt = (CT_Grid3D<int>*) group->firstItemByINModelName(this, DEF_in_nt);
+        const CT_Grid3D<int>* nb = (CT_Grid3D<int>*) out_group->firstItemByINModelName(this, DEF_in_nb);
+        const CT_Grid3D<int>* nt = (CT_Grid3D<int>*) out_group->firstItemByINModelName(this, DEF_in_nt);
 
-        CT_Grid3D<float>* ndnt = new CT_Grid3D<float>(_ndnt_ModelName.completeName(), out,
-            nd->minX(), nd->minY(), nd->minZ(),
-            nd->xdim(), nd->ydim(), nd->zdim(),
-            nd->resolution(), nd->NA(), nd->NA());
+        CT_Grid3D<float>* nbnt = new CT_Grid3D<float>(_nbnt_ModelName.completeName(), out_res,
+            nb->minX(), nb->minY(), nb->minZ(),
+            nb->xdim(), nb->ydim(), nb->zdim(),
+            nb->resolution(), nb->NA(), nb->NA());
 
-        size_t n = ndnt->nCells();
+        size_t n = nbnt->nCells();
         for(size_t i = 0; i < n; i++)
         {
-            if(nt->valueAtIndex(i))
+            if(nt->valueAtIndex(i)) // avoid division by zero
             {
-                int a = nd->valueAtIndex(i);
-                int b = nt->valueAtIndex(i);
-                float val = static_cast<float>(a)/b;
-                ndnt->setValueAtIndex(i, val);
+                nbnt->setValueAtIndex(i, static_cast<float>(nb->valueAtIndex(i))/nt->valueAtIndex(i));
             }
         }
-        group->addItemDrawable(ndnt);
-        ndnt->computeMinMax();
+        out_group->addItemDrawable(nbnt);
+        nbnt->computeMinMax();
     }
 }

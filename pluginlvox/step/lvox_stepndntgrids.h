@@ -82,7 +82,7 @@ private:
 
     // Step parameters
     // No parameter for this step
-    CT_AutoRenameModels _ndnt_ModelName;
+    CT_AutoRenameModels _nbnt_ModelName;
 };
 
 #endif // LVOX_STEPNDNTGRIDS_H
