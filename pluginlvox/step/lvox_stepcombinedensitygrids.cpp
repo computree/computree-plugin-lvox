@@ -105,7 +105,9 @@ void LVOX_StepCombineDensityGrids::createOutResultModelListProtected()
     resultModel->setRootGroup(DEF_groupOut_grids, new CT_StandardItemGroup(), tr("Grilles"));
     resultModel->addItemModel(DEF_groupOut_grids, DEF_itemOut_hits, new CT_Grid3D<int>(), tr("hits"));
     resultModel->addItemModel(DEF_groupOut_grids, DEF_itemOut_theoretical, new CT_Grid3D<int>(), tr("theoretical"));
+    resultModel->addItemAttributeModel(DEF_itemOut_theoretical, DEF_inATTisNt, new CT_StdItemAttributeT<bool>("LVOX_GRD_NT"), tr("isNt"));
     resultModel->addItemModel(DEF_groupOut_grids, DEF_itemOut_before, new CT_Grid3D<int>(), tr("before"));
+    resultModel->addItemAttributeModel(DEF_itemOut_before, DEF_inATTisNb, new CT_StdItemAttributeT<bool>("LVOX_GRD_NB"), tr("isNb"));
     resultModel->addItemModel(DEF_groupOut_grids, DEF_itemOut_density, new CT_Grid3D<float>(), tr("density - %1").arg(modeString));
     resultModel->addItemModel(DEF_groupOut_grids, DEF_itemOut_deltaT, new CT_Grid3D<float>(), tr("delta theoretical"));
     resultModel->addItemModel(DEF_groupOut_grids, DEF_itemOut_scanId, new CT_Grid3D<int>(), tr("scanId"));
