@@ -39,6 +39,7 @@
 #include "step/lvox_stepinterpolatedensitygrid.h"
 #include "step/lvox_stepcomputeprofile.h"
 #include "step/lvox_stepndntgrids.h"
+#include "step/lvox_stepexportcomputedgrids.h"
 
 #include "ct_global/ct_context.h"
 #include "ct_categories/ct_stdcategory.h"
@@ -61,6 +62,7 @@ bool LVOX_StepPluginManager::loadGenericsStep()
 
     addNewVoxelsStep<LVOX_StepLoadInFile>(QObject::tr("LVOX"));
     addNewVoxelsStep<LVOX_StepComputeLvoxGrids>(QObject::tr("LVOX"));
+    addNewVoxelsStep<LVOX_StepExportComputedGrids>(QObject::tr("LVOX"));
     addNewVoxelsStep<LVOX_StepMergeInputs>(QObject::tr("LVOX"));
     addNewVoxelsStep<LVOX_StepCombineDensityGrids>(QObject::tr("LVOX"));
     addNewVoxelsStep<LVOX_StepInterpolateDensityGrids>(QObject::tr("LVOX"));
