@@ -1,4 +1,4 @@
-#include "lvox_stepexportcomputedgrids.h"
+#include "lvox_stepexportmergedgrids.h"
 
 #include "ct_itemdrawable/ct_grid3d.h"
 #include "ct_itemdrawable/tools/iterator/ct_groupiterator.h"
@@ -24,39 +24,39 @@
 #define DEF_attr_density "isDensity"
 
 // Constructor : initialization of parameters
-LVOX_StepExportComputedGrids::LVOX_StepExportComputedGrids(CT_StepInitializeData &dataInit) : CT_AbstractStep(dataInit)
+LVOX_StepExportMergedGrids::LVOX_StepExportMergedGrids(CT_StepInitializeData &dataInit) : CT_AbstractStep(dataInit)
 {
 }
 
 // Step description (tooltip of contextual menu)
-QString LVOX_StepExportComputedGrids::getStepDescription() const
+QString LVOX_StepExportMergedGrids::getStepDescription() const
 {
-    return tr("2a - Export computed grids");
+    return tr("3a - Export merged grids");
 }
 
 // Step detailled description
-QString LVOX_StepExportComputedGrids::getStepDetailledDescription() const
+QString LVOX_StepExportMergedGrids::getStepDetailledDescription() const
 {
-    return tr("Export all the computed grids into a folder");
+    return tr("Export all the merged grids into a folder");
 }
 
 // Step URL
-QString LVOX_StepExportComputedGrids::getStepURL() const
+QString LVOX_StepExportMergedGrids::getStepURL() const
 {
     //return tr("STEP URL HERE");
     return CT_AbstractStep::getStepURL(); //by default URL of the plugin
 }
 
 // Step copy method
-CT_VirtualAbstractStep* LVOX_StepExportComputedGrids::createNewInstance(CT_StepInitializeData &dataInit)
+CT_VirtualAbstractStep* LVOX_StepExportMergedGrids::createNewInstance(CT_StepInitializeData &dataInit)
 {
-    return new LVOX_StepExportComputedGrids(dataInit);
+    return new LVOX_StepExportMergedGrids(dataInit);
 }
 
 //////////////////// PROTECTED METHODS //////////////////
 
 // Creation and affiliation of IN models
-void LVOX_StepExportComputedGrids::createInResultModelListProtected()
+void LVOX_StepExportMergedGrids::createInResultModelListProtected()
 {
     CT_InResultModelGroup* in_res = createNewInResultModel(DEF_in_res, tr("Grilles"));
 
@@ -80,13 +80,13 @@ void LVOX_StepExportComputedGrids::createInResultModelListProtected()
 }
 
 // Creation and affiliation of OUT models
-void LVOX_StepExportComputedGrids::createOutResultModelListProtected()
+void LVOX_StepExportMergedGrids::createOutResultModelListProtected()
 {
     // No out result, just files on disk
 }
 
 // Semi-automatic creation of step parameters DialogBox
-void LVOX_StepExportComputedGrids::createPostConfigurationDialog()
+void LVOX_StepExportMergedGrids::createPostConfigurationDialog()
 {
     CT_StepConfigurableDialog* diag = newStandardPostConfigurationDialog();
 
@@ -111,7 +111,7 @@ void LVOX_StepExportComputedGrids::createPostConfigurationDialog()
 //    return grid;
 //}
 
-void LVOX_StepExportComputedGrids::compute()
+void LVOX_StepExportMergedGrids::compute()
 {
     QDir().mkdir(_folder.first());
 

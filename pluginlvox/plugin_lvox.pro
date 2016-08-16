@@ -27,7 +27,13 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     step/lvox_stepinterpolatedensitygrid.h \
     step/lvox_stepcomputeprofile.h \
     step/lvox_stepndntgrids.h \
-    step/lvox_stepmergeinputs.h
+    step/lvox_stepmergeinputs.h \
+    step/lvox_stepexportcomputedgrids.h \
+    tools/lvox_grid3dexporter.h \
+    step/lvox_stepimportcomputedgrids.h \
+    step/lvox_stepexportmergedgrids.h \
+    step/lvox_stepimportmergedgrids.h \
+    step/lvox_stepcomparegrids.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -45,7 +51,13 @@ SOURCES += \
     step/lvox_stepinterpolatedensitygrid.cpp \
     step/lvox_stepcomputeprofile.cpp \
     step/lvox_stepndntgrids.cpp \
-    step/lvox_stepmergeinputs.cpp
+    step/lvox_stepmergeinputs.cpp \
+    step/lvox_stepexportcomputedgrids.cpp \
+    tools/lvox_grid3dexporter.cpp \
+    step/lvox_stepimportcomputedgrids.cpp \
+    step/lvox_stepimportmergedgrids.cpp \
+    step/lvox_stepexportmergedgrids.cpp \
+    step/lvox_stepcomparegrids.cpp
 
 TRANSLATIONS += languages/pluginlvoxv2_en.ts \
                 languages/pluginlvoxv2_fr.ts
