@@ -34,15 +34,15 @@
 #include "step/lvox_stepcomputelvoxgrids.h"
 #include "step/lvox_steploadinfile.h"
 #include "step/lvox_stepcombinedensitygrids.h"
-#include "step/lvox_stepmergeinputs.h"
+//#include "step/lvox_stepmergeinputs.h"
 #include "step/lvox_stepcomputepad.h"
 #include "step/lvox_stepinterpolatedensitygrid.h"
 #include "step/lvox_stepcomputeprofile.h"
 #include "step/lvox_stepndntgrids.h"
 #include "step/lvox_stepexportcomputedgrids.h"
-#include "step/lvox_stepimportcomputedgrids.h"
+//#include "step/lvox_stepimportcomputedgrids.h"
 #include "step/lvox_stepexportmergedgrids.h"
-#include "step/lvox_stepimportmergedgrids.h"
+//#include "step/lvox_stepimportmergedgrids.h"
 #include "step/lvox_stepcomparegrids.h"
 
 #include "ct_global/ct_context.h"
@@ -67,11 +67,11 @@ bool LVOX_StepPluginManager::loadGenericsStep()
     addNewVoxelsStep<LVOX_StepLoadInFile>(QObject::tr("LVOX"));
     addNewVoxelsStep<LVOX_StepComputeLvoxGrids>(QObject::tr("LVOX"));
     addNewVoxelsStep<LVOX_StepExportComputedGrids>(QObject::tr("LVOX"));
-    addNewVoxelsStep<LVOX_StepImportComputedGrids>(QObject::tr("LVOX"));
+//    addNewVoxelsStep<LVOX_StepImportComputedGrids>(QObject::tr("LVOX"));
 //    addNewVoxelsStep<LVOX_StepMergeInputs>(QObject::tr("LVOX"));
     addNewVoxelsStep<LVOX_StepCombineDensityGrids>(QObject::tr("LVOX"));
     addNewVoxelsStep<LVOX_StepExportMergedGrids>(QObject::tr("LVOX"));
-    addNewVoxelsStep<LVOX_StepImportMergedGrids>(QObject::tr("LVOX"));
+//    addNewVoxelsStep<LVOX_StepImportMergedGrids>(QObject::tr("LVOX"));
     addNewVoxelsStep<LVOX_StepInterpolateDensityGrids>(QObject::tr("LVOX"));
     addNewVoxelsStep<LVOX_StepNdNtGrids>(QObject::tr("LVOX"));
     addNewVoxelsStep<LVOX_StepComputeProfile>(QObject::tr("LVOX"));
