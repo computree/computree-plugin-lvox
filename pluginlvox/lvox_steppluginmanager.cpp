@@ -45,6 +45,12 @@
 //#include "step/lvox_stepimportmergedgrids.h"
 #include "step/lvox_stepcomparegrids.h"
 
+
+#include "urfm/step/lvox2_stepcomputelvoxgrids.h"
+#include "urfm/step/lvox2_stepcombinedensitygrids.h"
+#include "urfm/step/lvox2_stepexportcomputedgrids.h"
+
+
 #include "ct_global/ct_context.h"
 #include "ct_categories/ct_stdcategory.h"
 
@@ -77,6 +83,10 @@ bool LVOX_StepPluginManager::loadGenericsStep()
     addNewVoxelsStep<LVOX_StepComputeProfile>(QObject::tr("LVOX"));
     addNewVoxelsStep<LVOX_StepComputePAD>(QObject::tr("LVOX"));
     addNewVoxelsStep<LVOX_StepCompareGrids>(QObject::tr("LVOX"));
+
+    addNewVoxelsStep<LVOX_StepComputeLvoxGrids>(QObject::tr("LVOX2"));
+    addNewVoxelsStep<LVOX_StepCombineDensityGrids>(QObject::tr("LVOX2"));
+    addNewVoxelsStep<LVOX_StepExportComputedGrids>(QObject::tr("LVOX2"));
 
     return true;
 }

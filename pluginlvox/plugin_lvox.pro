@@ -33,7 +33,12 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
 #    step/lvox_stepimportcomputedgrids.h \
     step/lvox_stepexportmergedgrids.h \
 #    step/lvox_stepimportmergedgrids.h \
-    step/lvox_stepcomparegrids.h
+    step/lvox_stepcomparegrids.h \
+    urfm/step/lvox2_stepcombinedensitygrids.h \
+    urfm/step/lvox2_stepcomputelvoxgrids.h \
+    urfm/step/lvox2_stepexportcomputedgrids.h \
+    urfm/tools/lvox2_computebeforethread.h \
+    urfm/tools/lvox2_countvisitor.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -57,7 +62,12 @@ SOURCES += \
 #    step/lvox_stepimportcomputedgrids.cpp \
 #    step/lvox_stepimportmergedgrids.cpp \
     step/lvox_stepexportmergedgrids.cpp \
-    step/lvox_stepcomparegrids.cpp
+    step/lvox_stepcomparegrids.cpp \
+    urfm/step/lvox2_stepcombinedensitygrids.cpp \
+    urfm/step/lvox2_stepcomputelvoxgrids.cpp \
+    urfm/step/lvox2_stepexportcomputedgrids.cpp \
+    urfm/tools/lvox2_computebeforethread.cpp \
+    urfm/tools/lvox2_countvisitor.cpp
 
 TRANSLATIONS += languages/pluginlvoxv2_en.ts \
                 languages/pluginlvoxv2_fr.ts

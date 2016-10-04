@@ -83,7 +83,7 @@ void LVOX_ComputeHitsThread::run()
         qDebug() << QString("%1 points des scènes d'entrées ne sont pas dans la grille").arg(nbOutPoints);
     }
 
-    _grilleHits->computeMinMax();
+    _grilleHits->computeMinMax(); // Calcul des limites hautes et basses des valeurs de la grille => Nécessaire à la visualisation
 
     if (_computeDistance)
     {
