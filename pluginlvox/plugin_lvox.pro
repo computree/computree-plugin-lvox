@@ -1,5 +1,7 @@
 COMPUTREE += ctlibio
 
+CHECK_CAN_USE_OPENCV = 1
+
 CT_PREFIX = ../../computreev3
 include($${CT_PREFIX}/shared.pri)
 include($${PLUGIN_SHARED_DIR}/include.pri)
@@ -37,8 +39,11 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     urfm/step/lvox2_stepcombinedensitygrids.h \
     urfm/step/lvox2_stepcomputelvoxgrids.h \
     urfm/step/lvox2_stepexportcomputedgrids.h \
-    urfm/tools/lvox2_computebeforethread.h \
-    urfm/tools/lvox2_countvisitor.h
+    urfm/tools/lvox2_computeactualbeamthread.h \
+    urfm/tools/lvox2_countvisitor.h \
+    urfm/step/lvox2_stepcomputeheightprofile.h \
+    urfm/step/lvox2_stepfiltergridbyradius.h \
+    urfm/step/lvox2_steppreparepointcloud.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -66,8 +71,11 @@ SOURCES += \
     urfm/step/lvox2_stepcombinedensitygrids.cpp \
     urfm/step/lvox2_stepcomputelvoxgrids.cpp \
     urfm/step/lvox2_stepexportcomputedgrids.cpp \
-    urfm/tools/lvox2_computebeforethread.cpp \
-    urfm/tools/lvox2_countvisitor.cpp
+    urfm/tools/lvox2_countvisitor.cpp \
+    urfm/tools/lvox2_computeactualbeamthread.cpp \
+    urfm/step/lvox2_stepcomputeheightprofile.cpp \
+    urfm/step/lvox2_stepfiltergridbyradius.cpp \
+    urfm/step/lvox2_steppreparepointcloud.cpp
 
 TRANSLATIONS += languages/pluginlvoxv2_en.ts \
                 languages/pluginlvoxv2_fr.ts

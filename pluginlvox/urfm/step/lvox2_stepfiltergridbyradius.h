@@ -1,40 +1,30 @@
 /****************************************************************************
+ Copyright (C) 2010-2012 the Office National des Forêts (ONF), France
+                         All rights reserved.
 
- Copyright (C) 2012-2012 Universite de Sherbrooke, Quebec, CANADA
-                     All rights reserved.
+ Contact : alexandre.piboule@onf.fr
 
- Contact :  richard.fournier@usherbrooke.ca
-            jean-francois.cote@nrcan-rncan.gc.ca
-            joris.ravaglia@gmail.com
+ Developers : Alexandre PIBOULE (ONF)
 
- Developers : Joris RAVAGLIA
- Adapted by Alexandre Piboule for Computree 2.0
+ This file is part of PluginONF library.
 
- This file is part of Computree version 2.0.
-
- Computree is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
+ PluginONF is free library: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
 
- Computree is distributed in the hope that it will be useful,
+ PluginONF is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with Computree.  If not, see <http://www.gnu.org/licenses/>.
-
+ You should have received a copy of the GNU Lesser General Public License
+ along with PluginONF.  If not, see <http://www.gnu.org/licenses/lgpl.html>.
 *****************************************************************************/
 
 
-#ifndef LVOX2_STEPCOMPUTELVOXGRIDS_H
-#define LVOX2_STEPCOMPUTELVOXGRIDS_H
-
-/** \file LVOX2_StepComputeLvoxGrids.h
-    \author Ravaglia J. - mailto : joris.ravaglia@gmail.com
-    \version 0.1
-*/
+#ifndef LVOX2_STEPFILTERGRIDBYRADIUS_H
+#define LVOX2_STEPFILTERGRIDBYRADIUS_H
 
 #include "ct_step/abstract/ct_abstractstep.h"                    // The step inherits from ct_abstractstep
 
@@ -42,11 +32,10 @@
 #include "ct_tools/model/ct_autorenamemodels.h"
 #include "ct_tools/ct_monitoredqthread.h"
 
+#include <QMutex>
 
-/** \class  LVOX2_StepComputeLvoxGrids
-    \brief
-*/
-class LVOX2_StepComputeLvoxGrids : public CT_AbstractStep
+
+class LVOX2_StepFilterGridByRadius : public CT_AbstractStep
 {
     /** \def    Q_OBJECT :
         \brief  Macro from the Qt environment. Useful to get the name of the step (among others)*/
@@ -59,7 +48,7 @@ public:
     *  Constructor of the class
     *  \param dataInit : informations about the step : parent step, plugin manager managing this step and some settings from Qt (for the Q_OBJECT?).
     */
-    LVOX2_StepComputeLvoxGrids(CT_StepInitializeData &dataInit);
+    LVOX2_StepFilterGridByRadius(CT_StepInitializeData &dataInit);
 
     /*!
     *  \brief Gives a description of the step
@@ -68,6 +57,13 @@ public:
     *  \warning Inherited from CT_AbstractStep, this method is not pure virtual (could be not defined here).
     */
     virtual QString getStepDescription() const;
+
+    /**
+     * @brief Inherit this method if you want to return your own detailled description.
+     *
+     *        By default return a empty string
+     */
+    virtual QString getStepDetailledDescription() const;
 
     /*!
     *  \brief Creates a new instance of this step
@@ -118,50 +114,18 @@ protected:
     */
     virtual void compute();
 
-public slots:
-    void updateProgress();
-
 private:
 
+    double  _centerX;
+    double  _centerY;
+    double  _radius;
+
     // Declaration of autoRenames Variables (groups or items addes to In models copies)
-    CT_AutoRenameModels _deltaout_ModelName;
-    CT_AutoRenameModels _deltain_ModelName;
-    CT_AutoRenameModels _deltabef_ModelName;
-    CT_AutoRenameModels _deltatheo_ModelName;
-    CT_AutoRenameModels _deltaactu_ModelName;
-
-    CT_AutoRenameModels _bef_ModelName;
-    CT_AutoRenameModels _theo_ModelName;
-    CT_AutoRenameModels _actu_ModelName;
-    CT_AutoRenameModels _hits_ModelName;
-    CT_AutoRenameModels _density_ModelName;
-
-    CT_AutoRenameModels _NiFlag_ModelName;
-    CT_AutoRenameModels _NbFlag_ModelName;
-    CT_AutoRenameModels _NtFlag_ModelName;
-    CT_AutoRenameModels _NtaFlag_ModelName;
-    CT_AutoRenameModels _DensityFlag_ModelName;
-
-
-    QList<CT_MonitoredQThread*>     _threadList;
-
-//********************************************//
-//              Attributes of LVox            //
-//********************************************//
-
-    double          _res;                   /*!< size of a voxel*/
-    int             _effectiveRayThresh;    /*!< minimum number of effective ray (Nt-Nb) in the voxel to calculate a density*/
-    bool            _computeDistances;
-    int             _ntMode; // mode of computation of total number of beam (0 theoretical, 1 actual, or 2 both)
-    int             _gridMode;
-    double          _xBase;
-    double          _yBase;
-    double          _zBase;
-
-    int          _xDim;
-    int          _yDim;
-    int          _zDim;
+    CT_AutoRenameModels _outGrid_ModelName;
 
 };
 
-#endif // LVOX2_STEPCOMPUTELVOXGRIDS_H
+#endif // LVOX2_STEPFILTERGRIDBYRADIUS_H
+
+
+

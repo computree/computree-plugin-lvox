@@ -39,6 +39,7 @@
 #include "ct_itemdrawable/ct_scene.h"
 #include "ct_itemdrawable/ct_scanner.h"
 #include "ct_itemdrawable/ct_grid3d.h"
+#include "ct_itemdrawable/ct_pointsattributesscalartemplated.h"
 #include "qvector3d.h"
 
 #include "ct_step/abstract/ct_abstractsteploadfile.h"
@@ -48,6 +49,7 @@
 #include "tools/lvox_computetheoriticalsthread.h"
 #include "tools/lvox_computebeforethread.h"
 #include "tools/lvox_computedensitythread.h"
+#include "urfm/tools/lvox2_computeactualbeamthread.h"
 
 #include <QFileInfo>
 #include <QDebug>
@@ -56,6 +58,7 @@
 
 #define DEF_SearchInResult "r"
 #define DEF_SearchInScene   "sc"
+#define DEF_SearchInFlag   "flag"
 #define DEF_SearchInScan   "sca"
 #define DEF_SearchInGroup   "gr"
 
@@ -67,7 +70,7 @@ LVOX2_StepComputeLvoxGrids::LVOX2_StepComputeLvoxGrids(CT_StepInitializeData &da
     _res = 0.5;
     _effectiveRayThresh = 10;
     _computeDistances = false;
-
+    _ntMode = 0; // by default, Beam number is theoretical
     _gridMode = 1;
     _xBase = -20.0;
     _yBase = -20.0;
@@ -98,11 +101,13 @@ void LVOX2_StepComputeLvoxGrids::createInResultModelListProtected()
     resultModel->addGroupModel("", DEF_SearchInGroup, CT_AbstractItemGroup::staticGetType(), tr("Scan"));
     resultModel->addItemModel(DEF_SearchInGroup, DEF_SearchInScene, CT_Scene::staticGetType(), tr("Scène"));
     resultModel->addItemModel(DEF_SearchInGroup, DEF_SearchInScan, CT_Scanner::staticGetType(), tr("Scanner"));
+    resultModel->addItemModel(DEF_SearchInGroup, DEF_SearchInFlag, CT_PointsAttributesScalarTemplated<int>::staticGetType(),tr("Flag"), "", CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
 
 }
 
 void LVOX2_StepComputeLvoxGrids::createOutResultModelListProtected()
 {
+
     // create a new OUT result that is a copy of the IN result selected by the user
     CT_OutResultModelGroupToCopyPossibilities *res = createNewOutResultModelToCopy(DEF_SearchInResult);
 
@@ -113,9 +118,15 @@ void LVOX2_StepComputeLvoxGrids::createOutResultModelListProtected()
         res->addItemModel(DEF_SearchInGroup, _hits_ModelName, new CT_Grid3D<int>(), tr("Hits"));
         res->addItemAttributeModel(_hits_ModelName, _NiFlag_ModelName, new CT_StdItemAttributeT<bool>("LVOX_GRD_NI"), tr("isNi"));
 
-        res->addItemModel(DEF_SearchInGroup, _theo_ModelName, new CT_Grid3D<int>(), tr("Theoretical"));
-        res->addItemAttributeModel(_theo_ModelName, _NtFlag_ModelName, new CT_StdItemAttributeT<bool>("LVOX_GRD_NT"), tr("isNt"));
-
+        if (_ntMode==0||_ntMode==2) // Nt is theoritical (initial formulation)
+        {
+            res->addItemModel(DEF_SearchInGroup, _theo_ModelName, new CT_Grid3D<int>(), tr("Theoretical"));
+            res->addItemAttributeModel(_theo_ModelName, _NtFlag_ModelName, new CT_StdItemAttributeT<bool>("LVOX_GRD_NT"), tr("isNt"));
+        }
+        if (_ntMode==1||_ntMode==2) {// Nt is actual
+            res->addItemModel(DEF_SearchInGroup, _actu_ModelName, new CT_Grid3D<int>(), tr("ActualTotal"));
+            res->addItemAttributeModel(_actu_ModelName, _NtaFlag_ModelName, new CT_StdItemAttributeT<bool>("LVOX_GRD_NTA"), tr("isNta"));
+        }
         res->addItemModel(DEF_SearchInGroup, _bef_ModelName, new CT_Grid3D<int>(), tr("Before"));
         res->addItemAttributeModel(_bef_ModelName, _NbFlag_ModelName, new CT_StdItemAttributeT<bool>("LVOX_GRD_NB"), tr("isNb"));
 
@@ -127,7 +138,14 @@ void LVOX2_StepComputeLvoxGrids::createOutResultModelListProtected()
         {
             res->addItemModel(DEF_SearchInGroup, _deltain_ModelName, new CT_Grid3D<float>(), tr("DeltaIn"));
             res->addItemModel(DEF_SearchInGroup, _deltaout_ModelName, new CT_Grid3D<float>(), tr("DeltaOut"));
-            res->addItemModel(DEF_SearchInGroup, _deltatheo_ModelName, new CT_Grid3D<float>(), tr("Deltatheoretical"));
+            if (_ntMode==0||_ntMode==2) // Nt is theoritical (initial formulation)
+            {
+                res->addItemModel(DEF_SearchInGroup, _deltatheo_ModelName, new CT_Grid3D<float>(), tr("DeltaTheoretical"));
+
+            }
+            if (_ntMode==1||_ntMode==2) { // Nt is actual
+                res->addItemModel(DEF_SearchInGroup, _deltaactu_ModelName, new CT_Grid3D<float>(), tr("DeltaActualTotal"));
+            }
             res->addItemModel(DEF_SearchInGroup, _deltabef_ModelName, new CT_Grid3D<float>(), tr("DeltaBefore"));
 
         }
@@ -145,6 +163,13 @@ void LVOX2_StepComputeLvoxGrids::createPostConfigurationDialog()
     configDialog->addDouble(tr("Resolution of the grids"),tr("meters"),0.0001,10000,2, _res );
     configDialog->addInt(tr("Minimum number of effective ray in a voxel to take it into account"),tr(""),0,100000, _effectiveRayThresh );
     configDialog->addBool(tr("Compute Distances"), tr(""), tr(""), _computeDistances);
+    //configDialog->addBool(tr("Compute actual beams"), tr(""), tr(""), _computeActualBeams);
+    configDialog->addEmpty();
+    configDialog->addText(tr("Computation of total beam number :"),"", "");
+    CT_ButtonGroup &bg_ntMode = configDialog->addButtonGroup(_ntMode);
+    configDialog->addExcludeValue("", "", tr("Default mode : Theoretical number"), bg_ntMode, 0);
+    configDialog->addExcludeValue("", "", tr("Actual beam number (a full point cloud is required)"), bg_ntMode, 1);
+    configDialog->addExcludeValue("", "", tr("Both are computed"), bg_ntMode, 2);
 
     configDialog->addEmpty();
 
@@ -210,6 +235,9 @@ void LVOX2_StepComputeLvoxGrids::compute()
 
         const CT_Scene* scene = (CT_Scene*)group->firstItemByINModelName(this, DEF_SearchInScene);
         const CT_Scanner* scanner = (CT_Scanner*)group->firstItemByINModelName(this, DEF_SearchInScan);
+        const CT_PointsAttributesScalarTemplated<int>* flag = (CT_PointsAttributesScalarTemplated<int>*)group->firstItemByINModelName(this, DEF_SearchInFlag);
+
+        if (flag == NULL) {qDebug() << "Pas de Flag";}
 
         if (scene!=NULL && scanner!=NULL)
         {
@@ -342,23 +370,39 @@ void LVOX2_StepComputeLvoxGrids::compute()
 
         // Declaring the output grids
         CT_Grid3D<int>*      hitGrid = CT_Grid3D<int>::createGrid3DFromXYZCoords(_hits_ModelName.completeName(), outResult, xMin, yMin, zMin, xMax, yMax, zMax, _res, -1, 0, true);
-        CT_Grid3D<int>*      theoriticalGrid = new CT_Grid3D<int>(_theo_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-        CT_Grid3D<int>*      beforeGrid = new CT_Grid3D<int>(_bef_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-        CT_Grid3D<float>*   density = new CT_Grid3D<float>(_density_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-
         hitGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NiFlag_ModelName.completeName(), "LVOX_GRD_NI", outResult, true));
-        theoriticalGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NtFlag_ModelName.completeName(), "LVOX_GRD_NT", outResult, true));
+        CT_Grid3D<int>*      theoriticalGrid = NULL;
+        if (_ntMode==0||_ntMode==2) // Nt is theoritical (initial formulation)
+        {
+            theoriticalGrid = new CT_Grid3D<int>(_theo_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            theoriticalGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NtFlag_ModelName.completeName(), "LVOX_GRD_NT", outResult, true));
+        }
+        CT_Grid3D<int>*      actualGrid = NULL;
+        if (_ntMode==1||_ntMode==2) // Nt is actual
+        {
+            actualGrid = new CT_Grid3D<int>(_actu_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            actualGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NtaFlag_ModelName.completeName(), "LVOX_GRD_NTA", outResult, true));
+        }
+        CT_Grid3D<int>*      beforeGrid = new CT_Grid3D<int>(_bef_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
         beforeGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NbFlag_ModelName.completeName(), "LVOX_GRD_NB", outResult, true));
+        CT_Grid3D<float>*   density = new CT_Grid3D<float>(_density_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
         density->addItemAttribute(new CT_StdItemAttributeT<bool>(_DensityFlag_ModelName.completeName(), "LVOX_GRD_DENSITY", outResult, true));
 
 
         CT_Grid3D<float>*   deltaInGrid = NULL;
         CT_Grid3D<float>*   deltaOutGrid = NULL;
         CT_Grid3D<float>*   deltaTheoritical = NULL;
+        CT_Grid3D<float>*   deltaActual = NULL;
         CT_Grid3D<float>*   deltaBefore = NULL;
 
+        // grids are added to results
         group->addItemDrawable(hitGrid);
-        group->addItemDrawable(theoriticalGrid);
+        if (_ntMode==0||_ntMode==2) { // Nt is theoretical
+            group->addItemDrawable(theoriticalGrid);
+        }
+        if (_ntMode==1||_ntMode==2) { // Nt is actual
+            group->addItemDrawable(actualGrid);
+        }
         group->addItemDrawable(beforeGrid);
         group->addItemDrawable(density);
 
@@ -366,34 +410,67 @@ void LVOX2_StepComputeLvoxGrids::compute()
         {
             deltaInGrid = new CT_Grid3D<float>(_deltain_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
             deltaOutGrid = new CT_Grid3D<float>(_deltaout_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            if (_ntMode==0||_ntMode==2) {// Nt is theoretical
             deltaTheoritical = new CT_Grid3D<float>(_deltatheo_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            }
+            if (_ntMode==1||_ntMode==2) {// Nt is actual
+            deltaActual = new CT_Grid3D<float>(_deltaactu_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            }
             deltaBefore = new CT_Grid3D<float>(_deltabef_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
 
             group->addItemDrawable(deltaInGrid);
             group->addItemDrawable(deltaOutGrid);
-            group->addItemDrawable(deltaTheoritical);
+            if (_ntMode==0||_ntMode==2) { // Nt is theoretical
+              group->addItemDrawable(deltaTheoritical);}
+            if (_ntMode==1||_ntMode==2) { // Nt is actual
+              group->addItemDrawable(deltaActual);}
             group->addItemDrawable(deltaBefore);
         }
 
         LVOX_ComputeHitsThread* hitsThread = new LVOX_ComputeHitsThread(scanner, hitGrid, deltaInGrid, deltaOutGrid, scene, _computeDistances);
-        connect(hitsThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
+            connect(hitsThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
         _threadList.append(hitsThread);
         baseThreads.append(hitsThread);
 
-        LVOX_ComputeTheoriticalsThread* theoreticalThread = new LVOX_ComputeTheoriticalsThread(scanner, theoriticalGrid, deltaTheoritical, _computeDistances);
-        connect(theoreticalThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
-        _threadList.append(theoreticalThread);
-        baseThreads.append(theoreticalThread);
-
         LVOX_ComputeBeforeThread* beforeThread = new LVOX_ComputeBeforeThread(scanner, beforeGrid, deltaBefore, scene, _computeDistances);
-        connect(beforeThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
+            connect(beforeThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
         _threadList.append(beforeThread);
         baseThreads.append(beforeThread);
 
-        LVOX_ComputeDensityThread* densityThread = new LVOX_ComputeDensityThread(density, hitGrid, theoriticalGrid, beforeGrid, _effectiveRayThresh);
-        connect(densityThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
-        _threadList.append(densityThread);
-        densityThreads.append(densityThread);
+        if (_ntMode==0) // Nt is theoritical (initial formulation)
+        {
+            LVOX_ComputeTheoriticalsThread* theoreticalThread = new LVOX_ComputeTheoriticalsThread(scanner, theoriticalGrid, deltaTheoritical, _computeDistances);
+               connect(theoreticalThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
+            _threadList.append(theoreticalThread);
+            baseThreads.append(theoreticalThread);
+
+            LVOX_ComputeDensityThread* densityThread = new LVOX_ComputeDensityThread(density, hitGrid, theoriticalGrid, beforeGrid, _effectiveRayThresh);
+                connect(densityThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
+            _threadList.append(densityThread);
+              densityThreads.append(densityThread);
+        } else if (_ntMode>=1) { // Nt is really computed (new formulation that requires that the scene contains the whole point cloud)
+            LVOX2_ComputeActualBeamThread* actualBeamThread = new LVOX2_ComputeActualBeamThread(scanner, actualGrid, deltaActual, scene, _computeDistances);
+            connect(actualBeamThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
+            _threadList.append(actualBeamThread);
+            baseThreads.append(actualBeamThread);
+
+            LVOX_ComputeDensityThread* densityThread = new LVOX_ComputeDensityThread(density, hitGrid, actualGrid, beforeGrid, _effectiveRayThresh);
+                connect(densityThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
+            _threadList.append(densityThread);
+              densityThreads.append(densityThread);
+
+        }
+        if (_ntMode==2) // Nt is theoritical (initial formulation)
+        {
+            LVOX_ComputeTheoriticalsThread* theoreticalThread = new LVOX_ComputeTheoriticalsThread(scanner, theoriticalGrid, deltaTheoritical, _computeDistances);
+               connect(theoreticalThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
+            _threadList.append(theoreticalThread);
+            baseThreads.append(theoreticalThread);
+        }
+
+
+
+
     }
 
     int size = baseThreads.size();

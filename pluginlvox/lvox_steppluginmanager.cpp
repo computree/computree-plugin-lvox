@@ -49,6 +49,9 @@
 #include "urfm/step/lvox2_stepcomputelvoxgrids.h"
 #include "urfm/step/lvox2_stepcombinedensitygrids.h"
 #include "urfm/step/lvox2_stepexportcomputedgrids.h"
+#include "urfm/step/lvox2_stepcomputeheightprofile.h"
+#include "urfm/step/lvox2_stepfiltergridbyradius.h"
+#include "urfm/step/lvox2_steppreparepointcloud.h"
 
 
 #include "ct_global/ct_context.h"
@@ -60,6 +63,7 @@ LVOX_StepPluginManager::LVOX_StepPluginManager() : CT_AbstractStepPlugin()
     PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory("LVOX_GRD_NI", QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Ni"));
     PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory("LVOX_GRD_NB", QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Nb"));
     PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory("LVOX_GRD_NT", QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Nt"));
+    PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory("LVOX_GRD_NTA", QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Nta"));
     PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory("LVOX_GRD_DENSITY", QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Density"));
 }
 
@@ -84,9 +88,12 @@ bool LVOX_StepPluginManager::loadGenericsStep()
     addNewVoxelsStep<LVOX_StepComputePAD>(QObject::tr("LVOX"));
     addNewVoxelsStep<LVOX_StepCompareGrids>(QObject::tr("LVOX"));
 
-    addNewVoxelsStep<LVOX_StepComputeLvoxGrids>(QObject::tr("LVOX2"));
-    addNewVoxelsStep<LVOX_StepCombineDensityGrids>(QObject::tr("LVOX2"));
-    addNewVoxelsStep<LVOX_StepExportComputedGrids>(QObject::tr("LVOX2"));
+    addNewVoxelsStep<LVOX2_StepComputeLvoxGrids>(QObject::tr("LVOX2"));
+    addNewVoxelsStep<LVOX2_StepCombineDensityGrids>(QObject::tr("LVOX2"));
+    addNewVoxelsStep<LVOX2_StepExportComputedGrids>(QObject::tr("LVOX2"));
+    addNewVoxelsStep<LVOX2_StepComputeHeightProfile>(QObject::tr("LVOX2"));
+    addNewVoxelsStep<LVOX2_StepFilterGridByRadius>(QObject::tr("LVOX2"));
+    addNewVoxelsStep<LVOX2_StepPreparePointCloud>(QObject::tr("LVOX2"));
 
     return true;
 }
