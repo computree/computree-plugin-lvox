@@ -24,6 +24,7 @@
 LVOX_StepComputeProfile::LVOX_StepComputeProfile(CT_StepInitializeData &dataInit) : CT_AbstractStep(dataInit)
 {
     _min = 0;
+    _max = std::numeric_limits<double>::infinity();
 }
 
 // Step description (tooltip of contextual menu)
@@ -66,7 +67,9 @@ void LVOX_StepComputeProfile::createPostConfigurationDialog()
 {
     CT_StepConfigurableDialog *configDialog = newStandardPostConfigurationDialog();
 
-    configDialog->addDouble(tr("Ne prendre en compte que les valeurs > à"), "", -99999, 99999, 2, _min);
+    configDialog->addDouble(tr("Ne prendre en compte que les valeurs > à"), "", 0, 99999, 2, _min);
+
+    configDialog->addDouble(tr("Ne prendre en compte que les valeurs < à"), "", 0, 99999, 2, _max);
 }
 
 void LVOX_StepComputeProfile::compute()
@@ -110,7 +113,7 @@ void LVOX_StepComputeProfile::compute()
                         inGrid->index(xx, yy, zz, index);
                         double value = inGrid->valueAtIndexAsDouble(index);
 
-                        if (value > _min)
+                        if (value > _min && value < _max)
                         {
                             outProfile->addValueAtIndex(zz, value);
                         }

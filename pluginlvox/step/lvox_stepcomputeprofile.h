@@ -63,6 +63,7 @@ private:
     CT_AutoRenameModels _outProfile_ModelName;
 
     double _min;
+    double _max;
 
 };
 
