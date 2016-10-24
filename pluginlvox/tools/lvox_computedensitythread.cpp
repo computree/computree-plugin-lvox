@@ -37,7 +37,7 @@ void LVOX_ComputeDensityThread::run()
         {
             _densityGrid->setValueAtIndex(i, -3);
         // Excessive Ni
-        } else if (_hitsGrid->valueAtIndex(i) > (_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i)))
+        } else if (_hitsGrid->valueAtIndex(i) >= (_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i)))
         {
              _densityGrid->setValueAtIndex(i, (float)(_hitsGrid->valueAtIndex(i)) / (float)(_hitsGrid->valueAtIndex(i) + 1) );
             //_densityGrid->setValueAtIndex(i, 1); // Eviter l'ajout de density = 1 car cela suppose PAD = inf.
