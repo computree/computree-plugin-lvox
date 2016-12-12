@@ -551,6 +551,89 @@
     </message>
 </context>
 <context>
+    <name>LVOX_StepMergeInputs</name>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="32"/>
+        <source>0 - Merge exported grids into one result</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="38"/>
+        <source>Merge exported grids into one result</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="65"/>
+        <source>Result</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="69"/>
+        <source>Grilles</source>
+        <translation type="unfinished">Grilles</translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="71"/>
+        <source>Hits</source>
+        <translation type="unfinished">hits (retours)</translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="72"/>
+        <source>isNi</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="74"/>
+        <source>Theoretical</source>
+        <translation type="unfinished">Théorique</translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="75"/>
+        <source>isNt</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="77"/>
+        <source>Before</source>
+        <translation type="unfinished">before (intercéptés avant)</translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="78"/>
+        <source>isNb</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="80"/>
+        <source>Density</source>
+        <translation type="unfinished">densité</translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="81"/>
+        <source>isDensity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="90"/>
+        <source>Choisir le fichier de la grille &apos;hits&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="91"/>
+        <source>Choisir le fichier de la grille &apos;theoretical&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="92"/>
+        <source>Choisir le fichier de la grille &apos;before&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../step/lvox_stepmergeinputs.cpp" line="93"/>
+        <source>Choisir le fichier de la grille &apos;intensity&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>LVOX_StepNdNtGrids</name>
     <message>
         <location filename="../step/lvox_stepndntgrids.cpp" line="25"/>
@@ -606,13 +689,14 @@
         <translation>Mauvaise extension de fichier</translation>
     </message>
     <message>
-        <location filename="../lvox_steppluginmanager.cpp" line="61"/>
         <location filename="../lvox_steppluginmanager.cpp" line="62"/>
         <location filename="../lvox_steppluginmanager.cpp" line="63"/>
         <location filename="../lvox_steppluginmanager.cpp" line="64"/>
         <location filename="../lvox_steppluginmanager.cpp" line="65"/>
         <location filename="../lvox_steppluginmanager.cpp" line="66"/>
         <location filename="../lvox_steppluginmanager.cpp" line="67"/>
+        <location filename="../lvox_steppluginmanager.cpp" line="68"/>
+        <location filename="../lvox_steppluginmanager.cpp" line="69"/>
         <source>LVOX</source>
         <translation></translation>
     </message>

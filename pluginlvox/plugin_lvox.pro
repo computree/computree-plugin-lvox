@@ -43,7 +43,10 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     urfm/tools/lvox2_countvisitor.h \
     urfm/step/lvox2_stepcomputeheightprofile.h \
     urfm/step/lvox2_stepfiltergridbyradius.h \
-    urfm/step/lvox2_steppreparepointcloud.h
+    urfm/step/lvox2_steppreparepointcloud.h \
+    tools/lvox_countwithlengththresholdvisitor.h \
+    tools/lvox_computebeforewithlengththresholdthread.h \
+    step/lvox_stepcomputeocclusionspace.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -75,7 +78,10 @@ SOURCES += \
     urfm/tools/lvox2_computeactualbeamthread.cpp \
     urfm/step/lvox2_stepcomputeheightprofile.cpp \
     urfm/step/lvox2_stepfiltergridbyradius.cpp \
-    urfm/step/lvox2_steppreparepointcloud.cpp
+    urfm/step/lvox2_steppreparepointcloud.cpp \
+    tools/lvox_countwithlengththresholdvisitor.cpp \
+    tools/lvox_computebeforewithlengththresholdthread.cpp \
+    step/lvox_stepcomputeocclusionspace.cpp
 
 TRANSLATIONS += languages/pluginlvoxv2_en.ts \
                 languages/pluginlvoxv2_fr.ts

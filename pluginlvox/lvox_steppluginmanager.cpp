@@ -44,6 +44,7 @@
 #include "step/lvox_stepexportmergedgrids.h"
 //#include "step/lvox_stepimportmergedgrids.h"
 #include "step/lvox_stepcomparegrids.h"
+#include "step/lvox_stepcomputeocclusionspace.h"
 
 
 #include "urfm/step/lvox2_stepcomputelvoxgrids.h"
@@ -94,6 +95,9 @@ bool LVOX_StepPluginManager::loadGenericsStep()
     addNewVoxelsStep<LVOX2_StepComputeHeightProfile>(QObject::tr("LVOX2"));
     addNewVoxelsStep<LVOX2_StepFilterGridByRadius>(QObject::tr("LVOX2"));
     addNewVoxelsStep<LVOX2_StepPreparePointCloud>(QObject::tr("LVOX2"));
+
+    addNewBetaStep<LVOX_StepComputeOcclusionsSpace>(QObject::tr("LVOX"));
+
 
     return true;
 }
