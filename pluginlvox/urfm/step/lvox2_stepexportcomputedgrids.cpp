@@ -157,7 +157,7 @@ void LVOX2_StepExportComputedGrids::compute()
     // une fois la liste constituée
     if(!hits_list.isEmpty())
     {
-        LVOX_Grid3DExporter exporter = LVOX_Grid3DExporter();
+        LVOX_Grid3DExporter exporter;
         exporter.init();
         exporter.setExportFilePath(_folder.first() + "/ni.GRD3D");
 
@@ -176,7 +176,7 @@ void LVOX2_StepExportComputedGrids::compute()
     }
     if(!theo_list.isEmpty())
     {
-        LVOX_Grid3DExporter exporter = LVOX_Grid3DExporter();
+        LVOX_Grid3DExporter exporter;
         exporter.init();
         exporter.setExportFilePath(_folder.first() + "/nt.GRD3D");
 
@@ -195,7 +195,7 @@ void LVOX2_StepExportComputedGrids::compute()
     }
     if(!before_list.isEmpty())
     {
-        LVOX_Grid3DExporter exporter = LVOX_Grid3DExporter();
+        LVOX_Grid3DExporter exporter;
         exporter.init();
         exporter.setExportFilePath(_folder.first() + "/nb.GRD3D");
 
@@ -214,7 +214,7 @@ void LVOX2_StepExportComputedGrids::compute()
     }
     if(!density_list.isEmpty())
     {
-        LVOX_Grid3DExporter exporter = LVOX_Grid3DExporter();
+        LVOX_Grid3DExporter exporter;
         exporter.init();
         exporter.setExportFilePath(_folder.first() + "/density.GRD3D");
 
