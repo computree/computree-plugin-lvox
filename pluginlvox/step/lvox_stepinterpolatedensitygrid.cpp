@@ -121,7 +121,7 @@ void LVOX_StepInterpolateDensityGrids::compute()
                     for (size_t xx = 0 ;  xx < itemIn_density->xdim() ; xx++)
                     {
                         float value = itemIn_density->value(xx, yy, zz);
-                        if (value < 0) // replace NA values
+                        if (value < 0 ) // replace NA values or incoherent density results
                         {
                             if (itemIn_hits->value(xx, yy, zz) >= _effectiveRayThresh)
                             {
