@@ -30,6 +30,8 @@
 // Constructor : initialization of parameters
 LVOX_StepComputePAD::LVOX_StepComputePAD(CT_StepInitializeData &dataInit) : CT_AbstractStep(dataInit)
 {
+    _EraseInfinity = false;
+    _PADlimit = 100; // 100 m2/voxel
 }
 
 // Step description (tooltip of contextual menu)
@@ -70,10 +72,17 @@ void LVOX_StepComputePAD::createOutResultModelListProtected()
 // Semi-automatic creation of step parameters DialogBox
 void LVOX_StepComputePAD::createPostConfigurationDialog()
 {
+    CT_StepConfigurableDialog *configDialog = newStandardPostConfigurationDialog();
+
+     configDialog->addBool(tr("    -> Ecraser les valeurs infinies "),"", "", _EraseInfinity);
+     configDialog->addDouble(tr("   -> Effacer les valeurs > à"), "", 0, 100, 2, _PADlimit);
 }
+
 
 void LVOX_StepComputePAD::compute()
 {
+
+    float realMax=0;
     CT_ResultGroup* resultIn_grids = getInputResults().first();
 
     QList<CT_ResultGroup*> outResultList = getOutResultList();
@@ -117,13 +126,37 @@ void LVOX_StepComputePAD::compute()
                         itemIn_density->index(xx, yy, zz, index);
                         float density = itemIn_density->valueAtIndex(index);
                         float deltaT = itemIn_deltaT->valueAtIndex(index);
+                        float result = LVOX_StepComputePAD::computePAD(density, res, deltaT, 0.5);
 
-                        itemOut_PAD->setValueAtIndex(index, LVOX_StepComputePAD::computePAD(density, res, deltaT, 0.5));
-                    }
+                        // Real max operations
+                        if (result==std::numeric_limits<float>::infinity()){
+                            if(_EraseInfinity){
+                                _InfinityIndexStack.push(index); // Save the voxel index in case of infinity
+                            }
+                        }
+                        else if(realMax<result){realMax=result;} // Or compute the maximum finite result in order to replace the non finite ones
+
+                        // Value assignement
+                        if (result>_PADlimit){
+                            itemOut_PAD->setValueAtIndex(index,0);
+                        }
+                        else
+                            itemOut_PAD->setValueAtIndex(index,result);
                 }
+              }
+           }
+
+            itemOut_PAD->computeMinMax();
+           //PS_LOG->addWarningMessage(LogInterface::reader, "Extremum PAD [" + QString::number(itemOut_PAD->dataMin()) + ";" + QString::number(itemOut_PAD->dataMax()) +"] ");
+
+            if(_EraseInfinity){
+                while (!_InfinityIndexStack.isEmpty())
+                itemOut_PAD->setValueAtIndex(_InfinityIndexStack.pop(), realMax);
             }
 
             itemOut_PAD->computeMinMax();
+            //PS_LOG->addWarningMessage(LogInterface::reader, "Extremum PAD [" + QString::number(itemOut_PAD->dataMin()) + ";" + QString::number(itemOut_PAD->dataMax()) +"] ");
+
         }
     }
 
@@ -131,7 +164,15 @@ void LVOX_StepComputePAD::compute()
 
 float LVOX_StepComputePAD::computePAD(float density, float res, float D_Nt_mean, float gFunction)
 {
-    if (density <= 0) {return density;}
+    if (density <= 0) {
+        //PS_LOG->addWarningMessage(LogInterface::reader, tr("Densité <= 0  [Valeur impossible !!] "));
+        return density;
+    }
+    else if (density >= 1) {
+        //PS_LOG->addWarningMessage(LogInterface::reader, tr("Densité = 1 [PAD infini !!] "));
+    }
+
+    if (D_Nt_mean == 0) {PS_LOG->addWarningMessage(LogInterface::reader, tr("Distance Nt moyenne = 0 [PAD infini !!] "));}
 
     return -std::log(1-density)/(D_Nt_mean*0.5);
 
@@ -141,3 +182,4 @@ float LVOX_StepComputePAD::computePAD(float density, float res, float D_Nt_mean,
 
 //    return (D_Nt_mean_deltaH - std::sqrt(D_Nt_mean_deltaH*D_Nt_mean_deltaH + 4*deltaD_deltaH*std::log(1-density))) / (2*deltaD*gFunction);
 }
+

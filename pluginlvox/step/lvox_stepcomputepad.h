@@ -29,6 +29,7 @@
 #define LVOX_STEPCOMPUTEPAD_H
 
 #include "ct_step/abstract/ct_abstractstep.h"
+#include <QStack>
 
 /*!
  * \class LVOX_StepComputePAD
@@ -91,7 +92,11 @@ protected:
      * Step computation, using input results, and creating output results
      */
     void compute();
+private :
 
+    bool    _EraseInfinity;
+    double   _PADlimit;
+    QStack<size_t> _InfinityIndexStack;
 
 };
 
