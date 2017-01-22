@@ -39,9 +39,17 @@ void LVOX_ComputeDensityThread::run()
         // Excessive Ni
         } else if (_hitsGrid->valueAtIndex(i) >= (_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i)))
         {
-             _densityGrid->setValueAtIndex(i, (float)(_hitsGrid->valueAtIndex(i)) / (float)(_hitsGrid->valueAtIndex(i) + 1) );
-            //_densityGrid->setValueAtIndex(i, 1); // Eviter l'ajout de density = 1 car cela suppose PAD = inf.
-        // Normal case
+            //SOLUTION 1 : rejected : Eviter l'ajout de density = 1 car cela suppose PAD = inf.
+            //_densityGrid->setValueAtIndex(i, 1);
+
+            // SOLUTION 2 : Eviter l'ajout de density = 0,9999 car cela suppose PAD presque inf. De plus cela augmente la valeur moyenne des voxels
+            //  de la couche et ceci à pour effet de fausser l'algorithme d'interpolation.
+            //_densityGrid->setValueAtIndex(i, (float)(_hitsGrid->valueAtIndex(i)) / (float)(_hitsGrid->valueAtIndex(i) + 1) );
+
+            // SOLUTION 3 : code d'erreur pour utiliser l'interpolation
+            _densityGrid->setValueAtIndex(i, 0);
+
+            // Normal case
         }else
         {
             _densityGrid->setValueAtIndex(i, (float)(_hitsGrid->valueAtIndex(i)) / (float)(_theoriticalGrid->valueAtIndex(i) - _beforeGrid->valueAtIndex(i) ) );
