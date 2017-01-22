@@ -39,10 +39,15 @@
 #include "ct_itemdrawable/ct_scene.h"
 #include "ct_itemdrawable/ct_scanner.h"
 #include "ct_itemdrawable/ct_grid3d.h"
+#include "ct_itemdrawable/CT_FileHeader.h"
 #include "qvector3d.h"
 
 #include "ct_step/abstract/ct_abstractsteploadfile.h"
 #include "ct_view/ct_stepconfigurabledialog.h"
+
+#ifdef CT_LARCHIHEADER_H
+#include "ctlibio/readers/ct_reader_larchitect_grid.h"
+#endif
 
 #include "tools/lvox_computehitsthread.h"
 #include "tools/lvox_computetheoriticalsthread.h"
@@ -51,13 +56,33 @@
 
 #include <QFileInfo>
 #include <QDebug>
+#include <QMap>
 #include <limits>
+
+
+#include "qfile.h"
+#include "qtextstream.h"
+#include "qfileinfo.h"
+#include "qdebug.h"
+
 
 
 #define DEF_SearchInResult "r"
 #define DEF_SearchInScene   "sc"
 #define DEF_SearchInScan   "sca"
 #define DEF_SearchInGroup   "gr"
+
+//Alias for in model
+#define DEF_resultIn_header "rheader"
+#define DEF_groupIn_header "gheader"
+#define DEF_inATTisNi "isNi"
+#define DEF_itemIn_header "header"
+
+
+#define DEF_CT_header "genericHeader"
+
+
+
 
 LVOX_StepComputeLvoxGrids::LVOX_StepComputeLvoxGrids(CT_StepInitializeData &dataInit) : CT_AbstractStep(dataInit)
 {
@@ -68,7 +93,7 @@ LVOX_StepComputeLvoxGrids::LVOX_StepComputeLvoxGrids(CT_StepInitializeData &data
     _effectiveRayThresh = 10;
     _computeDistances = false;
 
-    _gridMode = 1;
+    _gridMode = 0;
     _xBase = -20.0;
     _yBase = -20.0;
     _zBase = -10.0;
@@ -92,12 +117,30 @@ CT_VirtualAbstractStep* LVOX_StepComputeLvoxGrids::createNewInstance(CT_StepInit
 
 void LVOX_StepComputeLvoxGrids::createInResultModelListProtected()
 {
-    CT_InResultModelGroupToCopy *resultModel = createNewInResultModelForCopy(DEF_SearchInResult, tr("Scène(s)"));
+//    CT_InResultModelGroup *resultLARCHI = createNewInResultModel(DEF_resultIn_header, tr("Résultat d'en-tête"));
+//   resultLARCHI->setZeroOrMoreRootGroup();
+//    resultLARCHI->addGroupModel("", DEF_groupIn_header, CT_AbstractItemGroup::staticGetType(), tr("Groupe Header"));
 
-    resultModel->setZeroOrMoreRootGroup();
-    resultModel->addGroupModel("", DEF_SearchInGroup, CT_AbstractItemGroup::staticGetType(), tr("Scan"));
-    resultModel->addItemModel(DEF_SearchInGroup, DEF_SearchInScene, CT_Scene::staticGetType(), tr("Scène"));
-    resultModel->addItemModel(DEF_SearchInGroup, DEF_SearchInScan, CT_Scanner::staticGetType(), tr("Scanner"));
+
+    CT_InResultModelGroupToCopy *resultScan = createNewInResultModelForCopy(DEF_SearchInResult, tr("Scène"), "", true);
+    resultScan->setZeroOrMoreRootGroup();
+    resultScan->addGroupModel("", DEF_SearchInGroup, CT_AbstractItemGroup::staticGetType(), tr("Scan"));
+    resultScan->addItemModel(DEF_SearchInGroup, DEF_SearchInScene, CT_Scene::staticGetType(), tr("Scène"));
+    resultScan->addItemModel(DEF_SearchInGroup, DEF_SearchInScan, CT_Scanner::staticGetType(), tr("Scanner"));
+
+
+/* Tentative d'ajout d'un résultat d'entrée de type "header de fichier". Ceci avait pour but de récupérer facilement les coordonnées d'une grille
+ * de référence pour l'utiliser comme base au calcul de nouvelles grilles de voxels. Sans succès. */
+/* Finalement ceci a été géré par un nouveau lecteur de header spécifique aux grilles L-Architect : CT_LARCHIHEADER_H                     */
+#ifdef CT_LARCHIHEADER_H
+//    resultScan->addItemModel(DEF_SearchInGroup, DEF_itemIn_header, CT_FileHeader::staticGetType(), tr("Grille de référence"), "",
+//                               CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
+
+
+//    resultModel->addItemModel(DEF_groupIn_grids, DEF_itemIn_hits, CT_Grid3D<int>::staticGetType(), tr("hits"), "",
+//                              CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
+//    resultModel->addItemAttributeModel(DEF_itemIn_hits, DEF_inATTisNi, QList<QString>() << "LVOX_GRD_NI", CT_AbstractCategory::ANY, tr("isNi"), "", CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
+#endif
 
 }
 
@@ -155,7 +198,10 @@ void LVOX_StepComputeLvoxGrids::createPostConfigurationDialog()
     configDialog->addExcludeValue("", "", tr("Custom mode : Relative to folowing coordinates:"), bg_gridMode, 1);
     configDialog->addExcludeValue("", "", tr("Custom mode : Relative to folowing coordinates + custom dimensions:"), bg_gridMode, 2);
     configDialog->addExcludeValue("", "", tr("Custom mode : centered on folowing coordinates + custom dimensions:"), bg_gridMode, 3);
-
+#ifdef CT_LARCHIHEADER_H
+    configDialog->addExcludeValue("", "", tr("Automatic mode : use grid paramters from grid file"), bg_gridMode, 4);
+    configDialog->addFileChoice(tr("Choisir le fichier .grid"), CT_FileChoiceButton::OneExistingFile, "Fichier L-Architect (*.grid)", _gridfileName);
+#endif
 
     configDialog->addDouble(tr("X coordinate:"), "", -std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 4, _xBase);
     configDialog->addDouble(tr("Y coordinate:"), "", -std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 4, _yBase);
@@ -235,7 +281,10 @@ void LVOX_StepComputeLvoxGrids::compute()
         }
     }
 
-    if (_gridMode == 0) {
+
+
+    if (_gridMode == 0) {   // Boite englobante = simple
+        PS_LOG->addInfoMessage(LogInterface::trace, "Mode " + QString::number(_gridMode));
 
         xMin = std::min(xMinScene, xMinScanner);
         yMin = std::min(yMinScene, yMinScanner);
@@ -245,7 +294,8 @@ void LVOX_StepComputeLvoxGrids::compute()
         yMax = std::max(yMaxScene, yMaxScanner);
         zMax = std::max(zMaxScene, zMaxScanner);
 
-    } else if (_gridMode == 1) {
+    } else if (_gridMode == 1) { //
+        PS_LOG->addInfoMessage(LogInterface::trace, "Mode " + QString::number(_gridMode));
 
         double xMinAdjusted = std::min(xMinScene, xMinScanner);
         double yMinAdjusted = std::min(yMinScene, yMinScanner);
@@ -276,6 +326,7 @@ void LVOX_StepComputeLvoxGrids::compute()
         while (zMax < zMaxAdjusted) {zMax += _res;}
 
     } else if (_gridMode == 2) {
+        PS_LOG->addInfoMessage(LogInterface::trace, "Mode " + QString::number(_gridMode));
 
         xMin = _xBase;
         yMin = _yBase;
@@ -299,7 +350,8 @@ void LVOX_StepComputeLvoxGrids::compute()
         {
             PS_LOG->addMessage(LogInterface::warning, LogInterface::step, tr("Dimensions spécifiées ne contenant pas les positions de scans : la grille a du être élargie !"));
         }
-    } else {
+    } else if (_gridMode == 3)   {
+        PS_LOG->addInfoMessage(LogInterface::trace, "Mode " + QString::number(_gridMode));
 
         xMin = _xBase - _res*_xDim;
         yMin = _yBase - _res*_yDim;
@@ -323,8 +375,58 @@ void LVOX_StepComputeLvoxGrids::compute()
         {
             PS_LOG->addMessage(LogInterface::warning, LogInterface::step, tr("Dimensions spécifiées ne contenant pas les positions de scans : la grille a du être élargie !"));
         }
-    }
+    } else if (_gridMode == 4){
 
+#ifdef CT_LARCHIHEADER_H
+
+        PS_LOG->addInfoMessage(LogInterface::trace, "Mode " + QString::number(_gridMode));
+
+            QFileInfo fileInfo(_gridfileName.first());
+
+            if (fileInfo.exists())
+            {
+                QString extension = fileInfo.completeSuffix();
+                CT_Reader_LArchitect_Grid *reader;
+
+                if(extension == "grid"){
+                    reader = new CT_Reader_LArchitect_Grid();
+                    PS_LOG->addMessage(LogInterface::trace, LogInterface::step, QObject::tr("File reader created"));
+
+                    if (reader->setFilePath(_gridfileName.first()) != NULL)
+                    {
+                        reader->init();
+
+                        CT_LARCHIHEADER * _header = reader->getHeader();
+
+                        PS_LOG->addInfoMessage(LogInterface::step, "  : DIM XYZ [" + QString::number(_header->get_xDim()) + ";" + QString::number(_header->get_yDim()) + ";" + QString::number(_header->get_zDim()) + "] ");
+                        PS_LOG->addInfoMessage(LogInterface::step, "  : RES XYZ [" + QString::number(_header->get_Res(0)) + ";" + QString::number(_header->get_Res(1)) + ";" + QString::number(_header->get_Res(2)) + "] ");
+                        PS_LOG->addInfoMessage(LogInterface::step, "  : MIN XYZ [" + QString::number(_header->get_xMin()) + ";" + QString::number(_header->get_yMin()) + ";" + QString::number(_header->get_zMin()) + "] ");
+
+                        xMin = _header->get_xMin();
+                        yMin = _header->get_yMin();
+                        zMin = _header->get_zMin();
+
+                        _xDim = _header->get_xDim()*_header->get_Res(0)/_res;
+                        _yDim = _header->get_yDim()*_header->get_Res(1)/_res;
+                        _zDim = _header->get_zDim()*_header->get_Res(2)/_res;
+
+                        xMax = xMin + _header->get_xDim()*_header->get_Res(0);
+                        yMax = yMin + _header->get_yDim()*_header->get_Res(1);
+                        zMax = zMin + _header->get_zDim()*_header->get_Res(2);
+
+                        PS_LOG->addInfoMessage(LogInterface::step, "  : NEW Base position [" + QString::number(xMin) + ";" + QString::number(yMin) + ";" + QString::number(zMin) + "] " + "Resolution out : " + QString::number(_res));
+                        PS_LOG->addInfoMessage(LogInterface::step, "  : SIZE (m) [" + QString::number(_xDim*_res) + ";" + QString::number(_yDim*_res) + ";" + QString::number(_zDim*_res) + "] " + "Resolution in : " + QString::number(_header->get_Res(0)));
+                        PS_LOG->addInfoMessage(LogInterface::step, "  : NEW DIM [" + QString::number(_xDim) + ";" + QString::number(_yDim) + ";" + QString::number(_zDim) + "] " + "Resolution out : " + QString::number(_res));
+
+                    }
+                    delete reader;
+                }
+
+           }
+#endif
+      }
+
+/*      WHY ? >> Cause LVOX Traversial Algorithm CRASH without */
     xMin -= _res;
     yMin -= _res;
     zMin -= _res;
@@ -344,12 +446,12 @@ void LVOX_StepComputeLvoxGrids::compute()
         CT_Grid3D<int>*      hitGrid = CT_Grid3D<int>::createGrid3DFromXYZCoords(_hits_ModelName.completeName(), outResult, xMin, yMin, zMin, xMax, yMax, zMax, _res, -1, 0, true);
         CT_Grid3D<int>*      theoriticalGrid = new CT_Grid3D<int>(_theo_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
         CT_Grid3D<int>*      beforeGrid = new CT_Grid3D<int>(_bef_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
-        CT_Grid3D<float>*    density = new CT_Grid3D<float>(_density_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+        CT_Grid3D<float>*   densityGrid = new CT_Grid3D<float>(_density_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
 
         hitGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NiFlag_ModelName.completeName(), "LVOX_GRD_NI", outResult, true));
         theoriticalGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NtFlag_ModelName.completeName(), "LVOX_GRD_NT", outResult, true));
         beforeGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NbFlag_ModelName.completeName(), "LVOX_GRD_NB", outResult, true));
-        density->addItemAttribute(new CT_StdItemAttributeT<bool>(_DensityFlag_ModelName.completeName(), "LVOX_GRD_DENSITY", outResult, true));
+        densityGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_DensityFlag_ModelName.completeName(), "LVOX_GRD_DENSITY", outResult, true));
 
 
         CT_Grid3D<float>*   deltaInGrid = NULL;
@@ -360,7 +462,7 @@ void LVOX_StepComputeLvoxGrids::compute()
         group->addItemDrawable(hitGrid);
         group->addItemDrawable(theoriticalGrid);
         group->addItemDrawable(beforeGrid);
-        group->addItemDrawable(density);
+        group->addItemDrawable(densityGrid);
 
         if (_computeDistances)
         {
@@ -390,7 +492,7 @@ void LVOX_StepComputeLvoxGrids::compute()
         _threadList.append(beforeThread);
         baseThreads.append(beforeThread);
 
-        LVOX_ComputeDensityThread* densityThread = new LVOX_ComputeDensityThread(density, hitGrid, theoriticalGrid, beforeGrid, _effectiveRayThresh);
+        LVOX_ComputeDensityThread* densityThread = new LVOX_ComputeDensityThread(densityGrid, hitGrid, theoriticalGrid, beforeGrid, _effectiveRayThresh);
         connect(densityThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
         _threadList.append(densityThread);
         densityThreads.append(densityThread);
@@ -436,6 +538,7 @@ void LVOX_StepComputeLvoxGrids::compute()
     qDeleteAll(_threadList);
 
     setProgress(100);
+
 }
 
 void LVOX_StepComputeLvoxGrids::updateProgress()

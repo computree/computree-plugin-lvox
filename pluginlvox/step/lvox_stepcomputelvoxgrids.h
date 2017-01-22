@@ -116,12 +116,14 @@ protected:
     *
     *  \warning Inherited from CT_AbstractStep, this method is pure virtual, each step MUST define its own method.
     */
+
     virtual void compute();
 
 public slots:
     void updateProgress();
 
 private:
+
 
     // Declaration of autoRenames Variables (groups or items addes to In models copies)
     CT_AutoRenameModels _deltaout_ModelName;
@@ -152,6 +154,10 @@ private:
     double          _xBase;
     double          _yBase;
     double          _zBase;
+
+#ifdef CT_LARCHIHEADER_H
+    QStringList     _gridfileName;          /*!< Name of .grid L-Architect reference 3D grid */
+#endif
 
     int          _xDim;
     int          _yDim;
