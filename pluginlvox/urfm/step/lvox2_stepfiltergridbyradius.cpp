@@ -43,6 +43,9 @@
 
 #include "ct_view/ct_stepconfigurabledialog.h"
 
+
+#include <math.h>
+
 #define DEF_SearchInResult "r"
 #define DEF_SearchInGroup   "gr"
 #define DEF_SearchInGrid   "grid"
@@ -111,15 +114,21 @@ void LVOX2_StepFilterGridByRadius::compute()
     {
         CT_StandardItemGroup *group = (CT_StandardItemGroup*)itOut.next();
         const CT_AbstractGrid3D* inGrid = (CT_AbstractGrid3D*)group->firstItemByINModelName(this, DEF_SearchInGrid);
-
-        if (inGrid!=NULL)
+         if (inGrid!=NULL)
         {
             bool ok;
             double NAval = inGrid->NAAsString().toDouble(&ok);
             if (!ok) {NAval = -std::numeric_limits<double>::max();}
 
             // Declaring the output grids
-            CT_Grid3D<double>* outGrid = new CT_Grid3D<double>(_outGrid_ModelName.completeName(), outResult, inGrid->minX(), inGrid->minY(), inGrid->minZ(), inGrid->xdim(), inGrid->ydim(), inGrid->zdim(), inGrid->resolution(), NAval, 0);
+            //CT_Grid3D<double>* outGrid = new CT_Grid3D<double>(_outGrid_ModelName.completeName(), outResult, inGrid->minX(), inGrid->minY(), inGrid->minZ(), inGrid->xdim(), inGrid->ydim(), inGrid->zdim(), inGrid->resolution(), NAval, 0);
+            CT_Grid3D<double>* outGrid = new CT_Grid3D<double>(_outGrid_ModelName.completeName(), outResult, inGrid->minX(), inGrid->minY(), inGrid->minZ(), inGrid->xdim(), inGrid->ydim(), inGrid->zdim(), inGrid->resolution(), -1, 0);
+
+            //CT_Grid3D<float>*   density = new CT_Grid3D<float>(_density_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), _res, -1, 0);
+            //density->addItemAttribute(new CT_StdItemAttributeT<bool>(_DensityFlag_ModelName.completeName(), "LVOX_GRD_DENSITY", outResult, true));
+
+            outGrid->computeMinMax();
+           // qDebug() << "Filtering grid by radius:" << outGrid->dataMin() << outGrid->dataMax();
 
             // loop on z levels
             for (size_t zz = 0 ;  zz < inGrid->zdim() ; zz++)
@@ -131,18 +140,20 @@ void LVOX2_StepFilterGridByRadius::compute()
                         size_t index;
                         inGrid->index(xx, yy, zz, index);
                         double value = inGrid->valueAtIndexAsDouble(index);
-
-                        double dist = xx;
-
-                        if (dist < _radius)
+                          //qDebug() << "Filtering grid by radius=" << value;
+                          double dist2 = pow(inGrid->getCellCenterX(xx) - _centerX, 2.0) + pow(inGrid->getCellCenterY(yy) - _centerY,2.0);
+                        if (dist2 < pow(_radius, 2.0))
                         {
                             outGrid->setValueAtIndex(index, value);
+                        } else {
+                            outGrid->setValueAtIndex(index, 0.f);
                         }
                     }
                 }
             }
 
             outGrid->computeMinMax();
+            qDebug() << "Filtering grid by radius:" << outGrid->dataMin() << outGrid->dataMax();
             group->addItemDrawable(outGrid);
         }
     }

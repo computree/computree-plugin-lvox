@@ -50,11 +50,13 @@
 #include "tools/lvox_computebeforethread.h"
 #include "tools/lvox_computedensitythread.h"
 #include "urfm/tools/lvox2_computeactualbeamthread.h"
+#include "urfm/tools/lvox2_computehitsthread.h"
+#include "ct_iterator/ct_pointiterator.h"
 
 #include <QFileInfo>
 #include <QDebug>
 #include <limits>
-
+#include <stdlib.h>
 
 #define DEF_SearchInResult "r"
 #define DEF_SearchInScene   "sc"
@@ -67,18 +69,19 @@ LVOX2_StepComputeLvoxGrids::LVOX2_StepComputeLvoxGrids(CT_StepInitializeData &da
     //********************************************//
     //              Attributes of LVox            //
     //********************************************//
-    _res = 0.5;
-    _effectiveRayThresh = 10;
+    _res = 0.1; //0.5;
+    _effectiveRayThresh = 0;
     _computeDistances = false;
-    _ntMode = 0; // by default, Beam number is theoretical
-    _gridMode = 1;
-    _xBase = -20.0;
-    _yBase = -20.0;
-    _zBase = -10.0;
+    _ntMode = 1; //0; // by default, Beam number is theoretical
+    _gridMode = 3;//1
+    _xBase = 0;//-20.0;
+    _yBase = 0;//-20.0;
+    _zBase = 0;//-10.0;
 
-    _xDim = 80;
-    _yDim = 80;
-    _zDim = 80;
+    _xDim = 60;//80;
+    _yDim = 60;//80;
+    _zDim = 40;//80;
+    _cylindricFilter = true;
 }
 
 QString LVOX2_StepComputeLvoxGrids::getStepDescription() const
@@ -177,9 +180,9 @@ void LVOX2_StepComputeLvoxGrids::createPostConfigurationDialog()
 
     CT_ButtonGroup &bg_gridMode = configDialog->addButtonGroup(_gridMode);
     configDialog->addExcludeValue("", "", tr("Default mode : Bounding box of the scene"), bg_gridMode, 0);
-    configDialog->addExcludeValue("", "", tr("Custom mode : Relative to folowing coordinates:"), bg_gridMode, 1);
-    configDialog->addExcludeValue("", "", tr("Custom mode : Relative to folowing coordinates + custom dimensions:"), bg_gridMode, 2);
-    configDialog->addExcludeValue("", "", tr("Custom mode : centered on folowing coordinates + custom dimensions:"), bg_gridMode, 3);
+    configDialog->addExcludeValue("", "", tr("Custom mode : Relative to following coordinates:"), bg_gridMode, 1);
+    configDialog->addExcludeValue("", "", tr("Custom mode : Relative to following coordinates + custom dimensions:"), bg_gridMode, 2);
+    configDialog->addExcludeValue("", "", tr("Custom mode : centered on following coordinates + custom dimensions:"), bg_gridMode, 3);
 
 
     configDialog->addDouble(tr("X coordinate:"), "", -std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 4, _xBase);
@@ -190,7 +193,7 @@ void LVOX2_StepComputeLvoxGrids::createPostConfigurationDialog()
     configDialog->addInt(tr("Y dimension:"), "", 1, 1000, _yDim);
     configDialog->addInt(tr("Z dimension:"), "", 1, 1000, _zDim);
 
-
+   configDialog->addBool(tr("Placette cylindrique"),"", "", _cylindricFilter);
 }
 
 void LVOX2_StepComputeLvoxGrids::compute()
@@ -210,6 +213,13 @@ void LVOX2_StepComputeLvoxGrids::compute()
     double xMax = -std::numeric_limits<double>::max();
     double yMax = -std::numeric_limits<double>::max();
     double zMax = -std::numeric_limits<double>::max();
+    // Global limit of the enlarge grid (necessary for computations)
+    double xMin2 = 0.f;
+    double yMin2 = 0.f;
+    double zMin2 = 0.f;
+    double xMax2 = 0.f;
+    double yMax2 = 0.f;
+    double zMax2 = 0.f;
 
     double xMinScene = std::numeric_limits<double>::max();
     double yMinScene = std::numeric_limits<double>::max();
@@ -313,20 +323,7 @@ void LVOX2_StepComputeLvoxGrids::compute()
         yMax = yMin + _res*_yDim;
         zMax = zMin + _res*_zDim;
 
-        bool enlarged = false;
 
-        while (xMin > xMinScanner) {xMin -= _res; enlarged = true;}
-        while (yMin > yMinScanner) {yMin -= _res; enlarged = true;}
-        while (zMin > zMinScanner) {zMin -= _res; enlarged = true;}
-
-        while (xMax < xMaxScanner) {xMax += _res; enlarged = true;}
-        while (yMax < yMaxScanner) {yMax += _res; enlarged = true;}
-        while (zMax < zMaxScanner) {zMax += _res; enlarged = true;}
-
-        if (enlarged)
-        {
-            PS_LOG->addMessage(LogInterface::warning, LogInterface::step, tr("Dimensions spécifiées ne contenant pas les positions de scans : la grille a du être élargie !"));
-        }
     } else {
 
         xMin = _xBase - _res*_xDim;
@@ -337,28 +334,34 @@ void LVOX2_StepComputeLvoxGrids::compute()
         yMax = _yBase + _res*_yDim;
         zMax = _zBase + _res*_zDim;
 
-        bool enlarged = false;
-
-        while (xMin > xMinScanner) {xMin -= _res; enlarged = true;}
-        while (yMin > yMinScanner) {yMin -= _res; enlarged = true;}
-        while (zMin > zMinScanner) {zMin -= _res; enlarged = true;}
-
-        while (xMax < xMaxScanner) {xMax += _res; enlarged = true;}
-        while (yMax < yMaxScanner) {yMax += _res; enlarged = true;}
-        while (zMax < zMaxScanner) {zMax += _res; enlarged = true;}
-
-        if (enlarged)
-        {
-            PS_LOG->addMessage(LogInterface::warning, LogInterface::step, tr("Dimensions spécifiées ne contenant pas les positions de scans : la grille a du être élargie !"));
-        }
     }
+// enlarge the grid when necessary to include scan positions
+    bool enlarged = false;
+    xMin2 = xMin;
+    xMax2 = xMax;
+    yMin2 = yMin,
+    yMax2 = yMax;
+    zMin2 = zMin;
+    zMax2 = zMax;
 
-    xMin -= _res;
-    yMin -= _res;
-    zMin -= _res;
-    xMax += _res;
-    yMax += _res;
-    zMax += _res;
+    while (xMin2 > xMinScanner) {xMin2 -= _res; enlarged = true;}
+    while (yMin2 > yMinScanner) {yMin2 -= _res; enlarged = true;}
+    while (zMin2 > zMinScanner) {zMin2 -= _res; enlarged = true;}
+
+    while (xMax2 < xMaxScanner) {xMax2 += _res; enlarged = true;}
+    while (yMax2 < yMaxScanner) {yMax2 += _res; enlarged = true;}
+    while (zMax2 < zMaxScanner) {zMax2 += _res; enlarged = true;}
+
+    if (enlarged)
+    {
+        PS_LOG->addMessage(LogInterface::warning, LogInterface::step, tr("Dimensions spécifiées ne contenant pas les positions de scans : la grille a du être élargie !"));
+    }
+    xMin2 -= _res;
+    yMin2 -= _res;
+    zMin2 -= _res;
+    xMax2 += _res;
+    yMax2 += _res;
+    zMax2 += _res;
 
     QMapIterator<CT_AbstractItemGroup*, QPair<const CT_Scene*, const CT_Scanner*> > it(pointsOfView);
     while (it.hasNext() && !isStopped())
@@ -367,9 +370,32 @@ void LVOX2_StepComputeLvoxGrids::compute()
         CT_AbstractItemGroup* group = it.key();
         const CT_Scene* scene = it.value().first;
         const CT_Scanner* scanner =it.value().second;
+        // check properties of the point cloud
+        size_t zeros = 0;
+        size_t fars = 0;
+        const CT_AbstractPointCloudIndex *pointCloudIndex = scene->getPointCloudIndex();
+        size_t n_points = pointCloudIndex->size();
+        Eigen::Vector3d scanPos = scanner->getPosition();
+        CT_PointIterator itP(pointCloudIndex);
+        while (itP.hasNext())
+        {
+            const CT_Point &point = itP.next().currentPoint();
+            if ((abs(point(0)-scanPos(0))<=0.001)&&(abs(point(1)-scanPos(1))<=0.001)&&(abs(point(2)-scanPos(2))<=0.001)) {
+                zeros++;
+                if (zeros==1) {
+                    qDebug() << "point example" << point(0) << point(1) << point(2);
+                }
+            }
+            if (pow(point(0)-scanPos(0),2.0)+pow(point(1)-scanPos(1),2.0)+pow(point(2)-scanPos(2),2.0)>400) {
+                fars++;
+
+            }
+        }
+        qDebug() << "scan: null beams="<<zeros<< "over" << n_points << "points";
+         qDebug() << "scan: far beams="<<fars<< "over" << n_points << "points";
 
         // Declaring the output grids
-        CT_Grid3D<int>*      hitGrid = CT_Grid3D<int>::createGrid3DFromXYZCoords(_hits_ModelName.completeName(), outResult, xMin, yMin, zMin, xMax, yMax, zMax, _res, -1, 0, true);
+        CT_Grid3D<int>*      hitGrid = CT_Grid3D<int>::createGrid3DFromXYZCoords(_hits_ModelName.completeName(), outResult, xMin2, yMin2, zMin2, xMax2, yMax2, zMax2, _res, -1, 0, true);
         hitGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NiFlag_ModelName.completeName(), "LVOX_GRD_NI", outResult, true));
         CT_Grid3D<int>*      theoriticalGrid = NULL;
         if (_ntMode==0||_ntMode==2) // Nt is theoritical (initial formulation)
@@ -427,7 +453,7 @@ void LVOX2_StepComputeLvoxGrids::compute()
             group->addItemDrawable(deltaBefore);
         }
 
-        LVOX_ComputeHitsThread* hitsThread = new LVOX_ComputeHitsThread(scanner, hitGrid, deltaInGrid, deltaOutGrid, scene, _computeDistances);
+        LVOX2_ComputeHitsThread* hitsThread = new LVOX2_ComputeHitsThread(scanner, hitGrid, deltaInGrid, deltaOutGrid, scene, _computeDistances, _cylindricFilter, xMin, xMax, yMin, yMax, zMin,zMax);
             connect(hitsThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
         _threadList.append(hitsThread);
         baseThreads.append(hitsThread);
@@ -440,7 +466,7 @@ void LVOX2_StepComputeLvoxGrids::compute()
         if (_ntMode==0) // Nt is theoritical (initial formulation)
         {
             LVOX_ComputeTheoriticalsThread* theoreticalThread = new LVOX_ComputeTheoriticalsThread(scanner, theoriticalGrid, deltaTheoritical, _computeDistances);
-               connect(theoreticalThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
+              connect(theoreticalThread, SIGNAL(progressChanged()), this, SLOT(updateProgress()));
             _threadList.append(theoreticalThread);
             baseThreads.append(theoreticalThread);
 
@@ -511,6 +537,8 @@ void LVOX2_StepComputeLvoxGrids::compute()
     }
 
     qDeleteAll(_threadList);
+
+
 
     setProgress(100);
 }

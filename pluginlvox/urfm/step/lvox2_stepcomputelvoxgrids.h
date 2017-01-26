@@ -161,6 +161,7 @@ private:
     int          _xDim;
     int          _yDim;
     int          _zDim;
+    bool        _cylindricFilter;// Ni are counted only inside a cylinder (IGN, RH)
 
 };
 
