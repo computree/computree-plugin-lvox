@@ -49,6 +49,7 @@
 
 #include "urfm/step/lvox2_stepcomputelvoxgrids.h"
 #include "urfm/step/lvox2_stepcombinedensitygrids.h"
+#include "urfm/step/lvox2_stepcombinelvoxgrids.h"
 #include "urfm/step/lvox2_stepexportcomputedgrids.h"
 #include "urfm/step/lvox2_stepcomputeheightprofile.h"
 #include "urfm/step/lvox2_stepfiltergridbyradius.h"
@@ -91,6 +92,7 @@ bool LVOX_StepPluginManager::loadGenericsStep()
 
     addNewVoxelsStep<LVOX2_StepComputeLvoxGrids>(QObject::tr("LVOX2"));
     addNewVoxelsStep<LVOX2_StepCombineDensityGrids>(QObject::tr("LVOX2"));
+    addNewVoxelsStep<LVOX2_StepCombineLvoxGrids>(QObject::tr("LVOX2"));
     addNewVoxelsStep<LVOX2_StepExportComputedGrids>(QObject::tr("LVOX2"));
     addNewVoxelsStep<LVOX2_StepComputeHeightProfile>(QObject::tr("LVOX2"));
     addNewVoxelsStep<LVOX2_StepFilterGridByRadius>(QObject::tr("LVOX2"));

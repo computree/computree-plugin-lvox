@@ -37,9 +37,11 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
 #    step/lvox_stepimportmergedgrids.h \
     step/lvox_stepcomparegrids.h \
     urfm/step/lvox2_stepcombinedensitygrids.h \
+    urfm/step/lvox2_stepcombinelvoxgrids.h \
     urfm/step/lvox2_stepcomputelvoxgrids.h \
     urfm/step/lvox2_stepexportcomputedgrids.h \
     urfm/tools/lvox2_computeactualbeamthread.h \
+    urfm/tools/lvox2_computehitsthread.h \
     urfm/tools/lvox2_countvisitor.h \
     urfm/step/lvox2_stepcomputeheightprofile.h \
     urfm/step/lvox2_stepfiltergridbyradius.h \
@@ -72,10 +74,12 @@ SOURCES += \
     step/lvox_stepexportmergedgrids.cpp \
     step/lvox_stepcomparegrids.cpp \
     urfm/step/lvox2_stepcombinedensitygrids.cpp \
+    urfm/step/lvox2_stepcombinelvoxgrids.cpp \
     urfm/step/lvox2_stepcomputelvoxgrids.cpp \
     urfm/step/lvox2_stepexportcomputedgrids.cpp \
     urfm/tools/lvox2_countvisitor.cpp \
     urfm/tools/lvox2_computeactualbeamthread.cpp \
+    urfm/tools/lvox2_computehitsthread.cpp \
     urfm/step/lvox2_stepcomputeheightprofile.cpp \
     urfm/step/lvox2_stepfiltergridbyradius.cpp \
     urfm/step/lvox2_steppreparepointcloud.cpp \
