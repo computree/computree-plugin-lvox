@@ -73,6 +73,22 @@ LVOX_StepPluginManager::~LVOX_StepPluginManager()
 {
 }
 
+QString LVOX_StepPluginManager::getPluginRISCitation() const
+{
+    return "TY  - COMP\n"
+           "TI  - Plugin LVOX for Computree\n"
+           "AU  - Fournier, Richard\n"
+           "AU  - Ravaglia, Joris\n"
+           "AU  - Krebs, Michael\n"
+           "AU  - Piboule, Alexandre\n"
+           "PB  - University of Sherbrooke\n"
+           "PY  - 2017\n"
+           "UR  - http://rdinnovation.onf.fr/projects/plugin-lvox\n"
+           "ER  - \n";
+}
+
+
+
 bool LVOX_StepPluginManager::loadGenericsStep()
 {
 

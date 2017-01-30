@@ -40,6 +40,7 @@ public:
 
     QString getPluginURL() const {return QString("http://rdinnovation.onf.fr:8080/projects/plugin-lvox");}
 
+    QString getPluginRISCitation() const;
 protected:
 
     bool loadGenericsStep();
