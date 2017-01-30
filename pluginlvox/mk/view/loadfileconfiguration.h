@@ -98,31 +98,93 @@ private:
     QList<CT_AbstractReader*>               m_availableReaders;
     int                                     m_currentReaderIndex;
 
+    /**
+     * @brief Clear the current combobox and use the variable "m_availableReaders" to populate the combobox
+     */
     void initReaderComboBox();
 
+    /**
+     * @brief Change the UI to show value of the configuration of the item specified
+     */
     void editItem(QListWidgetItem *item);
+
+    /**
+     * @brief Update the Configuration of the item specified by use the UI values
+     */
     void updateConfiguration(QListWidgetItem *item);
 
+    /**
+     * @brief Show a QFileDialog to choose a file that can be oppened by the current reader
+     * @param filepath (OUT) : will have the list of filepath choosed by user
+     * @param multiple : to true if the user can select multiple files
+     * @return false if the user cancel, true otherwise.
+     */
     bool chooseFiles(QStringList &filepath, bool multiple);
 
+    /**
+     * @brief Returns the current reader selected in the combobox
+     */
     CT_AbstractReader* getSelectedReader() const;
+
+    /**
+     * @brief Returns the current item selected in the listwidget
+     */
     QListWidgetItem* getSelectedItem() const;
 
 private slots:
+    /**
+     * @brief Call it to add one or more files to the list (it will show a QFileDialog to choose it)
+     */
     void addFile();
+
+    /**
+     * @brief Call it to modify the current item in the list (it will show a QFileDialog to choose another file)
+     */
     void modifySelectedFile();
+
+    /**
+     * @brief Remove the current item in the list
+     */
     void removeSelectedFile();
+
+    /**
+     * @brief Remove all item in the list
+     */
     void removeAllFile();
 
+    /**
+     * @brief Apply the current configuration to all item in the list
+     */
     void on_pushButtonApplyConfigurationToNextFile_clicked();
+
+    /**
+     * @brief Apply the current configuration to the next item in the list
+     */
     void on_pushButtonApplyConfigurationToAll_clicked();
 
+    /**
+     * @brief Set enable/disable pushbutton, checkbox, etc... regardless the state of other element in UI
+     */
     void on_checkBoxForceScannerInformation_toggled(bool e);
 
+    /**
+     * @brief Set enable/disable pushbutton, checkbox, etc... regardless the state of other element in UI
+     */
     void on_listWidgetFiles_currentRowChanged(int currentRow);
+
+    /**
+     * @brief Update the configuration of the previous item and update UI to show the configuration of the current
+     */
     void on_listWidgetFiles_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
+
+    /**
+     * @brief Call "modifySelectedFile"
+     */
     void on_listWidgetFiles_itemDoubleClicked(QListWidgetItem *item);
 
+    /**
+     * @brief Clear the item list if the reader change (show a message box to user to inform it)
+     */
     void on_comboBoxReaderType_currentIndexChanged(int index);
 };
 
