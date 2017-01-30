@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>838</width>
-    <height>494</height>
+    <height>580</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -129,7 +129,7 @@
         <item>
          <widget class="QCheckBox" name="checkBoxScannerClockwise">
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cochez la case si votre scanner parcours la scène dans le sens des aiguilles d'une montre (FARO et Z+F par exemple).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cochez la case si votre appareil scanne la scène dans le sens des aiguilles d'une montre (à cocher lors de l'utilisation d'un scanner FARO ou Z+F).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>Clockwise ?</string>
@@ -139,7 +139,7 @@
         <item>
          <widget class="QCheckBox" name="checkBoxAngleInRadians">
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cochez la case si vous souhaitez écrirer les résolutions et angles en radians&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cochez la case si vous souhaitez écrire les résolutions et angles en radians&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>Radians ?</string>
