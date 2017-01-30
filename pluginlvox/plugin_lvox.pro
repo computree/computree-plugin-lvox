@@ -66,7 +66,9 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     mk/tools/lvox3_grid3dvoxelvisitor.h \
     mk/tools/lvox3_grid3dvoxelvisitorcontext.h \
     mk/tools/lvox3_countvisitor.h \
-    mk/tools/lvox3_distancevisitor.h
+    mk/tools/lvox3_distancevisitor.h \
+    mk/view/loadfileconfiguration.h \
+    mk/step/lvox3_steploadfiles.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -112,7 +114,9 @@ SOURCES += \
     mk/tools/lvox3_computedensity.cpp \
     mk/tools/lvox3_computelvoxgridspreparator.cpp \
     mk/tools/lvox3_computeall.cpp \
-    mk/tools/lvox3_rayboxintersectionmath.cpp
+    mk/tools/lvox3_rayboxintersectionmath.cpp \
+    mk/view/loadfileconfiguration.cpp \
+    mk/step/lvox3_steploadfiles.cpp
 
 TRANSLATIONS += languages/pluginlvoxv2_en.ts \
                 languages/pluginlvoxv2_fr.ts
@@ -120,4 +124,5 @@ TRANSLATIONS += languages/pluginlvoxv2_en.ts \
 INCLUDEPATH += .
 INCLUDEPATH += ./step
 
-FORMS +=
+FORMS += \
+    mk/view/loadfileconfiguration.ui

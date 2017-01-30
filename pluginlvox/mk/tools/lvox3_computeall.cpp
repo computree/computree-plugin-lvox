@@ -1,6 +1,6 @@
 #include "lvox3_computeall.h"
 
-#include <QtConcurrent/QtConcurrent>
+#include <QThread>
 
 LVOX3_ComputeAll::LVOX3_ComputeAll() : LVOX3_Worker()
 {
