@@ -48,7 +48,25 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     urfm/step/lvox2_steppreparepointcloud.h \
     tools/lvox_countwithlengththresholdvisitor.h \
     tools/lvox_computebeforewithlengththresholdthread.h \
-    step/lvox_stepcomputeocclusionspace.h
+    step/lvox_stepcomputeocclusionspace.h \
+    mk/step/lvox3_stepcomputelvoxgrids.h \
+    mk/tools/lvox3_computehits.h \
+    mk/tools/lvox3_errorcode.h \
+    mk/tools/lvox3_worker.h \
+    mk/tools/lvox3_computetheoriticals.h \
+    mk/tools/lvox3_computebefore.h \
+    mk/tools/lvox3_computedensity.h \
+    mk/tools/lvox3_computelvoxgridspreparator.h \
+    mk/tools/lvox3_gridmode.h \
+    mk/tools/lvox3_gridtype.h \
+    mk/tools/lvox3_computeall.h \
+    mk/tools/lvox3_gridtools.h \
+    mk/tools/lvox3_grid3dwootraversalalgorithm.h \
+    mk/tools/lvox3_rayboxintersectionmath.h \
+    mk/tools/lvox3_grid3dvoxelvisitor.h \
+    mk/tools/lvox3_grid3dvoxelvisitorcontext.h \
+    mk/tools/lvox3_countvisitor.h \
+    mk/tools/lvox3_distancevisitor.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -85,10 +103,21 @@ SOURCES += \
     urfm/step/lvox2_steppreparepointcloud.cpp \
     tools/lvox_countwithlengththresholdvisitor.cpp \
     tools/lvox_computebeforewithlengththresholdthread.cpp \
-    step/lvox_stepcomputeocclusionspace.cpp
+    step/lvox_stepcomputeocclusionspace.cpp \
+    mk/step/lvox3_stepcomputelvoxgrids.cpp \
+    mk/tools/lvox3_computehits.cpp \
+    mk/tools/lvox3_worker.cpp \
+    mk/tools/lvox3_computetheoriticals.cpp \
+    mk/tools/lvox3_computebefore.cpp \
+    mk/tools/lvox3_computedensity.cpp \
+    mk/tools/lvox3_computelvoxgridspreparator.cpp \
+    mk/tools/lvox3_computeall.cpp \
+    mk/tools/lvox3_rayboxintersectionmath.cpp
 
 TRANSLATIONS += languages/pluginlvoxv2_en.ts \
                 languages/pluginlvoxv2_fr.ts
 
 INCLUDEPATH += .
 INCLUDEPATH += ./step
+
+FORMS +=

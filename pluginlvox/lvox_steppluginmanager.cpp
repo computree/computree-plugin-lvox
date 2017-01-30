@@ -55,10 +55,12 @@
 #include "urfm/step/lvox2_stepfiltergridbyradius.h"
 #include "urfm/step/lvox2_steppreparepointcloud.h"
 
+#include "mk/step/lvox3_stepcomputelvoxgrids.h"
 
 #include "ct_global/ct_context.h"
 #include "ct_categories/ct_stdcategory.h"
 
+#include <QMutex>
 
 LVOX_StepPluginManager::LVOX_StepPluginManager() : CT_AbstractStepPlugin()
 {
@@ -116,6 +118,7 @@ bool LVOX_StepPluginManager::loadGenericsStep()
 
     addNewBetaStep<LVOX_StepComputeOcclusionsSpace>(QObject::tr("LVOX"));
 
+    addNewVoxelsStep<LVOX3_StepComputeLvoxGrids>(QObject::tr("LVOX3"));
 
     return true;
 }
