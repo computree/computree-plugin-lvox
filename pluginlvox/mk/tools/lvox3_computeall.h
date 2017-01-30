@@ -34,17 +34,41 @@ private:
     QMultiMap<int, LVOX3_Worker*>   m_workers;
     QList<LVOX3_Worker*>            m_currentWorkers;
     int                             m_progressOffset;
+    QMutex*                         m_mutex;
+    int                             m_nMaxThread;
+    int                             m_nCurrentThread;
+    int                             m_nCurrentWorkerFinished;
 
     /**
      * @brief Called by QtConcurrent to start the worker
      */
     static void startWorker(LVOX3_Worker* worker);
 
+    /**
+     * @brief Prepare a worker to start it in a thread
+     */
+    void prepareAWorker(LVOX3_Worker *worker);
+
+    /**
+     * @brief Start a worker and update m_nCurrentThread variable
+     */
+    void startAWorker(LVOX3_Worker *worker);
+
+    /**
+     * @brief Wait while all worker has finished her job
+     */
+    void waitForFinished();
+
 private slots:
     /**
      * @brief Call when the progression of a worker changed
      */
     void progressFromWorkerChanged();
+
+    /**
+     * @brief Called when a worker has finished
+     */
+    void workerFinished();
 };
 
 #endif // LVOX3_COMPUTEALL_H

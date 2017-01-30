@@ -24,6 +24,11 @@ public:
      */
     int getProgress() const;
 
+    /**
+     * @brief Returns true if the worker is finished
+     */
+    bool isFinished() const;
+
 public slots:
     /**
      * @brief Do the job
@@ -72,6 +77,7 @@ private:
     int     m_progressMax;
     int     m_progressRange;
     bool    m_cancel;
+    bool    m_finished;
 
 signals:
     /**
@@ -80,9 +86,14 @@ signals:
     void progressChanged(int progress);
 
     /**
-     * @brief emitted when the user want to cancel the process
+     * @brief Emitted when the user want to cancel the process
      */
     void cancelRequested();
+
+    /**
+     * @brief Emitted when the job is finished
+     */
+    void finished();
 };
 
 #endif // LVOX3_WORKER_H

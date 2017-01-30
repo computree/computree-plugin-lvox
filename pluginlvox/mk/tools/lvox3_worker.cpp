@@ -9,6 +9,7 @@ LVOX3_Worker::LVOX3_Worker()
     m_progressMin = 0;
     m_progressMax = 100;
     m_progressRange = 100;
+    m_finished = false;
 }
 
 bool LVOX3_Worker::mustCancel() const
@@ -19,6 +20,11 @@ bool LVOX3_Worker::mustCancel() const
 int LVOX3_Worker::getProgress() const
 {
     return m_progress;
+}
+
+bool LVOX3_Worker::isFinished() const
+{
+    return m_finished;
 }
 
 int LVOX3_Worker::getProgressRangeMin() const
@@ -38,15 +44,21 @@ int LVOX3_Worker::getProgressRange() const
 
 void LVOX3_Worker::compute()
 {
+    m_cancel = false;
+    m_finished = false;
+
+    setProgress(0);
+
     QElapsedTimer timer;
     timer.start();
-
-    m_cancel = false;
-    setProgress(0);
 
     doTheJob();
 
     qDebug() << metaObject()->className() << " elapsed : " << timer.elapsed();
+
+    m_finished = true;
+
+    emit finished();
 }
 
 void LVOX3_Worker::cancel()
