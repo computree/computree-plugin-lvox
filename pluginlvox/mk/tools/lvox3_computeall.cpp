@@ -27,10 +27,12 @@ void LVOX3_ComputeAll::doTheJob()
     m_nMaxThread = qMax(1, QThread::idealThreadCount());
 
     m_progressOffset = 0;
-    m_nCurrentThread = 0;
-    m_nCurrentWorkerFinished = 0;
 
     foreach (int key, keys) {
+
+        m_nCurrentThread = 0;
+        m_nCurrentWorkerFinished = 0;
+
         m_currentWorkers = m_workers.values(key);
 
         foreach (LVOX3_Worker* worker, m_currentWorkers) {
