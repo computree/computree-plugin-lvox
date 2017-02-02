@@ -2,16 +2,16 @@
 #define LVOX3_GRIDTOOLS_H
 
 #include "Eigen/Core"
-#include "ct_itemdrawable/ct_grid3d.h"
+#include "ct_itemdrawable/abstract/ct_abstractgrid3d.h"
 
-template<typename T>
 class LVOX3_GridTools {
 public:
-    LVOX3_GridTools(const CT_Grid3D<T>* grid) {
+    LVOX3_GridTools(const CT_AbstractGrid3D* grid) {
         grid->getMinCoordinates(m_gridBBOXMin);
         m_gridDimX = grid->xdim();
         m_gridDimXMultDimY = m_gridDimX * grid->ydim();
         m_gridResolution = grid->resolution();
+        m_gridResolutionDiv2 = m_gridResolution/2.0;;
     }
 
     inline void computeGridIndexForPoint(const Eigen::Vector3d& point,
@@ -70,6 +70,25 @@ public:
         topRightCorner = bottomLeftCorner.array() + m_gridResolution;
     }
 
+    inline void computeCellTopMiddleCoordsAtIndex(const size_t& index,
+                                                  Eigen::Vector3d& coords) {
+        size_t col = 0, lin = 0, level = 0;
+
+        if(index >= m_gridDimXMultDimY)
+            level = index/m_gridDimXMultDimY;
+
+        if(index >= m_gridDimX)
+            lin = (index - (level*m_gridDimXMultDimY))/m_gridDimX;
+
+        col = index - (level*m_gridDimXMultDimY) - (lin*m_gridDimX);
+
+        computeCellBottomLeftCornerAtColLinLevel(col, lin, level, coords);
+
+        coords.x() += m_gridResolutionDiv2;
+        coords.y() += m_gridResolutionDiv2;
+        coords.z() += m_gridResolution;
+    }
+
     static inline size_t computeColLinLevel(const double& min,
                                             const double& gridResolution,
                                             const double& val) {
@@ -81,6 +100,7 @@ private:
     double          m_gridDimX;
     double          m_gridDimXMultDimY;
     double          m_gridResolution;
+    double          m_gridResolutionDiv2;
 };
 
 #endif // LVOX3_GRIDTOOLS_H

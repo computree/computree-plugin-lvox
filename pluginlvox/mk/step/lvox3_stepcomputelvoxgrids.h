@@ -72,6 +72,7 @@ private:
     double          m_resolution;               /*!< size of a voxel */
     int             m_effectiveRayThreshold;    /*!< minimum number of effective ray (Nt-Nb) in the voxel to calculate a density */
     bool            m_computeDistances;         /*!< true if must compute distance */
+    bool            m_useMNT;                   /*!< true to use mnt to filter voxels below it */
     int             m_gridMode;                 /*!< grid mode */
     Eigen::Vector3d m_coordinates;              /*!< coordinates if gridMode == ...Coordinates... */
     Eigen::Vector3i m_dimensions;               /*!< dimensions if gridMode == ...CustomDimensions */

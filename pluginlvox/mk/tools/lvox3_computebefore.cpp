@@ -67,8 +67,8 @@ void LVOX3_ComputeBefore::doTheJob()
         {
             const float nHits = m_before->valueAtIndex(i);
 
-            if (nHits == 0)
-                m_shotDeltaDistance->setValueAtIndex(i, 0);  // TODO : check if must set an error code here
+            if (nHits <= 0)
+                m_shotDeltaDistance->setValueAtIndex(i, nHits);  // TODO : check if must set an error code here
             else
                 m_shotDeltaDistance->setValueAtIndex(i, m_shotDeltaDistance->valueAtIndex(i)/nHits);
         }

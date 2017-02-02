@@ -63,8 +63,8 @@ void LVOX3_ComputeTheoriticals::doTheJob()
         {
             const float nHits =  m_outputTheoriticalGrid->valueAtIndex(i);
 
-            if (nHits == 0)
-                m_outputDeltaTheoriticalGrid->setValueAtIndex(i, 0); // TODO : check if must set an error code here
+            if (nHits <= 0)
+                m_outputDeltaTheoriticalGrid->setValueAtIndex(i, nHits); // TODO : check if must set an error code here
             else
                 m_outputDeltaTheoriticalGrid->setValueAtIndex(i, m_outputDeltaTheoriticalGrid->valueAtIndex(i)/nHits);
         }

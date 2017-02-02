@@ -56,6 +56,7 @@ private:
     mu::Parser              m_finalParser;
 
     QVector<double*>        m_variables;
+    double                  m_outputVariable;
 
     void initParser(mu::Parser& parser, const std::string &formula);
 };

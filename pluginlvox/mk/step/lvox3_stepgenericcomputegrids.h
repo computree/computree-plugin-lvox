@@ -61,6 +61,13 @@ protected:
     void createInResultModelListProtected();
 
     /**
+     * @brief Show the INPUT elements configuration dialog. This dialog allow the user to select elements that must be used in "compute" method
+     *        for searched elements. The dialog is showed in read only mode if the step has childrens or if we can not configure something.
+     * @return true if settings is modified.
+     */
+    bool configureInputResult(bool forceReadOnly = false);
+
+    /**
      * @brief Show the post configuration dialog.
      *
      * If you want to show your own configuration dialog your must overload this method and show your dialog when this method is called. Don't forget

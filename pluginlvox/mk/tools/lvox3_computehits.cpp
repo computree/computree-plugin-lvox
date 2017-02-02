@@ -5,6 +5,7 @@
 
 #include "lvox3_gridtools.h"
 #include "lvox3_rayboxintersectionmath.h"
+#include "lvox3_errorcode.h"
 
 LVOX3_ComputeHits::LVOX3_ComputeHits(const CT_ShootingPattern* pattern,
                                      const CT_AbstractPointCloudIndex* pointCloudIndex,
@@ -31,7 +32,7 @@ void LVOX3_ComputeHits::doTheJob()
 
     setProgressRange(0, computeDistance ? n_points+1 : n_points);
 
-    LVOX3_GridTools<lvox::Grid3DiType> gridTool(m_hits);
+    LVOX3_GridTools gridTool(m_hits);
 
     CT_PointIterator itP(m_pointCloudIndex);
 
@@ -44,19 +45,22 @@ void LVOX3_ComputeHits::doTheJob()
         // we now that the grid is perfectly bounding the scene so we can use this tools that don't do
         // many check to reduce the compute time !
         gridTool.computeGridIndexForPoint(point, pointCol, pointLin, pointLevel, indice);
-        m_hits->addValueAtIndex(indice, 1);
 
-        if (computeDistance)
-        {
-            gridTool.computeCellBottomLeftTopRightCornerAtColLinLevel(pointCol, pointLin, pointLevel, bottom, top);
+        if(m_hits->valueAtIndex(indice) != lvox::Below_MNT) {
+            m_hits->addValueAtIndex(indice, 1);
 
-            if (LVOX3_RayBoxIntersectionMath::getIntersectionOfRay(bottom, top, scanPos, point - scanPos, in, out))
+            if (computeDistance)
             {
-                if(m_shotInDistance != NULL)
-                    m_shotInDistance->addValueAtIndex(indice, (in-point).norm());
+                gridTool.computeCellBottomLeftTopRightCornerAtColLinLevel(pointCol, pointLin, pointLevel, bottom, top);
 
-                if(m_shotOutDistance != NULL)
-                    m_shotOutDistance->addValueAtIndex(indice, (out-point).norm());
+                if (LVOX3_RayBoxIntersectionMath::getIntersectionOfRay(bottom, top, scanPos, point - scanPos, in, out))
+                {
+                    if(m_shotInDistance != NULL)
+                        m_shotInDistance->addValueAtIndex(indice, (in-point).norm());
+
+                    if(m_shotOutDistance != NULL)
+                        m_shotOutDistance->addValueAtIndex(indice, (out-point).norm());
+                }
             }
         }
 
@@ -70,33 +74,24 @@ void LVOX3_ComputeHits::doTheJob()
     {
         // Convert sums into means
         size_t ncells = m_hits->nCells();
-        qint32 hitsNA = m_hits->NA();
-        float inNA = 0;
-        float outNA = 0;
-
-        if(m_shotInDistance != NULL)
-            inNA = m_shotInDistance->NA();
-
-        if(m_shotOutDistance != NULL)
-            outNA = m_shotOutDistance->NA();
 
         for (size_t i = 0 ; (i < ncells) && !mustCancel(); i++)
         {
-            float value = m_hits->valueAtIndex(i);
+            float nHits = m_hits->valueAtIndex(i);
 
-            if ((value == 0) || (value == hitsNA))
+            if (nHits <= 0)
             {
                 if(m_shotInDistance != NULL)
-                    m_shotInDistance->setValueAtIndex(i, inNA);
+                    m_shotInDistance->setValueAtIndex(i, nHits);
 
                 if(m_shotOutDistance != NULL)
-                    m_shotOutDistance->setValueAtIndex(i, outNA);
+                    m_shotOutDistance->setValueAtIndex(i, nHits);
             } else {
                 if(m_shotInDistance != NULL)
-                    m_shotInDistance->setValueAtIndex(i, m_shotInDistance->valueAtIndex(i) / value);
+                    m_shotInDistance->setValueAtIndex(i, m_shotInDistance->valueAtIndex(i) / nHits);
 
                 if(m_shotOutDistance != NULL)
-                    m_shotOutDistance->setValueAtIndex(i, m_shotOutDistance->valueAtIndex(i) / value);
+                    m_shotOutDistance->setValueAtIndex(i, m_shotOutDistance->valueAtIndex(i) / nHits);
             }
         }
 

@@ -3,6 +3,7 @@
 #include "ct_itemdrawable/ct_scene.h"
 #include "ct_itemdrawable/ct_scanner.h"
 #include "ct_itemdrawable/ct_shootingpatternd.h"
+#include "ct_itemdrawable/abstract/ct_abstractimage2d.h"
 
 #include "ctlibio/readers/ct_reader_larchitect_grid.h"
 #include "ct_iterator/ct_resultgroupiterator.h"
@@ -14,9 +15,10 @@ LVOX3_ComputeLVOXGridsPreparator::LVOX3_ComputeLVOXGridsPreparator()
 
 LVOX3_ComputeLVOXGridsPreparator::Result LVOX3_ComputeLVOXGridsPreparator::prepare(const CT_VirtualAbstractStep* step,
                                                                                    CT_ResultGroupIterator& itGrp,
-                                                                                   const QString &sceneModelName,
-                                                                                   const QString &scannerModelName,
-                                                                                   const QString &shotPatternModelName,
+                                                                                   const QString& sceneModelName,
+                                                                                   const QString& scannerModelName,
+                                                                                   const QString& shotPatternModelName,
+                                                                                   const QString& mntModelName,
                                                                                    double gridResolution,
                                                                                    lvox::GridMode gridMode,
                                                                                    Coordinates coord,
@@ -46,6 +48,7 @@ LVOX3_ComputeLVOXGridsPreparator::Result LVOX3_ComputeLVOXGridsPreparator::prepa
         const CT_Scene* scene = (CT_Scene*)group->firstItemByINModelName(step, sceneModelName);
         const CT_Scanner* scanner = (CT_Scanner*)group->firstItemByINModelName(step, scannerModelName);
         const CT_ShootingPatternD* pattern = (CT_ShootingPatternD*)group->firstItemByINModelName(step, shotPatternModelName);
+        const CT_AbstractImage2D* mnt = (CT_AbstractImage2D*)group->firstItemByINModelName(step, mntModelName);
 
         if ((scene != NULL)
                 && ((scanner != NULL) || (pattern != NULL)))
@@ -53,6 +56,7 @@ LVOX3_ComputeLVOXGridsPreparator::Result LVOX3_ComputeLVOXGridsPreparator::prepa
             ToCompute tc;
             tc.scene = (CT_Scene*)scene;
             tc.pattern = (CT_ShootingPattern*)((scanner == NULL) ? pattern->getShootingPattern() : scanner->getShootingPattern());
+            tc.mnt = (CT_AbstractImage2D*)mnt;
 
             const Eigen::Vector3d& origin = tc.pattern->getOrigin();
 

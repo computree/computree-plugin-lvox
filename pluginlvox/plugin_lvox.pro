@@ -73,7 +73,8 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     mk/view/genericcomputegridsconfiguration.h \
     mk/view/predefinedmapperconfiguration.h \
     mk/tools/lvox3_genericcompute.h \
-    mk/tools/lvox3_genericconfiguration.h
+    mk/tools/lvox3_genericconfiguration.h \
+    mk/tools/lvox3_filtervoxelsbelowzvalues.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -125,7 +126,8 @@ SOURCES += \
     mk/step/lvox3_stepgenericcomputegrids.cpp \
     mk/view/genericcomputegridsconfiguration.cpp \
     mk/view/predefinedmapperconfiguration.cpp \
-    mk/tools/lvox3_genericcompute.cpp
+    mk/tools/lvox3_genericcompute.cpp \
+    mk/tools/lvox3_filtervoxelsbelowzvalues.cpp
 
 include(muParser/muparser.pri)
 

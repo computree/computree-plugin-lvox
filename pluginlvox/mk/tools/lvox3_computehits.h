@@ -6,6 +6,7 @@
 
 #include "ct_itemdrawable/ct_scene.h"
 #include "ct_itemdrawable/ct_grid3d.h"
+#include "ct_itemdrawable/abstract/ct_abstractimage2d.h"
 #include "ct_itemdrawable/tools/scanner/ct_shootingpattern.h"
 
 /*!

@@ -58,7 +58,7 @@ void LVOX3_GenericCompute::doTheJob()
 
     setProgressRange(0, nCells);
 
-    for(int i=0; i<nCells; ++i) {
+    for(int i=0; (i<nCells) && !mustCancel(); ++i) {
 
         checkVerified = false;
 
@@ -67,6 +67,8 @@ void LVOX3_GenericCompute::doTheJob()
 
             (*m_variables[inp.indexInVariables]) = inp.grid->valueAtIndexAsDouble(i);
         }
+
+        m_outputVariable = m_output->valueAtIndexAsDouble(i);
 
         for(j=0; !checkVerified && (j<nCFormula); ++j) {
 
@@ -96,6 +98,8 @@ void LVOX3_GenericCompute::initParser(mu::Parser &parser, const std::string& for
     for(char c = 'a'; c < 'z'; ++c) {
         parser.DefineVar(QString(c).toStdString(), m_variables[i++]);
     }
+
+    parser.DefineVar("this", &m_outputVariable);
 
     parser.SetExpr(formula);
 }

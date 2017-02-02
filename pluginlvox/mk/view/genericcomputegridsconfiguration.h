@@ -129,6 +129,11 @@ private:
 private slots:
 
     /**
+     * @brief Save the configuration of the current ouput grid
+     */
+    void saveCurrentConfiguration();
+
+    /**
      * @brief Called when the current item in out grid table changed
      */
     void on_tableWidgetOutGrid_cellChanged(int row, int column);

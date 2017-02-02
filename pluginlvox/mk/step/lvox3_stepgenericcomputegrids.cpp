@@ -18,6 +18,7 @@
 #include "mk/tools/lvox3_genericcompute.h"
 
 #include <QDialog>
+#include <QMessageBox>
 
 #define DEF_SearchInResult      "r"
 #define DEF_SearchInGroup       "gr"
@@ -276,6 +277,31 @@ void LVOX3_StepGenericComputeGrids::createInResultModelListProtected()
     // add multiple optionnal grid to let the user choose as many as he want
     for(char c = 'b'; c <= 'z'; ++c)
         resultScan->addItemModel(DEF_SearchInGroup, modelName + c, CT_AbstractGrid3D::staticGetType(), tr("Grille %1").arg(QString(c).toUpper()), tr("Grille optionnel à utiliser si vous voulez faire des calculs sur plus d'une grille"), CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
+}
+
+bool LVOX3_StepGenericComputeGrids::configureInputResult(bool forceReadOnly)
+{
+    if(!getStepChildList().isEmpty() || m_output.isEmpty() || forceReadOnly)
+        return CT_AbstractStep::configureInputResult(forceReadOnly);
+
+    int ret = QMessageBox::warning(NULL, tr("Attention"), tr("Vous avez déjà définie des grilles de sorties vous ne "
+                                                    "pouvez donc pas changer les grilles d'entrées. Voulez vous "
+                                                    "supprimer votre configuration des grilles de sorties pour modifier "
+                                                    "les grilles d'entrées ?"), QMessageBox::Yes | QMessageBox::No);
+
+    if(ret == QMessageBox::Yes) {
+        if(CT_AbstractStep::configureInputResult(false)) {
+            m_output.clear();
+
+            showPostConfigurationDialog();
+            initAfterConfiguration();
+            return true;
+        }
+
+        return false;
+    }
+
+    return CT_AbstractStep::configureInputResult(true);
 }
 
 bool LVOX3_StepGenericComputeGrids::postConfigure()

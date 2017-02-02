@@ -5,6 +5,7 @@
 #include "lvox3_rayboxintersectionmath.h"
 #include "lvox3_gridtools.h"
 #include "lvox3_gridtype.h"
+#include "lvox3_errorcode.h"
 
 #include "ct_itemdrawable/ct_grid3d.h"
 
@@ -19,7 +20,7 @@ public:
         m_gridTools = NULL;
 
         if(grid != NULL)
-            m_gridTools = new LVOX3_GridTools<T>(grid);
+            m_gridTools = new LVOX3_GridTools(grid);
     }
 
     ~LVOX3_DistanceVisitor() {
@@ -54,7 +55,7 @@ public:
 
 private:
     CT_Grid3D<T>*           m_grid;
-    LVOX3_GridTools<T>*     m_gridTools;
+    LVOX3_GridTools*        m_gridTools;
     lvox::MutexCollection*  m_multithreadCollection;
 };
 

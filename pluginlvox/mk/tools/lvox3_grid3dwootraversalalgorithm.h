@@ -5,6 +5,7 @@
 #include "ct_itemdrawable/tools/scanner/ct_shot.h"
 #include "ct_itemdrawable/tools/gridtools/ct_abstractgrid3dbeamvisitor.h"
 
+#include "lvox3_errorcode.h"
 #include "lvox3_gridtools.h"
 #include "lvox3_rayboxintersectionmath.h"
 #include "lvox3_grid3dvoxelvisitor.h"
@@ -35,7 +36,7 @@ public:
         m_chooseAxis[6] = 0;
         m_chooseAxis[7] = 0;
 
-        m_gridTools = new LVOX3_GridTools<T>(grid);
+        m_gridTools = new LVOX3_GridTools(grid);
     }
 
     ~LVOX3_Grid3DWooTraversalAlgorithm()
@@ -79,8 +80,12 @@ public:
 
             if (m_visitFirstVoxelTouched)
             {
-                for (int i = 0 ; i < m_numberOfVisitors ; ++i)
-                    m_visitorList.at(i)->visit(context);
+                if(m_grid->valueAtIndex(context.currentVoxelIndex) != lvox::Below_MNT) {
+                    for (int i = 0 ; i < m_numberOfVisitors ; ++i)
+                        m_visitorList.at(i)->visit(context);
+                } else {
+                    return;
+                }
             }
 
             while ( 1 )
@@ -102,8 +107,12 @@ public:
                 // Add the index of the voxel to the list
                 m_gridTools->computeGridIndexForColLinLevel(context.colLinLevel.x(), context.colLinLevel.y(), context.colLinLevel.z(), context.currentVoxelIndex);
 
-                for (int i = 0 ; i < m_numberOfVisitors ; ++i)
-                    m_visitorList.at(i)->visit(context);
+                if(m_grid->valueAtIndex(context.currentVoxelIndex) != lvox::Below_MNT) {
+                    for (int i = 0 ; i < m_numberOfVisitors ; ++i)
+                        m_visitorList.at(i)->visit(context);
+                } else {
+                    return;
+                }
 
                 // Updating tmax of this axis (increasing by deltaT)
                 tMax(nextStepAxis) = tMax(nextStepAxis) + tDel(nextStepAxis);
@@ -112,7 +121,7 @@ public:
     }
 
 private:
-    LVOX3_GridTools<T>*                         m_gridTools;
+    LVOX3_GridTools*                            m_gridTools;
     const CT_Grid3D<T>*                         m_grid;
     Eigen::Vector3d                             m_gridBottom;
     Eigen::Vector3d                             m_gridTop;

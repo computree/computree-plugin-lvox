@@ -10,6 +10,7 @@
 class CT_AbstractItemGroup;
 class CT_Scene;
 class CT_ShootingPattern;
+class CT_AbstractImage2D;
 class CT_ResultGroupIterator;
 class CT_VirtualAbstractStep;
 
@@ -22,6 +23,7 @@ public:
     struct ToCompute {
         CT_Scene*               scene;
         CT_ShootingPattern*     pattern;
+        CT_AbstractImage2D*     mnt;
     };
 
     struct Result {
@@ -50,6 +52,7 @@ public:
      * @param sceneModelName : scene model name to find it
      * @param scannerModelName : scanner model name to find it
      * @param shotPatternModelName : shooting pattern model name to find it
+     * @param mntModelName : mnt model name to find it
      * @param gridResolution : the grid resolution
      * @param gridMode : grid mode to use
      * @param coord : coordinate information if gridMode == ...Coordinates...
@@ -61,6 +64,7 @@ public:
                    const QString& sceneModelName,
                    const QString& scannerModelName,
                    const QString& shotPatternModelName,
+                   const QString& mntModelName,
                    double gridResolution,
                    lvox::GridMode gridMode,
                    Coordinates coord = Coordinates(),

@@ -46,6 +46,8 @@ GenericComputeGridsConfiguration::GenericComputeGridsConfiguration(QWidget *pare
 
     m_reset = false;
 
+    connect(ui->lineEditComputeFormula, SIGNAL(textChanged(QString)), this, SLOT(saveCurrentConfiguration()), Qt::DirectConnection);
+
     initTableHeaders();
 }
 
@@ -146,7 +148,7 @@ bool GenericComputeGridsConfiguration::updateElement(QString *err)
     if(!canAcceptIt(err))
         return false;
 
-    saveConfiguration(ui->tableWidgetOutGrid->currentRow());
+    saveCurrentConfiguration();
 
     return true;
 }
@@ -304,6 +306,7 @@ void GenericComputeGridsConfiguration::restoreConfiguration(int row)
     ui->tableWidgetChecks->setEnabled(!m_outputconfiguration.isEmpty() && (row >= 0) && (row < m_outputconfiguration.size()));
     ui->pushButtonAddCheck->setEnabled(ui->tableWidgetChecks->isEnabled());
     ui->pushButtonDeleteCheck->setEnabled(ui->tableWidgetChecks->isEnabled());
+    ui->lineEditComputeFormula->setEnabled(ui->tableWidgetChecks->isEnabled());
 
     updateLabelConfigureOutGrid();
 
@@ -362,7 +365,7 @@ void GenericComputeGridsConfiguration::initTableHeaders()
 
 void GenericComputeGridsConfiguration::adjustTableWidgetColumnsToContents()
 {
-    /*int n = ui->tableWidgetInGrid->columnCount()-1;
+    int n = ui->tableWidgetInGrid->columnCount()-1;
 
     for(int i=0; i<n; ++i)
         ui->tableWidgetInGrid->resizeColumnToContents(i);
@@ -379,7 +382,7 @@ void GenericComputeGridsConfiguration::adjustTableWidgetColumnsToContents()
 
     ui->tableWidgetInGrid->horizontalHeader()->stretchLastSection();
     ui->tableWidgetOutGrid->horizontalHeader()->stretchLastSection();
-    ui->tableWidgetChecks->horizontalHeader()->stretchLastSection();*/
+    ui->tableWidgetChecks->horizontalHeader()->stretchLastSection();
 }
 
 void GenericComputeGridsConfiguration::setOrAddCurrentPredefinedConfiguration(bool add)
@@ -436,6 +439,11 @@ void GenericComputeGridsConfiguration::setOrAddCurrentPredefinedConfiguration(bo
                 setOutputGridConfiguration(mapper.getPredefinedConfigurationMapped().output);
         }
     }
+}
+
+void GenericComputeGridsConfiguration::saveCurrentConfiguration()
+{
+    saveConfiguration(ui->comboBoxOutGridToConfigure->currentIndex());
 }
 
 void GenericComputeGridsConfiguration::on_tableWidgetOutGrid_cellChanged(int row, int column)
