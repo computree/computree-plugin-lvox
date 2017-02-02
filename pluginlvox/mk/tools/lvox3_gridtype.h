@@ -10,6 +10,9 @@ namespace lvox {
     typedef float                       Grid3DfType;
     typedef QMutex                      MutexType;
 
+    static QMetaType::Type Grid3DiMetaType() { return QMetaType::Int; }
+    static QMetaType::Type Grid3DfMetaType() { return QMetaType::Float; }
+
     typedef CT_Grid3D<Grid3DiType>      Grid3Di;
     typedef CT_Grid3D<Grid3DfType>      Grid3Df;
     typedef std::vector<MutexType*>     MutexCollection;

@@ -68,7 +68,12 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     mk/tools/lvox3_countvisitor.h \
     mk/tools/lvox3_distancevisitor.h \
     mk/view/loadfileconfiguration.h \
-    mk/step/lvox3_steploadfiles.h
+    mk/step/lvox3_steploadfiles.h \
+    mk/step/lvox3_stepgenericcomputegrids.h \
+    mk/view/genericcomputegridsconfiguration.h \
+    mk/view/predefinedmapperconfiguration.h \
+    mk/tools/lvox3_genericcompute.h \
+    mk/tools/lvox3_genericconfiguration.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -116,7 +121,13 @@ SOURCES += \
     mk/tools/lvox3_computeall.cpp \
     mk/tools/lvox3_rayboxintersectionmath.cpp \
     mk/view/loadfileconfiguration.cpp \
-    mk/step/lvox3_steploadfiles.cpp
+    mk/step/lvox3_steploadfiles.cpp \
+    mk/step/lvox3_stepgenericcomputegrids.cpp \
+    mk/view/genericcomputegridsconfiguration.cpp \
+    mk/view/predefinedmapperconfiguration.cpp \
+    mk/tools/lvox3_genericcompute.cpp
+
+include(muParser/muparser.pri)
 
 TRANSLATIONS += languages/pluginlvoxv2_en.ts \
                 languages/pluginlvoxv2_fr.ts
@@ -125,4 +136,6 @@ INCLUDEPATH += .
 INCLUDEPATH += ./step
 
 FORMS += \
-    mk/view/loadfileconfiguration.ui
+    mk/view/loadfileconfiguration.ui \
+    mk/view/genericcomputegridsconfiguration.ui \
+    mk/view/predefinedmapperconfiguration.ui

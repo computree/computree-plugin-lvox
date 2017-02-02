@@ -16,7 +16,7 @@
 #include "mk/tools/lvox3_computehits.h"
 #include "mk/tools/lvox3_computebefore.h"
 #include "mk/tools/lvox3_computetheoriticals.h"
-#include "mk/tools/lvox3_computedensity.h"
+//#include "mk/tools/lvox3_computedensity.h"
 #include "mk/tools/lvox3_computeall.h"
 #include "mk/tools/lvox3_computelvoxgridspreparator.h"
 #include "mk/tools/lvox3_gridtype.h"
@@ -126,8 +126,8 @@ void LVOX3_StepComputeLvoxGrids::createOutResultModelListProtected()
         res->addItemModel(DEF_SearchInGroup, _bef_ModelName, new lvox::Grid3Di(), tr("Before"));
         res->addItemAttributeModel(_bef_ModelName, _NbFlag_ModelName, new CT_StdItemAttributeT<bool>("LVOX_GRD_NB"), tr("isNb"));
 
-        res->addItemModel(DEF_SearchInGroup, _density_ModelName, new lvox::Grid3Df(), tr("Density"));
-        res->addItemAttributeModel(_density_ModelName, _DensityFlag_ModelName, new CT_StdItemAttributeT<bool>("LVOX_GRD_DENSITY"), tr("isDensity"));
+        //res->addItemModel(DEF_SearchInGroup, _density_ModelName, new lvox::Grid3Df(), tr("Density"));
+        //res->addItemAttributeModel(_density_ModelName, _DensityFlag_ModelName, new CT_StdItemAttributeT<bool>("LVOX_GRD_DENSITY"), tr("isDensity"));
 
         // and if must compute distance, grids with distance
         if (m_computeDistances)
@@ -177,12 +177,12 @@ void LVOX3_StepComputeLvoxGrids::compute()
             lvox::Grid3Di*      hitGrid = lvox::Grid3Di::createGrid3DFromXYZCoords(_hits_ModelName.completeName(), outResult, pRes.minBBox.x(), pRes.minBBox.y(), pRes.minBBox.z(), pRes.maxBBox.x(), pRes.maxBBox.y(), pRes.maxBBox.z(), m_resolution, lvox::Max_Error_Code, 0, true);
             lvox::Grid3Di*      theoriticalGrid = new lvox::Grid3Di(_theo_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), m_resolution, lvox::Max_Error_Code, 0);
             lvox::Grid3Di*      beforeGrid = new lvox::Grid3Di(_bef_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), m_resolution, lvox::Max_Error_Code, 0);
-            lvox::Grid3Df*      densityGrid = new lvox::Grid3Df(_density_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), m_resolution, lvox::Max_Error_Code, 0);
+            //lvox::Grid3Df*      densityGrid = new lvox::Grid3Df(_density_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), m_resolution, lvox::Max_Error_Code, 0);
 
             hitGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NiFlag_ModelName.completeName(), "LVOX_GRD_NI", outResult, true));
             theoriticalGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NtFlag_ModelName.completeName(), "LVOX_GRD_NT", outResult, true));
             beforeGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NbFlag_ModelName.completeName(), "LVOX_GRD_NB", outResult, true));
-            densityGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_DensityFlag_ModelName.completeName(), "LVOX_GRD_DENSITY", outResult, true));
+            //densityGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_DensityFlag_ModelName.completeName(), "LVOX_GRD_DENSITY", outResult, true));
 
             lvox::Grid3Df*   deltaInGrid = NULL;
             lvox::Grid3Df*   deltaOutGrid = NULL;
@@ -192,7 +192,7 @@ void LVOX3_StepComputeLvoxGrids::compute()
             group->addItemDrawable(hitGrid);
             group->addItemDrawable(theoriticalGrid);
             group->addItemDrawable(beforeGrid);
-            group->addItemDrawable(densityGrid);
+            //group->addItemDrawable(densityGrid);
 
             if (m_computeDistances)
             {
@@ -210,12 +210,12 @@ void LVOX3_StepComputeLvoxGrids::compute()
             LVOX3_ComputeHits* hitsWorker = new LVOX3_ComputeHits(tc.pattern, tc.scene->getPointCloudIndex(), hitGrid, deltaInGrid, deltaOutGrid);
             LVOX3_ComputeTheoriticals* theoriticalWorker = new LVOX3_ComputeTheoriticals(tc.pattern, theoriticalGrid, deltaTheoritical);
             LVOX3_ComputeBefore* beforeWorker = new LVOX3_ComputeBefore(tc.pattern, tc.scene->getPointCloudIndex(), beforeGrid, deltaBefore);
-            LVOX3_ComputeDensity* densityWorker = new LVOX3_ComputeDensity(densityGrid, hitGrid, theoriticalGrid, beforeGrid, m_effectiveRayThreshold);
+            //LVOX3_ComputeDensity* densityWorker = new LVOX3_ComputeDensity(densityGrid, hitGrid, theoriticalGrid, beforeGrid, m_effectiveRayThreshold);
 
             workersManager.addWorker(0, hitsWorker);
             workersManager.addWorker(0, theoriticalWorker);
             workersManager.addWorker(0, beforeWorker);
-            workersManager.addWorker(1, densityWorker);
+            //workersManager.addWorker(1, densityWorker);
         }
 
         connect(&workersManager, SIGNAL(progressChanged(int)), this, SLOT(progressChanged(int)), Qt::DirectConnection);

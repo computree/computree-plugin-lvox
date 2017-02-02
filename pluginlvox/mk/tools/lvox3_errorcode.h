@@ -13,7 +13,7 @@ namespace lvox {
      * @brief Error or warning code that must be used in grid
      */
     enum ErrorOrWarningCode {
-        B_Equals_C = -1,                    // warning
+        B_Equals_C = -1,                    // error
         B_Inferior_C = -2,                  // error
         B_Minus_C_Inferior_Threshold = -3,  // warning
         A_Superior_B_Minus_C = -4,          // error
@@ -34,7 +34,10 @@ namespace lvox {
         Too_little_information_for_IDR_calculation = B_Minus_C_Inferior_Threshold,
         A_voxel_has_returned_more_rays_than_incoming_rays = A_Superior_B_Minus_C,
         All_incoming_rays_were_returned = A_Equals_B_Minus_C,
-        Probable_probability_of_number_of_returned_rays = IDR_Surestimated
+        Probable_probability_of_number_of_returned_rays = IDR_Surestimated,
+
+        // other
+        Zero_Division = B_Equals_C
     };
 }
 
