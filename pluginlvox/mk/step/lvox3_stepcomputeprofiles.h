@@ -3,21 +3,27 @@
  * @date 25.01.2017
  * @version 1
  */
-#ifndef LVOX3_STEPLOADFILES_H
-#define LVOX3_STEPLOADFILES_H
+#ifndef LVOX3_STEPCOMPUTEPROFILES_H
+#define LVOX3_STEPCOMPUTEPROFILES_H
 
-#include "ct_step/abstract/ct_abstractstepcanbeaddedfirst.h"
+#include "ct_step/abstract/ct_abstractstep.h"
 #include "ct_tools/model/ct_autorenamemodels.h"
 
-#include "mk/view/loadfileconfiguration.h"
+#include "ct_itemdrawable/abstract/ct_abstractgrid3d.h"
+#include "ct_itemdrawable/ct_profile.h"
+#include "ct_itemdrawable/ct_standarditemgroup.h"
 
-class LVOX3_StepLoadFiles : public CT_AbstractStepCanBeAddedFirst
+#include "mk/view/computeprofilesconfiguration.h"
+
+/**
+ * @brief Compute profile from grid
+ */
+class LVOX3_StepComputeProfiles : public CT_AbstractStep
 {
     Q_OBJECT
 
 public:
-    LVOX3_StepLoadFiles(CT_StepInitializeData &dataInit);
-    ~LVOX3_StepLoadFiles();
+    LVOX3_StepComputeProfiles(CT_StepInitializeData &dataInit);
 
     /**
      * @brief Return a short description of what do this class
@@ -60,12 +66,6 @@ protected:
     bool postConfigure();
 
     /**
-     * @brief Redefine this method if you want to init something after all configuration dialog has been called
-     * @return true if your initialisation is a success
-     */
-    bool protectedInitAfterConfiguration();
-
-    /**
      * @brief This method defines what kind of output the step produces
      */
     void createOutResultModelListProtected();
@@ -76,22 +76,37 @@ protected:
     void compute();
 
 private:
-    bool                                            m_useUserScannerConfiguration;
-    CT_AbstractReader*                              m_reader;
-    QList<LoadFileConfiguration::Configuration>     m_configuration;
+    typedef Eigen::Matrix<size_t, 3, 1> Vector3SizeT;
 
-    QList<CT_AbstractReader*>                       m_availableReaders;
-    CT_AutoRenameModels                             m_autoRenameFileHeader;
+    CT_AutoRenameModels m_outGroupModelName;
+    CT_AutoRenameModels m_outProfileModelName;
 
-    /**
-     * @brief Init reader list if empty
-     */
-    void initReaders();
+    ComputeProfilesConfiguration::Configuration m_configuration;
 
     /**
-     * @brief Returns a copy of the reader founded in the available list
+     * @brief Create a new profil and return it
      */
-    CT_AbstractReader* getReaderByClassName(const QString& className) const;
+    CT_Profile<double>* createProfile(CT_ResultGroup* outResult,
+                                      const CT_AbstractGrid3D* grid,
+                                      const size_t& currentIndex,
+                                      const Eigen::Vector3i& axeNormal,
+                                      const Eigen::Vector3i& axeOrdonnee,
+                                      double NAValue) const;
+
+    /**
+     * @brief Add the profile
+     */
+    void addProfile(CT_Profile<double>* profile, CT_ResultGroup* outResult, CT_StandardItemGroup* group);
+
+    /**
+     * @brief Modify start and end by using min, max, dim and minAndMaxInPourcent values
+     */
+    static void setStartEnd(size_t min, size_t max, Vector3SizeT& startEndStep, const size_t& dim, bool minAndMaxInPourcent);
+
+    /**
+     * @brief Modify step by using step and stepInPourcent values
+     */
+    static void setStep(size_t step, Vector3SizeT& startEndStep, bool stepInPourcent);
 };
 
-#endif // LVOX3_STEPLOADFILES_H
+#endif // LVOX3_STEPCOMPUTEPROFILES_H

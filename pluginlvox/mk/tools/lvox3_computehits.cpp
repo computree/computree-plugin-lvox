@@ -26,9 +26,12 @@ void LVOX3_ComputeHits::doTheJob()
     Eigen::Vector3d bottom, top, in, out;
 
     const size_t n_points = m_pointCloudIndex->size();
-    const Eigen::Vector3d& scanPos = m_pattern->getOrigin();
+    Eigen::Vector3d scanPos;
 
     bool computeDistance = (m_shotInDistance != NULL) || (m_shotOutDistance != NULL);
+
+    if(computeDistance)
+        scanPos = m_pattern->getOrigin();
 
     setProgressRange(0, computeDistance ? n_points+1 : n_points);
 

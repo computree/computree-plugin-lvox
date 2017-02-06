@@ -1,3 +1,8 @@
+/**
+ * @author Michael Krebs (AMVALOR)
+ * @date 25.01.2017
+ * @version 1
+ */
 #ifndef LOADFILECONFIGURATION_H
 #define LOADFILECONFIGURATION_H
 

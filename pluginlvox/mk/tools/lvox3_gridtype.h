@@ -1,7 +1,13 @@
+/**
+ * @author Michael Krebs (AMVALOR)
+ * @date 25.01.2017
+ * @version 1
+ */
 #ifndef LVOX3_GRIDTYPE_H
 #define LVOX3_GRIDTYPE_H
 
 #include "ct_itemdrawable/ct_grid3d.h"
+#include "ct_itemdrawable/ct_image2d.h"
 
 #include <QMutex>
 
@@ -16,6 +22,7 @@ namespace lvox {
     typedef CT_Grid3D<Grid3DiType>      Grid3Di;
     typedef CT_Grid3D<Grid3DfType>      Grid3Df;
     typedef std::vector<MutexType*>     MutexCollection;
+    typedef CT_Image2D<float>           SkyRaster;
 }
 
 #endif // LVOX3_GRIDTYPE_H

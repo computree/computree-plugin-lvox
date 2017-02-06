@@ -1,3 +1,8 @@
+/**
+ * @author Michael Krebs (AMVALOR)
+ * @date 25.01.2017
+ * @version 1
+ */
 #ifndef LVOX3_COMPUTEHITS_H
 #define LVOX3_COMPUTEHITS_H
 
