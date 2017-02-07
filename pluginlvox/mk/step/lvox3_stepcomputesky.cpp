@@ -22,7 +22,7 @@ LVOX3_StepComputeSky::LVOX3_StepComputeSky(CT_StepInitializeData &dataInit) : CT
 
 QString LVOX3_StepComputeSky::getStepDescription() const
 {
-    return tr("Calcul une grille ciel (LVOX 3)");
+    return tr("1a - Calcul un raster ciel (LVOX 3)");
 }
 
 CT_VirtualAbstractStep* LVOX3_StepComputeSky::createNewInstance(CT_StepInitializeData &dataInit)

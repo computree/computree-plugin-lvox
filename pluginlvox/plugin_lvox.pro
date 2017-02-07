@@ -77,7 +77,8 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     mk/step/lvox3_stepcomputeprofiles.h \
     mk/view/computeprofilesconfiguration.h \
     mk/step/lvox3_stepcomputesky.h \
-    mk/tools/lvox3_filtervoxelsbyzvaluesofraster.h
+    mk/tools/lvox3_filtervoxelsbyzvaluesofraster.h \
+    mk/tools/lvox3_interpolatedistance.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -133,7 +134,8 @@ SOURCES += \
     mk/step/lvox3_stepcomputeprofiles.cpp \
     mk/view/computeprofilesconfiguration.cpp \
     mk/step/lvox3_stepcomputesky.cpp \
-    mk/tools/lvox3_filtervoxelsbyzvaluesofraster.cpp
+    mk/tools/lvox3_filtervoxelsbyzvaluesofraster.cpp \
+    mk/tools/lvox3_interpolatedistance.cpp
 
 include(muParser/muparser.pri)
 

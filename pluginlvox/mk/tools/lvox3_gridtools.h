@@ -77,7 +77,31 @@ public:
 
     inline void computeCellTopMiddleCoordsAtIndex(const size_t& index,
                                                   Eigen::Vector3d& coords) {
-        size_t col = 0, lin = 0, level = 0;
+        size_t col, lin, level;
+
+        computeColLinLevelForIndex(index, col, lin, level);
+        computeCellBottomLeftCornerAtColLinLevel(col, lin, level, coords);
+
+        coords.x() += m_gridResolutionDiv2;
+        coords.y() += m_gridResolutionDiv2;
+        coords.z() += m_gridResolution;
+    }
+
+    inline void computeCellCenterCoordsAtColLinLevel(const size_t& col,
+                                                     const size_t& lin,
+                                                     const size_t& level,
+                                                     Eigen::Vector3d& coords) {
+        computeCellBottomLeftCornerAtColLinLevel(col, lin, level, coords);
+
+        coords.array() += m_gridResolutionDiv2;
+    }
+
+    inline void computeColLinLevelForIndex(const size_t& index,
+                                             size_t& col,
+                                             size_t& lin,
+                                             size_t& level) {
+        lin = 0;
+        level = 0;
 
         if(index >= m_gridDimXMultDimY)
             level = index/m_gridDimXMultDimY;
@@ -86,12 +110,6 @@ public:
             lin = (index - (level*m_gridDimXMultDimY))/m_gridDimX;
 
         col = index - (level*m_gridDimXMultDimY) - (lin*m_gridDimX);
-
-        computeCellBottomLeftCornerAtColLinLevel(col, lin, level, coords);
-
-        coords.x() += m_gridResolutionDiv2;
-        coords.y() += m_gridResolutionDiv2;
-        coords.z() += m_gridResolution;
     }
 
     static inline size_t computeColLinLevel(const double& min,
