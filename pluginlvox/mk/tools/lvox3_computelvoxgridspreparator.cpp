@@ -19,6 +19,7 @@ LVOX3_ComputeLVOXGridsPreparator::Result LVOX3_ComputeLVOXGridsPreparator::prepa
                                                                                    const QString& scannerModelName,
                                                                                    const QString& shotPatternModelName,
                                                                                    const QString& mntModelName,
+                                                                                   const QString& skyModelName,
                                                                                    double gridResolution,
                                                                                    lvox::GridMode gridMode,
                                                                                    Coordinates coord,
@@ -49,6 +50,7 @@ LVOX3_ComputeLVOXGridsPreparator::Result LVOX3_ComputeLVOXGridsPreparator::prepa
         const CT_Scanner* scanner = (CT_Scanner*)group->firstItemByINModelName(step, scannerModelName);
         const CT_ShootingPatternD* pattern = (CT_ShootingPatternD*)group->firstItemByINModelName(step, shotPatternModelName);
         const CT_AbstractImage2D* mnt = (CT_AbstractImage2D*)group->firstItemByINModelName(step, mntModelName);
+        const CT_AbstractImage2D* sky = (CT_AbstractImage2D*)group->firstItemByINModelName(step, skyModelName);
 
         if ((scene != NULL)
                 && ((scanner != NULL) || (pattern != NULL)))
@@ -57,6 +59,7 @@ LVOX3_ComputeLVOXGridsPreparator::Result LVOX3_ComputeLVOXGridsPreparator::prepa
             tc.scene = (CT_Scene*)scene;
             tc.pattern = (CT_ShootingPattern*)((scanner == NULL) ? pattern->getShootingPattern() : scanner->getShootingPattern());
             tc.mnt = (CT_AbstractImage2D*)mnt;
+            tc.sky = (CT_AbstractImage2D*)sky;
 
             const Eigen::Vector3d& origin = tc.pattern->getOrigin();
 

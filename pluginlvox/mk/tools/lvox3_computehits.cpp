@@ -49,7 +49,7 @@ void LVOX3_ComputeHits::doTheJob()
         // many check to reduce the compute time !
         gridTool.computeGridIndexForPoint(point, pointCol, pointLin, pointLevel, indice);
 
-        if(m_hits->valueAtIndex(indice) != lvox::Below_MNT) {
+        if(!lvox::FilterCode::isFiltered(m_hits->valueAtIndex(indice))) {
             m_hits->addValueAtIndex(indice, 1);
 
             if (computeDistance)

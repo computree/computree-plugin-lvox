@@ -74,10 +74,10 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     mk/view/predefinedmapperconfiguration.h \
     mk/tools/lvox3_genericcompute.h \
     mk/tools/lvox3_genericconfiguration.h \
-    mk/tools/lvox3_filtervoxelsbelowzvalues.h \
     mk/step/lvox3_stepcomputeprofiles.h \
     mk/view/computeprofilesconfiguration.h \
-    mk/step/lvox3_stepcomputesky.h
+    mk/step/lvox3_stepcomputesky.h \
+    mk/tools/lvox3_filtervoxelsbyzvaluesofraster.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -130,10 +130,10 @@ SOURCES += \
     mk/view/genericcomputegridsconfiguration.cpp \
     mk/view/predefinedmapperconfiguration.cpp \
     mk/tools/lvox3_genericcompute.cpp \
-    mk/tools/lvox3_filtervoxelsbelowzvalues.cpp \
     mk/step/lvox3_stepcomputeprofiles.cpp \
     mk/view/computeprofilesconfiguration.cpp \
-    mk/step/lvox3_stepcomputesky.cpp
+    mk/step/lvox3_stepcomputesky.cpp \
+    mk/tools/lvox3_filtervoxelsbyzvaluesofraster.cpp
 
 include(muParser/muparser.pri)
 

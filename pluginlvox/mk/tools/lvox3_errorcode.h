@@ -19,8 +19,9 @@ namespace lvox {
         A_Superior_B_Minus_C = -4,          // error
         A_Equals_B_Minus_C = -5,            // warning
         IDR_Surestimated = -6,              // warning
-        Below_MNT = -7,                     // filter
-        Max_Error_Code = -8,                // don't use it ! it is just to set NA() in grid
+        MNT = -7,                           // filter
+        Sky = -8,                           // filter
+        Max_Error_Code = -9,                // don't use it ! it is just to set NA() in grid
 
         // Same as previous but with Nb, Nt, Ni
         Nt_Equals_Nb = B_Equals_C,
@@ -39,6 +40,14 @@ namespace lvox {
 
         // other
         Zero_Division = B_Equals_C
+    };
+
+    struct FilterCode {
+        /**
+         * @brief Call it to know if the value is filtered or not
+         */
+        template<typename T>
+        static bool isFiltered(const T& value) { return value <= lvox::MNT; }
     };
 }
 

@@ -29,6 +29,7 @@ public:
         CT_Scene*               scene;
         CT_ShootingPattern*     pattern;
         CT_AbstractImage2D*     mnt;
+        CT_AbstractImage2D*     sky;
     };
 
     struct Result {
@@ -58,6 +59,7 @@ public:
      * @param scannerModelName : scanner model name to find it
      * @param shotPatternModelName : shooting pattern model name to find it
      * @param mntModelName : mnt model name to find it
+     * @param skyModelName : sky model name to find it
      * @param gridResolution : the grid resolution
      * @param gridMode : grid mode to use
      * @param coord : coordinate information if gridMode == ...Coordinates...
@@ -70,6 +72,7 @@ public:
                    const QString& scannerModelName,
                    const QString& shotPatternModelName,
                    const QString& mntModelName,
+                   const QString& skyModelName,
                    double gridResolution,
                    lvox::GridMode gridMode,
                    Coordinates coord = Coordinates(),

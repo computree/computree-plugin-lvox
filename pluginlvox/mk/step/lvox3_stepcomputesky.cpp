@@ -95,7 +95,7 @@ void LVOX3_StepComputeSky::compute()
             size_t index = 0;
             size_t nCells = hitGrid->nCells();
             size_t level, indice;
-            double sky = hitGrid->minZ();
+            double maxSkyLevel = hitGrid->minZ();
 
             LVOX3_GridTools gridTools(hitGrid);
 
@@ -109,7 +109,7 @@ void LVOX3_StepComputeSky::compute()
                         gridTools.computeGridIndexForColLinLevel(col, lin, level, indice);
                         if(hitGrid->valueAtIndex(indice) > m_minimumNumberOfPoints) {
                             const double value = hitGrid->minZ()+((level+1)*m_gridResolution);
-                            sky = qMax(value, sky);
+                            maxSkyLevel = qMax(value, maxSkyLevel);
                             break;
                         }
 
@@ -120,9 +120,9 @@ void LVOX3_StepComputeSky::compute()
             }
 
             for(size_t i=0; i<skyRaster->nCells(); ++i)
-                skyRaster->setValueAtIndex(i, sky);
+                skyRaster->setValueAtIndex(i, maxSkyLevel);
 
-            skyRaster->setlevel(sky);
+            skyRaster->setlevel(maxSkyLevel);
             skyRaster->computeMinMax();
 
             group->addItemDrawable(skyRaster);
@@ -130,7 +130,7 @@ void LVOX3_StepComputeSky::compute()
             skyRaster->addItemAttribute(new CT_StdItemAttributeT<double>(m_outZMaxModelName.completeName(),
                                                                     CT_AbstractCategory::staticInitDataZ(),
                                                                     outResult,
-                                                                    sky));
+                                                                    maxSkyLevel));
             group->addItemDrawable(hitGrid);
         }
     }

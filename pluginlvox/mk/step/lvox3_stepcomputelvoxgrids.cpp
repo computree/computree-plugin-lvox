@@ -14,22 +14,22 @@
 #include "ct_view/ct_stepconfigurabledialog.h"
 #include "ct_view/ct_buttongroup.h"
 
-#include "mk/tools/lvox3_filtervoxelsbelowzvalues.h"
+#include "mk/tools/lvox3_filtervoxelsbyzvaluesofraster.h"
 #include "mk/tools/lvox3_computehits.h"
 #include "mk/tools/lvox3_computebefore.h"
 #include "mk/tools/lvox3_computetheoriticals.h"
-//#include "mk/tools/lvox3_computedensity.h"
 #include "mk/tools/lvox3_computeall.h"
 #include "mk/tools/lvox3_computelvoxgridspreparator.h"
 #include "mk/tools/lvox3_gridtype.h"
 #include "mk/tools/lvox3_errorcode.h"
 
 #define DEF_SearchInResult      "r"
+#define DEF_SearchInGroup       "gr"
 #define DEF_SearchInScene       "sc"
 #define DEF_SearchInScan        "sca"
 #define DEF_SearchInShotPattern "pat"
 #define DEF_SearchInMNT         "mnt"
-#define DEF_SearchInGroup       "gr"
+#define DEF_SearchInSky         "sky"
 
 LVOX3_StepComputeLvoxGrids::LVOX3_StepComputeLvoxGrids(CT_StepInitializeData &dataInit) : CT_AbstractStep(dataInit)
 {
@@ -37,6 +37,7 @@ LVOX3_StepComputeLvoxGrids::LVOX3_StepComputeLvoxGrids(CT_StepInitializeData &da
     m_effectiveRayThreshold = 10;
     m_computeDistances = false;
     m_useMNT = true;
+    m_useSky = true;
 
     m_gridMode = lvox::BoundingBoxOfTheScene;
     m_coordinates.x() = -20.0;
@@ -76,6 +77,7 @@ void LVOX3_StepComputeLvoxGrids::createInResultModelListProtected()
     resultScan->addItemModel(DEF_SearchInGroup, DEF_SearchInShotPattern, CT_ShootingPatternD::staticGetType(), tr("Shooting pattern"), tr("The shooting pattern is used to simulate it. If it was not present choose at least a scanner !"), CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
 
     resultScan->addItemModel(DEF_SearchInGroup, DEF_SearchInMNT, CT_AbstractImage2D::staticGetType(), tr("MNT"), "", CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
+    resultScan->addItemModel(DEF_SearchInGroup, DEF_SearchInSky, CT_AbstractImage2D::staticGetType(), tr("MNC"), "", CT_InAbstractModel::C_ChooseOneIfMultiple, CT_InAbstractModel::F_IsOptional);
 }
 
 void LVOX3_StepComputeLvoxGrids::createPostConfigurationDialog()
@@ -89,6 +91,7 @@ void LVOX3_StepComputeLvoxGrids::createPostConfigurationDialog()
     configDialog->addInt(tr("Minimum number of effective ray in a voxel to take it into account"),tr(""),0,100000, m_effectiveRayThreshold );
     configDialog->addBool("", "", tr("Compute Distances"), m_computeDistances);
     configDialog->addBool("", "", tr("Use the MNT (if present) to filter voxels that was below it"), m_useMNT );
+    configDialog->addBool("", "", tr("Use the MNC (if present) to filter voxels that was above it"), m_useSky );
     configDialog->addEmpty();
 
     configDialog->addText(tr("Reference for (minX, minY, minZ) corner of the grid :"),"", "");
@@ -133,9 +136,6 @@ void LVOX3_StepComputeLvoxGrids::createOutResultModelListProtected()
         res->addItemModel(DEF_SearchInGroup, _bef_ModelName, new lvox::Grid3Di(), tr("Before"));
         res->addItemAttributeModel(_bef_ModelName, _NbFlag_ModelName, new CT_StdItemAttributeT<bool>("LVOX_GRD_NB"), tr("isNb"));
 
-        //res->addItemModel(DEF_SearchInGroup, _density_ModelName, new lvox::Grid3Df(), tr("Density"));
-        //res->addItemAttributeModel(_density_ModelName, _DensityFlag_ModelName, new CT_StdItemAttributeT<bool>("LVOX_GRD_DENSITY"), tr("isDensity"));
-
         // and if must compute distance, grids with distance
         if (m_computeDistances)
         {
@@ -164,6 +164,7 @@ void LVOX3_StepComputeLvoxGrids::compute()
                                                               DEF_SearchInScan,
                                                               DEF_SearchInShotPattern,
                                                               DEF_SearchInMNT,
+                                                              DEF_SearchInSky,
                                                               m_resolution,
                                                               (lvox::GridMode)m_gridMode,
                                                               coo,
@@ -185,7 +186,6 @@ void LVOX3_StepComputeLvoxGrids::compute()
             lvox::Grid3Di*      hitGrid = lvox::Grid3Di::createGrid3DFromXYZCoords(_hits_ModelName.completeName(), outResult, pRes.minBBox.x(), pRes.minBBox.y(), pRes.minBBox.z(), pRes.maxBBox.x(), pRes.maxBBox.y(), pRes.maxBBox.z(), m_resolution, lvox::Max_Error_Code, 0, true);
             lvox::Grid3Di*      theoriticalGrid = new lvox::Grid3Di(_theo_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), m_resolution, lvox::Max_Error_Code, 0);
             lvox::Grid3Di*      beforeGrid = new lvox::Grid3Di(_bef_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), m_resolution, lvox::Max_Error_Code, 0);
-            //lvox::Grid3Df*      densityGrid = new lvox::Grid3Df(_density_ModelName.completeName(), outResult, hitGrid->minX(), hitGrid->minY(), hitGrid->minZ(), hitGrid->xdim(), hitGrid->ydim(), hitGrid->zdim(), m_resolution, lvox::Max_Error_Code, 0);
 
             QList<CT_AbstractGrid3D*> allGrids;
             allGrids.append(hitGrid);
@@ -195,7 +195,6 @@ void LVOX3_StepComputeLvoxGrids::compute()
             hitGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NiFlag_ModelName.completeName(), "LVOX_GRD_NI", outResult, true));
             theoriticalGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NtFlag_ModelName.completeName(), "LVOX_GRD_NT", outResult, true));
             beforeGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_NbFlag_ModelName.completeName(), "LVOX_GRD_NB", outResult, true));
-            //densityGrid->addItemAttribute(new CT_StdItemAttributeT<bool>(_DensityFlag_ModelName.completeName(), "LVOX_GRD_DENSITY", outResult, true));
 
             lvox::Grid3Df*   deltaInGrid = NULL;
             lvox::Grid3Df*   deltaOutGrid = NULL;
@@ -205,7 +204,6 @@ void LVOX3_StepComputeLvoxGrids::compute()
             group->addItemDrawable(hitGrid);
             group->addItemDrawable(theoriticalGrid);
             group->addItemDrawable(beforeGrid);
-            //group->addItemDrawable(densityGrid);
 
             if (m_computeDistances)
             {
@@ -229,23 +227,28 @@ void LVOX3_StepComputeLvoxGrids::compute()
                 group->addItemDrawable(deltaBefore);
             }
 
-            LVOX3_FilterVoxelsBelowZValues* filterVoxelsBelowMNTWorker = NULL;
+            LVOX3_FilterVoxelsByZValuesOfRaster* filterVoxelsBelowMNTWorker = NULL;
+            LVOX3_FilterVoxelsByZValuesOfRaster* filterVoxelsInSkyWorker = NULL;
 
             if(tc.mnt != NULL)
-                filterVoxelsBelowMNTWorker = new LVOX3_FilterVoxelsBelowZValues(allGrids, tc.mnt);
+                filterVoxelsBelowMNTWorker = new LVOX3_FilterVoxelsByZValuesOfRaster(allGrids, tc.mnt, LVOX3_FilterVoxelsByZValuesOfRaster::Below, lvox::MNT);
+
+            if(tc.sky != NULL)
+                filterVoxelsInSkyWorker = new LVOX3_FilterVoxelsByZValuesOfRaster(allGrids, tc.sky, LVOX3_FilterVoxelsByZValuesOfRaster::Above, lvox::Sky);
 
             LVOX3_ComputeHits* hitsWorker = new LVOX3_ComputeHits(tc.pattern, tc.scene->getPointCloudIndex(), hitGrid, deltaInGrid, deltaOutGrid);
             LVOX3_ComputeTheoriticals* theoriticalWorker = new LVOX3_ComputeTheoriticals(tc.pattern, theoriticalGrid, deltaTheoritical);
             LVOX3_ComputeBefore* beforeWorker = new LVOX3_ComputeBefore(tc.pattern, tc.scene->getPointCloudIndex(), beforeGrid, deltaBefore);
-            //LVOX3_ComputeDensity* densityWorker = new LVOX3_ComputeDensity(densityGrid, hitGrid, theoriticalGrid, beforeGrid, m_effectiveRayThreshold);
 
             if(filterVoxelsBelowMNTWorker != NULL)
                 workersManager.addWorker(0, filterVoxelsBelowMNTWorker);
 
+            if(filterVoxelsInSkyWorker != NULL)
+                workersManager.addWorker(0, filterVoxelsInSkyWorker);
+
             workersManager.addWorker(1, hitsWorker);
             workersManager.addWorker(1, theoriticalWorker);
             workersManager.addWorker(1, beforeWorker);
-            //workersManager.addWorker(1, densityWorker);
         }
 
         connect(&workersManager, SIGNAL(progressChanged(int)), this, SLOT(progressChanged(int)), Qt::DirectConnection);

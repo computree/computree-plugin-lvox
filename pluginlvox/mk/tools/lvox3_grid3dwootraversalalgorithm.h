@@ -85,7 +85,7 @@ public:
 
             if (m_visitFirstVoxelTouched)
             {
-                if(m_grid->valueAtIndex(context.currentVoxelIndex) != lvox::Below_MNT) {
+                if(!lvox::FilterCode::isFiltered(m_grid->valueAtIndex(context.currentVoxelIndex))) {
                     for (int i = 0 ; i < m_numberOfVisitors ; ++i)
                         m_visitorList.at(i)->visit(context);
                 } else {
@@ -112,7 +112,7 @@ public:
                 // Add the index of the voxel to the list
                 m_gridTools->computeGridIndexForColLinLevel(context.colLinLevel.x(), context.colLinLevel.y(), context.colLinLevel.z(), context.currentVoxelIndex);
 
-                if(m_grid->valueAtIndex(context.currentVoxelIndex) != lvox::Below_MNT) {
+                if(!lvox::FilterCode::isFiltered(m_grid->valueAtIndex(context.currentVoxelIndex))) {
                     for (int i = 0 ; i < m_numberOfVisitors ; ++i)
                         m_visitorList.at(i)->visit(context);
                 } else {
