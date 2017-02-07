@@ -39,7 +39,7 @@
 #include "ct_itemdrawable/ct_scene.h"
 #include "ct_itemdrawable/ct_scanner.h"
 #include "ct_itemdrawable/ct_grid3d.h"
-#include "ct_itemdrawable/CT_FileHeader.h"
+#include "ct_itemdrawable/ct_fileheader.h"
 #include "qvector3d.h"
 
 #include "ct_step/abstract/ct_abstractsteploadfile.h"

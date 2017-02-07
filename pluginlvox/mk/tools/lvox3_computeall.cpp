@@ -1,6 +1,8 @@
 #include "lvox3_computeall.h"
 
 #include <QThread>
+#include <QMutex>
+#include <QMutexLocker>
 
 LVOX3_ComputeAll::LVOX3_ComputeAll() : LVOX3_Worker()
 {

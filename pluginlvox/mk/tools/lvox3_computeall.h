@@ -10,6 +10,8 @@
 
 #include <QMultiMap>
 
+class QMutex;
+
 /**
  * @brief Use this class to manage multiple worker
  */
