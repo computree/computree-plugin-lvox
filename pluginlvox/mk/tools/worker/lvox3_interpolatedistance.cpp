@@ -1,6 +1,5 @@
 #include "lvox3_interpolatedistance.h"
 
-#include "mk/tools/lvox3_gridtools.h"
 #include "mk/tools/lvox3_errorcode.h"
 
 #include "mk/tools/traversal/propagation/lvox3_grid3dpropagationalgorithm.h"
@@ -15,12 +14,6 @@ LVOX3_InterpolateDistance::LVOX3_InterpolateDistance(const lvox::Grid3Df *origin
     m_outDensityGrid = outDensityGrid;
     m_radius = radius;
     m_power = power;
-    m_gridTools = new LVOX3_GridTools(m_originalDensityGrid);
-}
-
-LVOX3_InterpolateDistance::~LVOX3_InterpolateDistance()
-{
-    delete m_gridTools;
 }
 
 void LVOX3_InterpolateDistance::doTheJob()

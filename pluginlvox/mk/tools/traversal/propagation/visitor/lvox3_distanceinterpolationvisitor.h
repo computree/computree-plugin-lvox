@@ -10,12 +10,21 @@
 #include "mk/tools/lvox3_gridtype.h"
 
 /**
- * @brief Use this visitor to interpolate a grid with a distance factor
+ * @brief Use this visitor to interpolate a grid with a distance factor.
+ *
+ * The formula used is : Sum(IDR / ((D^p)+1))
+ *                       --------------------
+ *                       Sum((1 / ((D^p)+1))
+ *
+ * "IDR" = value of density of the cell inspected
+ * "D" the distance between the first cell and the visited cell
+ * "p" the power value defined in constructor
  */
 class LVOX3_DistanceInterpolationVisitor : public LVOX3_PropagationVisitor
 {
 public:
-    LVOX3_DistanceInterpolationVisitor(const lvox::Grid3Df* densityGrid, const int& power);
+    LVOX3_DistanceInterpolationVisitor(const lvox::Grid3Df* densityGrid,
+                                       const int& power);
 
     /**
      * @brief Called when the propagation start

@@ -11,6 +11,16 @@
 
 /**
  * @brief Use this visitor to interpolate a grid with a trust (confiance) factor
+ *
+ * The formula used is : Sum(IDR * TF)
+ *                       --------------------
+ *                       Sum(TF)
+ *
+ * "IDR" = value of density of the cell inspected
+ * "TF" a trust factor calculated like this :
+ *      if ((Nb - Nt) is <= effectiveRayThreshold)                  => TF = 0
+ *      if ((Nb - Nt) > endRayThreshold)                            => TF = 1
+ *      if (effectiveRayThreshold < (Nb - Nt) < endRayThreshold     => TF = sin( ((Nb - Nt) - effectiveRayThreshold) / (endRayThreshold-effectiveRayThreshold))
  */
 class LVOX3_TrustInterpolationVisitor : public LVOX3_PropagationVisitor
 {
