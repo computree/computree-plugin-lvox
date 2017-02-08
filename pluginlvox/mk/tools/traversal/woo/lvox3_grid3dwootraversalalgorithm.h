@@ -10,18 +10,22 @@
 #include "ct_itemdrawable/tools/scanner/ct_shot.h"
 #include "ct_itemdrawable/tools/gridtools/ct_abstractgrid3dbeamvisitor.h"
 
-#include "lvox3_errorcode.h"
-#include "lvox3_gridtools.h"
-#include "lvox3_rayboxintersectionmath.h"
-#include "lvox3_grid3dvoxelvisitor.h"
+#include "mk/tools/lvox3_errorcode.h"
+#include "mk/tools/lvox3_gridtools.h"
+#include "mk/tools/lvox3_rayboxintersectionmath.h"
+#include "mk/tools/traversal/woo/visitor/lvox3_grid3dvoxelwoovisitor.h"
 
+/**
+ * @brief Use this class to propagate a shot in cells of 3D grid and do
+ *        anything for each cell touch by the shot
+ */
 template<typename T>
 class LVOX3_Grid3DWooTraversalAlgorithm
 {
 public:
     LVOX3_Grid3DWooTraversalAlgorithm(const CT_Grid3D<T>* grid,
                                       bool visitFirstVoxelTouched,
-                                      QVector<LVOX3_Grid3DVoxelVisitor*>& list)
+                                      QVector<LVOX3_Grid3DVoxelWooVisitor*>& list)
     {
         m_visitorList = list;
         m_numberOfVisitors = list.size();
@@ -57,7 +61,7 @@ public:
         {
             int i;
 
-            LVOX3_Grid3DVoxelVisitorContext context(origin, direction);
+            LVOX3_Grid3DVoxelWooVisitorContext context(origin, direction);
             context.nearImpactPointWithGrid = start;
             context.farImpactPointWithGrid = end;
 
@@ -132,7 +136,7 @@ private:
     Eigen::Vector3d                             m_gridTop;
     double                                      m_gridResolution;
     bool                                        m_visitFirstVoxelTouched;
-    QVector<LVOX3_Grid3DVoxelVisitor* >         m_visitorList;
+    QVector<LVOX3_Grid3DVoxelWooVisitor* >         m_visitorList;
     int                                         m_numberOfVisitors;
     quint8                                      m_chooseAxis[8];
 

@@ -50,35 +50,40 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     tools/lvox_computebeforewithlengththresholdthread.h \
     step/lvox_stepcomputeocclusionspace.h \
     mk/step/lvox3_stepcomputelvoxgrids.h \
-    mk/tools/lvox3_computehits.h \
+    mk/tools/worker/lvox3_computehits.h \
     mk/tools/lvox3_errorcode.h \
-    mk/tools/lvox3_worker.h \
-    mk/tools/lvox3_computetheoriticals.h \
-    mk/tools/lvox3_computebefore.h \
-    mk/tools/lvox3_computedensity.h \
+    mk/tools/worker/lvox3_worker.h \
+    mk/tools/worker/lvox3_computetheoriticals.h \
+    mk/tools/worker/lvox3_computebefore.h \
+    mk/tools/worker/lvox3_computedensity.h \
     mk/tools/lvox3_computelvoxgridspreparator.h \
     mk/tools/lvox3_gridmode.h \
     mk/tools/lvox3_gridtype.h \
-    mk/tools/lvox3_computeall.h \
+    mk/tools/worker/lvox3_computeall.h \
     mk/tools/lvox3_gridtools.h \
-    mk/tools/lvox3_grid3dwootraversalalgorithm.h \
+    mk/tools/traversal/woo/lvox3_grid3dwootraversalalgorithm.h \
     mk/tools/lvox3_rayboxintersectionmath.h \
-    mk/tools/lvox3_grid3dvoxelvisitor.h \
-    mk/tools/lvox3_grid3dvoxelvisitorcontext.h \
-    mk/tools/lvox3_countvisitor.h \
-    mk/tools/lvox3_distancevisitor.h \
+    mk/tools/traversal/woo/visitor/lvox3_countvisitor.h \
+    mk/tools/traversal/woo/visitor/lvox3_distancevisitor.h \
     mk/view/loadfileconfiguration.h \
     mk/step/lvox3_steploadfiles.h \
     mk/step/lvox3_stepgenericcomputegrids.h \
     mk/view/genericcomputegridsconfiguration.h \
     mk/view/predefinedmapperconfiguration.h \
-    mk/tools/lvox3_genericcompute.h \
+    mk/tools/worker/lvox3_genericcompute.h \
     mk/tools/lvox3_genericconfiguration.h \
     mk/step/lvox3_stepcomputeprofiles.h \
     mk/view/computeprofilesconfiguration.h \
     mk/step/lvox3_stepcomputesky.h \
-    mk/tools/lvox3_filtervoxelsbyzvaluesofraster.h \
-    mk/tools/lvox3_interpolatedistance.h
+    mk/tools/worker/lvox3_filtervoxelsbyzvaluesofraster.h \
+    mk/tools/worker/lvox3_interpolatedistance.h \
+    mk/tools/traversal/propagation/lvox3_grid3dpropagationalgorithm.h \
+    mk/tools/traversal/woo/visitor/lvox3_grid3dvoxelwoovisitorcontext.h \
+    mk/tools/traversal/woo/visitor/lvox3_grid3dvoxelwoovisitor.h \
+    mk/tools/traversal/propagation/visitor/lvox3_propagationvisitor.h \
+    mk/tools/traversal/propagation/visitor/lvox3_propagationvisitorcontext.h \
+    mk/tools/traversal/propagation/visitor/lvox3_distanceinterpolationvisitor.h \
+    mk/tools/traversal/propagation/visitor/lvox3_trustinterpolationvisitor.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -117,25 +122,28 @@ SOURCES += \
     tools/lvox_computebeforewithlengththresholdthread.cpp \
     step/lvox_stepcomputeocclusionspace.cpp \
     mk/step/lvox3_stepcomputelvoxgrids.cpp \
-    mk/tools/lvox3_computehits.cpp \
-    mk/tools/lvox3_worker.cpp \
-    mk/tools/lvox3_computetheoriticals.cpp \
-    mk/tools/lvox3_computebefore.cpp \
-    mk/tools/lvox3_computedensity.cpp \
+    mk/tools/worker/lvox3_computehits.cpp \
+    mk/tools/worker/lvox3_worker.cpp \
+    mk/tools/worker/lvox3_computetheoriticals.cpp \
+    mk/tools/worker/lvox3_computebefore.cpp \
+    mk/tools/worker/lvox3_computedensity.cpp \
     mk/tools/lvox3_computelvoxgridspreparator.cpp \
-    mk/tools/lvox3_computeall.cpp \
+    mk/tools/worker/lvox3_computeall.cpp \
     mk/tools/lvox3_rayboxintersectionmath.cpp \
     mk/view/loadfileconfiguration.cpp \
     mk/step/lvox3_steploadfiles.cpp \
     mk/step/lvox3_stepgenericcomputegrids.cpp \
     mk/view/genericcomputegridsconfiguration.cpp \
     mk/view/predefinedmapperconfiguration.cpp \
-    mk/tools/lvox3_genericcompute.cpp \
+    mk/tools/worker/lvox3_genericcompute.cpp \
     mk/step/lvox3_stepcomputeprofiles.cpp \
     mk/view/computeprofilesconfiguration.cpp \
     mk/step/lvox3_stepcomputesky.cpp \
-    mk/tools/lvox3_filtervoxelsbyzvaluesofraster.cpp \
-    mk/tools/lvox3_interpolatedistance.cpp
+    mk/tools/worker/lvox3_filtervoxelsbyzvaluesofraster.cpp \
+    mk/tools/worker/lvox3_interpolatedistance.cpp \
+    mk/tools/traversal/propagation/lvox3_grid3dpropagationalgorithm.cpp \
+    mk/tools/traversal/propagation/visitor/lvox3_distanceinterpolationvisitor.cpp \
+    mk/tools/traversal/propagation/visitor/lvox3_trustinterpolationvisitor.cpp
 
 include(muParser/muparser.pri)
 

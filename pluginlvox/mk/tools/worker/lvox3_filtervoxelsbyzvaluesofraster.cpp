@@ -1,7 +1,7 @@
 #include "lvox3_filtervoxelsbyzvaluesofraster.h"
 
-#include "lvox3_gridtools.h"
-#include "lvox3_errorcode.h"
+#include "mk/tools/lvox3_gridtools.h"
+#include "mk/tools/lvox3_errorcode.h"
 
 LVOX3_FilterVoxelsByZValuesOfRaster::LVOX3_FilterVoxelsByZValuesOfRaster(const QList<CT_AbstractGrid3D *> &grids,
                                                                const CT_AbstractImage2D *zValues,

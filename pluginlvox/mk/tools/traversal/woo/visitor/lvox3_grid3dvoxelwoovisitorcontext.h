@@ -3,15 +3,19 @@
  * @date 25.01.2017
  * @version 1
  */
-#ifndef LVOX3_GRID3DVOXELVISITORCONTEXT_H
-#define LVOX3_GRID3DVOXELVISITORCONTEXT_H
+#ifndef LVOX3_GRID3DVOXELWOOVISITORCONTEXT_H
+#define LVOX3_GRID3DVOXELWOOVISITORCONTEXT_H
 
 #include "Eigen/Core"
 
-struct LVOX3_Grid3DVoxelVisitorContext {
+/**
+ * @brief This is all elements computed in class LVOX3_Grid3DWooTraversalAlgorithm for
+ *        each cell that must be visited
+ */
+struct LVOX3_Grid3DVoxelWooVisitorContext {
     typedef Eigen::Matrix<size_t, 3, 1> Vector3SizeT;
 
-    LVOX3_Grid3DVoxelVisitorContext(const Eigen::Vector3d& origin,
+    LVOX3_Grid3DVoxelWooVisitorContext(const Eigen::Vector3d& origin,
                                     const Eigen::Vector3d& direction) : rayOrigin(origin),
                                                                         rayDirection(direction) {}
 
@@ -23,4 +27,4 @@ struct LVOX3_Grid3DVoxelVisitorContext {
     Eigen::Vector3d                 farImpactPointWithGrid;     /*! second impact point of the ray with the grid (bbox of the grid) */
 };
 
-#endif // LVOX3_GRID3DVOXELVISITORCONTEXT_H
+#endif // LVOX3_GRID3DVOXELWOOVISITORCONTEXT_H

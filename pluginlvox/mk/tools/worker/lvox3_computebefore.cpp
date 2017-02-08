@@ -1,8 +1,8 @@
 #include "lvox3_computebefore.h"
 
-#include "mk/tools/lvox3_grid3dwootraversalalgorithm.h"
-#include "mk/tools/lvox3_countvisitor.h"
-#include "mk/tools/lvox3_distancevisitor.h"
+#include "mk/tools/traversal/woo/lvox3_grid3dwootraversalalgorithm.h"
+#include "mk/tools/traversal/woo/visitor/lvox3_countvisitor.h"
+#include "mk/tools/traversal/woo/visitor/lvox3_distancevisitor.h"
 #include "mk/tools/lvox3_errorcode.h"
 
 #include "ct_itemdrawable/tools/gridtools/ct_grid3dwootraversalalgorithm.h"
@@ -24,7 +24,7 @@ void LVOX3_ComputeBefore::doTheJob()
     size_t n_points = m_pointCloudIndex->size();
 
     // Creates visitors
-    QVector<LVOX3_Grid3DVoxelVisitor*> list;
+    QVector<LVOX3_Grid3DVoxelWooVisitor*> list;
 
     LVOX3_CountVisitor<lvox::Grid3DiType> countVisitor(m_before);
     LVOX3_DistanceVisitor<lvox::Grid3DfType> distVisitor(m_shotDeltaDistance);

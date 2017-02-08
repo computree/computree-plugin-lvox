@@ -6,7 +6,7 @@
 #ifndef LVOX3_GENERICCOMPUTE_H
 #define LVOX3_GENERICCOMPUTE_H
 
-#include "mk/tools/lvox3_worker.h"
+#include "mk/tools/worker/lvox3_worker.h"
 
 #include "ct_itemdrawable/abstract/ct_abstractgrid3d.h"
 #include "mk/tools/lvox3_genericconfiguration.h"

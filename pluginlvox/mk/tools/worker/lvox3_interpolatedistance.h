@@ -7,7 +7,7 @@
 #define LVOX3_INTERPOLATEDISTANCE_H
 
 #include "lvox3_worker.h"
-#include "lvox3_gridtype.h"
+#include "mk/tools/lvox3_gridtype.h"
 
 class LVOX3_GridTools;
 

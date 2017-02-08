@@ -1,9 +1,9 @@
 #include "lvox3_computetheoriticals.h"
 
-#include "mk/tools/lvox3_countvisitor.h"
-#include "mk/tools/lvox3_distancevisitor.h"
+#include "mk/tools/traversal/woo/lvox3_grid3dwootraversalalgorithm.h"
+#include "mk/tools/traversal/woo/visitor/lvox3_countvisitor.h"
+#include "mk/tools/traversal/woo/visitor/lvox3_distancevisitor.h"
 #include "mk/tools/lvox3_errorcode.h"
-#include "mk/tools/lvox3_grid3dwootraversalalgorithm.h"
 
 LVOX3_ComputeTheoriticals::LVOX3_ComputeTheoriticals(const CT_ShootingPattern* pattern,
                                                      lvox::Grid3Di* theoricals,
@@ -21,7 +21,7 @@ LVOX3_ComputeTheoriticals::~LVOX3_ComputeTheoriticals()
 void LVOX3_ComputeTheoriticals::doTheJob()
 {
     // Creates visitors
-    QVector<LVOX3_Grid3DVoxelVisitor*> list;
+    QVector<LVOX3_Grid3DVoxelWooVisitor*> list;
 
     LVOX3_CountVisitor<lvox::Grid3DiType> countVisitor(m_outputTheoriticalGrid);
     LVOX3_DistanceVisitor<lvox::Grid3DfType> distVisitor(m_outputDeltaTheoriticalGrid);

@@ -3,9 +3,9 @@
 #include "ct_itemdrawable/ct_beam.h"
 #include "ct_iterator/ct_pointiterator.h"
 
-#include "lvox3_gridtools.h"
-#include "lvox3_rayboxintersectionmath.h"
-#include "lvox3_errorcode.h"
+#include "mk/tools/lvox3_gridtools.h"
+#include "mk/tools/lvox3_rayboxintersectionmath.h"
+#include "mk/tools/lvox3_errorcode.h"
 
 LVOX3_ComputeHits::LVOX3_ComputeHits(const CT_ShootingPattern* pattern,
                                      const CT_AbstractPointCloudIndex* pointCloudIndex,

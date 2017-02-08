@@ -3,12 +3,13 @@
 #include "ct_result/model/inModel/ct_inresultmodelgrouptocopy.h"
 #include "ct_result/model/outModel/tools/ct_outresultmodelgrouptocopypossibilities.h"
 #include "ct_result/ct_resultgroup.h"
-#include "ct_attributes/ct_stditemattributet.h"
 #include "ct_itemdrawable/ct_scene.h"
+#include "ct_attributes/ct_stditemattributet.h"
 #include "ct_view/ct_stepconfigurabledialog.h"
+
 #include "mk/tools/lvox3_gridtype.h"
 #include "mk/tools/lvox3_gridtools.h"
-#include "mk/tools/lvox3_computehits.h"
+#include "mk/tools/worker/lvox3_computehits.h"
 
 #define DEF_SearchInResult      "r"
 #define DEF_SearchInScene       "sc"

@@ -14,8 +14,8 @@
 
 #include "mk/tools/lvox3_errorcode.h"
 #include "mk/tools/lvox3_gridtype.h"
-#include "mk/tools/lvox3_computeall.h"
-#include "mk/tools/lvox3_genericcompute.h"
+#include "mk/tools/worker/lvox3_computeall.h"
+#include "mk/tools/worker/lvox3_genericcompute.h"
 
 #include <QDialog>
 #include <QMessageBox>

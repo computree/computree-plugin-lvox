@@ -7,7 +7,7 @@
 #define LVOX3_COMPUTEBEFORE_H
 
 #include "lvox3_worker.h"
-#include "lvox3_gridtype.h"
+#include "mk/tools/lvox3_gridtype.h"
 
 #include "ct_itemdrawable/ct_scene.h"
 #include "ct_itemdrawable/ct_grid3d.h"

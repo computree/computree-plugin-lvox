@@ -6,16 +6,16 @@
 #ifndef LVOX3_DISTANCEVISITOR_H
 #define LVOX3_DISTANCEVISITOR_H
 
-#include "lvox3_grid3dvoxelvisitor.h"
-#include "lvox3_rayboxintersectionmath.h"
-#include "lvox3_gridtools.h"
-#include "lvox3_gridtype.h"
-#include "lvox3_errorcode.h"
+#include "lvox3_grid3dvoxelwoovisitor.h"
+#include "mk/tools/lvox3_rayboxintersectionmath.h"
+#include "mk/tools/lvox3_gridtools.h"
+#include "mk/tools/lvox3_gridtype.h"
+#include "mk/tools/lvox3_errorcode.h"
 
 #include "ct_itemdrawable/ct_grid3d.h"
 
 template<typename T>
-class LVOX3_DistanceVisitor : public LVOX3_Grid3DVoxelVisitor
+class LVOX3_DistanceVisitor : public LVOX3_Grid3DVoxelWooVisitor
 {
 public:
     LVOX3_DistanceVisitor(const CT_Grid3D<T>* grid,
@@ -35,7 +35,7 @@ public:
     /**
      * @brief Called when a voxel must be visited
      */
-    void visit(const LVOX3_Grid3DVoxelVisitorContext& context) {
+    void visit(const LVOX3_Grid3DVoxelWooVisitorContext& context) {
         Eigen::Vector3d bot, top, nearInter, farInter;
         m_gridTools->computeCellBottomLeftTopRightCornerAtColLinLevel(context.colLinLevel.x(),
                                                                       context.colLinLevel.y(),
