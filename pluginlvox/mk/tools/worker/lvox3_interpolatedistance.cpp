@@ -34,7 +34,7 @@ void LVOX3_InterpolateDistance::doTheJob()
     for(size_t i=0; i<nCells; ++i) {
         const lvox::Grid3DfType density = m_originalDensityGrid->valueAtIndex(i);
 
-        if(density == lvox::Nt_Minus_Nb_Inferior_Threshold) {
+        if(lvox::NoDataCode::isNoData(density)) {
             algo.startFromCell(i);
         }
     }

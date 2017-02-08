@@ -49,6 +49,25 @@ namespace lvox {
         template<typename T>
         static bool isFiltered(const T& value) { return value <= lvox::MNT; }
     };
+
+    struct WarningCode {
+        /**
+         * @brief Call it to know if the value is a warning or not
+         */
+        template<typename T>
+        static bool isAWarning(const T& value) { return (value == lvox::Nt_Minus_Nb_Inferior_Threshold)
+                                                            || (value == lvox::Nt_Equals_Nb)
+                                                            || (value == IDR_Surestimated); }
+    };
+
+    struct NoDataCode {
+        /**
+         * @brief Call it to know if the value is nodata or not
+         */
+        template<typename T>
+        static bool isNoData(const T& value) { return (value == lvox::Nt_Minus_Nb_Inferior_Threshold)
+                                                            || (value == lvox::Nt_Equals_Nb); }
+    };
 }
 
 #endif // LVOX3_ERRORCODE_H

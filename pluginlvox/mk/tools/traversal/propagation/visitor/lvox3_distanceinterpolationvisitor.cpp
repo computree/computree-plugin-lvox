@@ -25,7 +25,7 @@ void LVOX3_DistanceInterpolationVisitor::visit(const LVOX3_PropagationVisitorCon
         if(density > 0) {
             const double denom = std::pow(context.m_distance, m_power);
             m_numerator += ((double)density)/denom;
-            m_denominator += denom;
+            m_denominator += 1.0/denom;
         }
     }
 }
