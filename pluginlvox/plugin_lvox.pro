@@ -77,6 +77,7 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     mk/step/lvox3_stepcomputesky.h \
     mk/tools/worker/lvox3_filtervoxelsbyzvaluesofraster.h \
     mk/tools/worker/lvox3_interpolatedistance.h \
+    mk/step/lvox3_stepinterpolatedistance.h \
     mk/tools/traversal/propagation/lvox3_grid3dpropagationalgorithm.h \
     mk/tools/traversal/woo/visitor/lvox3_grid3dvoxelwoovisitorcontext.h \
     mk/tools/traversal/woo/visitor/lvox3_grid3dvoxelwoovisitor.h \
@@ -142,6 +143,7 @@ SOURCES += \
     mk/step/lvox3_stepcomputesky.cpp \
     mk/tools/worker/lvox3_filtervoxelsbyzvaluesofraster.cpp \
     mk/tools/worker/lvox3_interpolatedistance.cpp \
+    mk/step/lvox3_stepinterpolatedistance.cpp \
     mk/tools/traversal/propagation/lvox3_grid3dpropagationalgorithm.cpp \
     mk/tools/traversal/propagation/visitor/lvox3_distanceinterpolationvisitor.cpp \
     mk/tools/traversal/propagation/visitor/lvox3_trustinterpolationvisitor.cpp \

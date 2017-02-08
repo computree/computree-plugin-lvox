@@ -60,6 +60,7 @@
 #include "mk/step/lvox3_stepgenericcomputegrids.h"
 #include "mk/step/lvox3_stepcomputeprofiles.h"
 #include "mk/step/lvox3_stepcomputesky.h"
+#include "mk/step/lvox3_stepinterpolatedistance.h"
 
 #include "ct_global/ct_context.h"
 #include "ct_categories/ct_stdcategory.h"
@@ -127,6 +128,7 @@ bool LVOX_StepPluginManager::loadGenericsStep()
     addNewVoxelsStep<LVOX3_StepGenericComputeGrids>(QObject::tr("LVOX3"));
     addNewVoxelsStep<LVOX3_StepComputeProfiles>(QObject::tr("LVOX3"));
     addNewVoxelsStep<LVOX3_StepComputeSky>(QObject::tr("LVOX3"));
+    addNewVoxelsStep<LVOX3_StepInterpolateDistance>(QObject::tr("LVOX3"));
 
     return true;
 }
