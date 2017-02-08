@@ -2,8 +2,11 @@
 
 #include "visitor/lvox3_propagationvisitor.h"
 
+#include <QStack>
+
 #define COMPUTECELL(XCOL, XLIN, XLEVEL)   m_gridTools->computeGridIndexForColLinLevel(XCOL, XLIN, XLEVEL, newIndice); \
-                                          recursiveComputeCell(newIndice, XCOL, XLIN, XLEVEL, firstCellCenter);
+                                          if (!m_visited.contains(newIndice)) \
+                                            stack.push_back(StackVar(newIndice, XCOL, XLIN, XLEVEL));
 
 LVOX3_Grid3DPropagationAlgorithm::LVOX3_Grid3DPropagationAlgorithm(const CT_AbstractGrid3D* grid,
                                                                    const VisitorCollection& list,
@@ -39,7 +42,13 @@ void LVOX3_Grid3DPropagationAlgorithm::startFromCell(const size_t& index)
     for (int i = 0 ; i < m_visitors.size() ; ++i)
         m_visitors.at(i)->start(context);
 
-    recursiveComputeCell(index, col, lin, level, cellCenter);
+    QStack<StackVar> stack;
+    stack.push_back(StackVar(index, col, lin, level));
+
+    while(!stack.isEmpty())  {
+        StackVar c = stack.pop();
+        recursiveComputeCell(c.cellIndex, c.col, c.lin, c.level, cellCenter, stack);
+    }
 
     for (int i = 0 ; i < m_visitors.size() ; ++i)
         m_visitors.at(i)->finish(context);
@@ -51,11 +60,9 @@ void LVOX3_Grid3DPropagationAlgorithm::recursiveComputeCell(const size_t &cellIn
                                                             const size_t& col,
                                                             const size_t& lin,
                                                             const size_t& level,
-                                                            const Eigen::Vector3d &firstCellCenter)
+                                                            const Eigen::Vector3d &firstCellCenter,
+                                                            QStack<StackVar>& stack)
 {
-    if (m_visited.contains(cellIndex))
-        return;
-
     m_visited.insert(cellIndex);
 
     const size_t maxCol = m_grid->xdim()-1;

@@ -10,6 +10,8 @@
 
 #include "mk/tools/lvox3_gridtools.h"
 
+#include "visitor/lvox3_propagationvisitorcontext.h"
+
 class LVOX3_PropagationVisitor;
 
 /**
@@ -45,6 +47,25 @@ public:
     void startFromCell(const size_t &index);
 
 private:
+    struct StackVar {
+        StackVar() : cellIndex(0),
+            col(0),
+            lin(0),
+            level(0){}
+        StackVar(const size_t& cellI,
+                 const size_t& c,
+                 const size_t& li,
+                 const size_t& le) : cellIndex(cellI),
+                                     col(c),
+                                     lin(li),
+                                     level(le) {}
+
+        const size_t cellIndex;
+        const size_t col;
+        const size_t lin;
+        const size_t level;
+    };
+
     LVOX3_GridTools*            m_gridTools;
     CT_AbstractGrid3D*          m_grid;
     const VisitorCollection&    m_visitors;
@@ -66,7 +87,8 @@ private:
                               const size_t& col,
                               const size_t& lin,
                               const size_t& level,
-                              const Eigen::Vector3d& firstCellCenter);
+                              const Eigen::Vector3d& firstCellCenter,
+                              QStack<StackVar> &stack);
 };
 
 #endif // LVOX3_GRID3DPROPAGATIONALGORITHM_H

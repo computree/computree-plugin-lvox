@@ -79,15 +79,15 @@ void LVOX3_StepInterpolateDistance::compute()
         if(igrid) {
             /**/
 
-            lvox::Grid3Df *outputGrid = new lvox::Grid3Df(m_outInterpolatedGridModelName.completeName(),
-                                                    outResult, igrid->minX(), igrid->minY(), igrid->minZ(),
-                                                    igrid->xdim(), igrid->ydim(), igrid->zdim(),
-                                                    igrid->resolution(), 0, 0);
+            lvox::Grid3Df *outputGrid = (lvox::Grid3Df*)igrid->copy(m_outInterpolatedGridModelName.completeName(),
+                                                    outResult, CT_ResultCopyModeList());
 
 
             LVOX3_InterpolateDistance worker(igrid, outputGrid, m_interpolateRadius, m_interpolatePower);
 
             worker.compute();
+
+            outputGrid->computeMinMax();
 
             /*
              * The object added knows its modelName and associated result group.

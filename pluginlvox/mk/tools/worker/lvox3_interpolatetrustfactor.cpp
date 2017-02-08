@@ -24,7 +24,8 @@ LVOX3_InterpolateTrustFactor::LVOX3_InterpolateTrustFactor(const lvox::Grid3Df* 
 
 void LVOX3_InterpolateTrustFactor::doTheJob()
 {
-    LVOX3_TrustInterpolationVisitor visitor(m_outDensityGrid,
+    LVOX3_TrustInterpolationVisitor visitor(m_originalDensityGrid,
+                                            m_outDensityGrid,
                                             m_beforeGrid,
                                             m_theoriticalsGrid,
                                             m_effectiveRayThreshold,

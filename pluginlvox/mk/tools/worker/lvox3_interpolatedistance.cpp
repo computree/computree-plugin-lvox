@@ -18,7 +18,9 @@ LVOX3_InterpolateDistance::LVOX3_InterpolateDistance(const lvox::Grid3Df *origin
 
 void LVOX3_InterpolateDistance::doTheJob()
 {
-    LVOX3_DistanceInterpolationVisitor visitor(m_outDensityGrid, m_power);
+    LVOX3_DistanceInterpolationVisitor visitor(m_originalDensityGrid,
+                                               m_outDensityGrid,
+                                               m_power);
 
     QVector<LVOX3_PropagationVisitor*> l;
     l.append(&visitor);

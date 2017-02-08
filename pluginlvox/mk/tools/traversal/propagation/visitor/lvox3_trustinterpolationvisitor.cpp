@@ -1,12 +1,14 @@
 #include "lvox3_trustinterpolationvisitor.h"
 
-LVOX3_TrustInterpolationVisitor::LVOX3_TrustInterpolationVisitor(const lvox::Grid3Df* outDensityGrid,
+LVOX3_TrustInterpolationVisitor::LVOX3_TrustInterpolationVisitor(const lvox::Grid3Df* inDensityGrid,
+                                                                 const lvox::Grid3Df* outDensityGrid,
                                                                  const lvox::Grid3Di* inBeforeGrid,
                                                                  const lvox::Grid3Di* inTheoriticalsGrid,
                                                                  qint32 effectiveRayThreshold,
                                                                  qint32 endRayThreshold)
 {
-    m_grid = (lvox::Grid3Df*)outDensityGrid;
+    m_inGrid = (lvox::Grid3Df*)inDensityGrid;
+    m_outGrid = (lvox::Grid3Df*)outDensityGrid;
     m_beforeGrid = (lvox::Grid3Di*)inBeforeGrid;
     m_theoriticalsGrid = (lvox::Grid3Di*)inTheoriticalsGrid;
     m_effectiveRayThreshold = effectiveRayThreshold;
@@ -25,7 +27,7 @@ void LVOX3_TrustInterpolationVisitor::start(const LVOX3_PropagationVisitorContex
 void LVOX3_TrustInterpolationVisitor::visit(const LVOX3_PropagationVisitorContext &context)
 {
     if(context.m_distance > 0) {
-        const lvox::Grid3DfType density = m_grid->valueAtIndex(context.m_cellIndex);
+        const lvox::Grid3DfType density = m_inGrid->valueAtIndex(context.m_cellIndex);
 
         if(density > 0) {
             const qint32 Nt_minus_Nb = m_theoriticalsGrid->valueAtIndex(context.m_cellIndex) - m_beforeGrid->valueAtIndex(context.m_cellIndex);
@@ -49,6 +51,6 @@ void LVOX3_TrustInterpolationVisitor::visit(const LVOX3_PropagationVisitorContex
 void LVOX3_TrustInterpolationVisitor::finish(const LVOX3_PropagationVisitorContext &context)
 {
     if(m_denominator != 0) {
-        m_grid->setValueAtIndex(context.m_cellIndex,  m_numerator/m_denominator);
+        m_outGrid->setValueAtIndex(context.m_cellIndex,  m_numerator/m_denominator);
     }
 }

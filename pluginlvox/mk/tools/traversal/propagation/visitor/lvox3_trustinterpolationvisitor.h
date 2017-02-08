@@ -31,7 +31,8 @@ public:
      * @param effectiveRayThreshold : minimum number of effective ray (Nt-Nb must be > to threshold) to have a trust factor > 0
      * @param endRayThreshold : maximum number of effective ray. If (Nt-Nb) > endRayThreshold the trust factor will be 1
      */
-    LVOX3_TrustInterpolationVisitor(const lvox::Grid3Df* outDensityGrid,
+    LVOX3_TrustInterpolationVisitor(const lvox::Grid3Df* inDensityGrid,
+                                    const lvox::Grid3Df* outDensityGrid,
                                     const lvox::Grid3Di* inBeforeGrid,
                                     const lvox::Grid3Di* inTheoriticalsGrid,
                                     qint32 effectiveRayThreshold,
@@ -59,7 +60,8 @@ public:
     void finish(const LVOX3_PropagationVisitorContext& context);
 
 private:
-    lvox::Grid3Df*  m_grid;
+    lvox::Grid3Df*  m_inGrid;
+    lvox::Grid3Df*  m_outGrid;
     lvox::Grid3Di*  m_beforeGrid;
     lvox::Grid3Di*  m_theoriticalsGrid;
     qint32          m_effectiveRayThreshold;
