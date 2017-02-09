@@ -4,10 +4,6 @@
 
 #include <QStack>
 
-#define COMPUTECELL(XCOL, XLIN, XLEVEL)   m_gridTools->computeGridIndexForColLinLevel(XCOL, XLIN, XLEVEL, newIndice); \
-                                          if (!m_visited.contains(newIndice)) \
-                                            stack.push_back(StackVar(newIndice, XCOL, XLIN, XLEVEL));
-
 LVOX3_Grid3DPropagationAlgorithm::LVOX3_Grid3DPropagationAlgorithm(const CT_AbstractGrid3D* grid,
                                                                    const VisitorCollection& list,
                                                                    const double &radius,
@@ -44,6 +40,7 @@ void LVOX3_Grid3DPropagationAlgorithm::startFromCell(const size_t& index)
 
     QStack<StackVar> stack;
     stack.push_back(StackVar(index, col, lin, level));
+    m_visited.insert(index);
 
     while(!stack.isEmpty())  {
         StackVar c = stack.pop();
@@ -63,8 +60,6 @@ void LVOX3_Grid3DPropagationAlgorithm::recursiveComputeCell(const size_t &cellIn
                                                             const Eigen::Vector3d &firstCellCenter,
                                                             QStack<StackVar>& stack)
 {
-    m_visited.insert(cellIndex);
-
     const size_t maxCol = m_grid->xdim()-1;
     const size_t maxLin = m_grid->ydim()-1;
     const size_t maxLevel = m_grid->zdim()-1;
@@ -82,30 +77,39 @@ void LVOX3_Grid3DPropagationAlgorithm::recursiveComputeCell(const size_t &cellIn
         for (int i = 0 ; i < m_visitors.size() ; ++i)
             m_visitors.at(i)->visit(context);
 
-        size_t newIndice;
-
         if(col > 0) {
-            COMPUTECELL(col-1, lin, level);
+            enqueueCell(col-1, lin, level, stack);
         }
 
         if(col < maxCol) {
-            COMPUTECELL(col+1, lin, level);
+        	enqueueCell(col+1, lin, level, stack);
         }
 
         if(lin > 0) {
-            COMPUTECELL(col, lin-1, level);
+        	enqueueCell(col, lin-1, level, stack);
         }
 
         if(lin < maxLin) {
-            COMPUTECELL(col, lin+1, level);
+        	enqueueCell(col, lin+1, level, stack);
         }
 
         if(level > 0) {
-            COMPUTECELL(col, lin, level-1);
+        	enqueueCell(col, lin, level-1, stack);
         }
 
         if(level < maxLevel) {
-            COMPUTECELL(col, lin, level+1);
+        	enqueueCell(col, lin, level+1, stack);
         }
     }
+}
+
+void LVOX3_Grid3DPropagationAlgorithm::enqueueCell(const size_t& col, const size_t& lin,
+		const size_t& level, QStack<StackVar> &stack)
+ {
+	size_t newIndice = 0;
+	m_gridTools->computeGridIndexForColLinLevel(col, lin, level, newIndice);
+	if (!m_visited.contains(newIndice)) {
+		m_visited.insert(newIndice);
+		stack.push_back(StackVar(newIndice, col, lin, level));
+	}
 }

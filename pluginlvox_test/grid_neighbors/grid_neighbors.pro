@@ -15,7 +15,9 @@ DEFINES += USE_OPENCV
 
 INCLUDEPATH += ../../pluginlvox/
 
+# rpath works only on Unix
 QMAKE_RPATHDIR += $${PLUGINSHARED_DESTDIR}
+QMAKE_RPATHDIR += $${PLUGINSHARED_DESTDIR}/plugins/
 
 QT       += testlib
 
@@ -29,3 +31,5 @@ TEMPLATE = app
 
 SOURCES += tst_grid_neighborstest.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
+
+LIBS += -L$${PLUGINSHARED_DESTDIR}/plugins/ -lplug_lvoxv2

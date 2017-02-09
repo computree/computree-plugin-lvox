@@ -60,10 +60,10 @@ private:
                                      lin(li),
                                      level(le) {}
 
-        const size_t cellIndex;
-        const size_t col;
-        const size_t lin;
-        const size_t level;
+        size_t cellIndex;
+        size_t col;
+        size_t lin;
+        size_t level;
     };
 
     LVOX3_GridTools*            m_gridTools;
@@ -89,6 +89,11 @@ private:
                               const size_t& level,
                               const Eigen::Vector3d& firstCellCenter,
                               QStack<StackVar> &stack);
+private:
+    void enqueueCell(const size_t& col,
+            		 const size_t& lin,
+					 const size_t& level,
+					 QStack<StackVar> &stack);
 };
 
 #endif // LVOX3_GRID3DPROPAGATIONALGORITHM_H
