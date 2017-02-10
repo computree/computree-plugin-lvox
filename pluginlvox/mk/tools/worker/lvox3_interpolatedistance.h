@@ -12,9 +12,9 @@
 /**
  * @brief Interpolate the grid density by using cells values that was in a defined radius
  *
- * The formula used is : Sum(IDR / ((D^p)+1))
+ * The formula used is : Sum(IDR / D^p)
  *                       --------------------
- *                       Sum((1 / ((D^p)+1))
+ *                       Sum(1 / D^p)
  *
  * "IDR" = value of density of the cell inspected
  * "D" the distance between the cell to change density and the cell inspected in the radius

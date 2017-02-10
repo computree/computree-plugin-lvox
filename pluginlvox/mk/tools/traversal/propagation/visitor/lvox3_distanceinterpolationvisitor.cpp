@@ -33,6 +33,7 @@ void LVOX3_DistanceInterpolationVisitor::visit(const LVOX3_PropagationVisitorCon
 void LVOX3_DistanceInterpolationVisitor::finish(const LVOX3_PropagationVisitorContext &context)
 {
     if(m_denominator != 0) {
-        m_outGrid->setValueAtIndex(context.m_cellIndex,  m_numerator/m_denominator);
+        double result = m_numerator/m_denominator;
+        m_outGrid->setValueAtIndex(context.m_cellIndex, result);
     }
 }

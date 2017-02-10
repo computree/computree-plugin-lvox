@@ -12,9 +12,9 @@
 /**
  * @brief Use this visitor to interpolate a grid with a distance factor.
  *
- * The formula used is : Sum(IDR / ((D^p)+1))
+ * The formula used is : Sum(IDR / D^p)
  *                       --------------------
- *                       Sum((1 / ((D^p)+1))
+ *                       Sum(1 / D^p)
  *
  * "IDR" = value of density of the cell inspected
  * "D" the distance between the first cell and the visited cell
