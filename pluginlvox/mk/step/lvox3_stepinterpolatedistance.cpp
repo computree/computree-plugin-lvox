@@ -14,7 +14,7 @@
 #define DEF_SearchInGroup       "gr"
 
 LVOX3_StepInterpolateDistance::LVOX3_StepInterpolateDistance(CT_StepInitializeData &dataInit)
-    : CT_AbstractStep(dataInit), m_interpolateRadius(1.0), m_interpolatePower(0)
+    : CT_AbstractStep(dataInit), m_interpolateDensityThreshold(0.0), m_interpolateRadius(1.0), m_interpolatePower(0)
 {
 }
 
@@ -47,7 +47,8 @@ void LVOX3_StepInterpolateDistance::createPostConfigurationDialog()
 {
     CT_StepConfigurableDialog *configDialog = newStandardPostConfigurationDialog();
 
-    configDialog->addDouble(tr("Interpolation radius"), tr("meter"), 0.0, 10000.0, 2, m_interpolateRadius);
+    configDialog->addDouble(tr("Density threshold"), tr(""), 0.0, 1.0, 3, m_interpolateDensityThreshold);
+    configDialog->addDouble(tr("Interpolation radius"), tr("meter"), 0.0, 10000.0, 3, m_interpolateRadius);
     configDialog->addInt(tr("Decay power"), tr(""), 0, 100, m_interpolatePower);
 }
 
@@ -77,13 +78,12 @@ void LVOX3_StepInterpolateDistance::compute()
         lvox::Grid3Df* igrid = dynamic_cast<lvox::Grid3Df*>(group->firstItemByINModelName(this, DEF_SearchInGrid));
 
         if(igrid) {
-            /**/
 
             lvox::Grid3Df *outputGrid = (lvox::Grid3Df*)igrid->copy(m_outInterpolatedGridModelName.completeName(),
                                                     outResult, CT_ResultCopyModeList());
 
-
-            LVOX3_InterpolateDistance worker(igrid, outputGrid, m_interpolateRadius, m_interpolatePower);
+            LVOX3_InterpolateDistance worker(igrid, outputGrid,
+                    m_interpolateRadius, m_interpolatePower, m_interpolateDensityThreshold);
 
             worker.compute();
 

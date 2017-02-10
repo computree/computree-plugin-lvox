@@ -5,22 +5,18 @@
 #include "mk/tools/traversal/propagation/lvox3_grid3dpropagationalgorithm.h"
 #include "mk/tools/traversal/propagation/visitor/lvox3_distanceinterpolationvisitor.h"
 
-LVOX3_InterpolateDistance::LVOX3_InterpolateDistance(const lvox::Grid3Df *originalDensityGrid,
-                                                     lvox::Grid3Df *outDensityGrid,
-                                                     double radius,
-                                                     int power)
-{
-    m_originalDensityGrid = (lvox::Grid3Df*)originalDensityGrid;
-    m_outDensityGrid = outDensityGrid;
-    m_radius = radius;
-    m_power = power;
+LVOX3_InterpolateDistance::LVOX3_InterpolateDistance(
+        const lvox::Grid3Df* originalDensityGrid,
+        lvox::Grid3Df* const outDensityGrid, double radius, int power, float densityThreshold) :
+        m_originalDensityGrid(originalDensityGrid), m_outDensityGrid(outDensityGrid),
+        m_radius(radius), m_power(power), m_densityThreshold(densityThreshold) {
 }
 
 void LVOX3_InterpolateDistance::doTheJob()
 {
     LVOX3_DistanceInterpolationVisitor visitor(m_originalDensityGrid,
                                                m_outDensityGrid,
-                                               m_power);
+                                               m_power, m_densityThreshold);
 
     QVector<LVOX3_PropagationVisitor*> l;
     l.append(&visitor);

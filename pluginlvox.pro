@@ -1,5 +1,6 @@
 TEMPLATE = subdirs
 
-SUBDIRS += \
-    pluginlvox/plugin_lvox.pro \
-    pluginlvox_test
+SUBDIRS += pluginlvox
+SUBDIRS += pluginlvox_test
+
+pluginlvox_test.depends = pluginlvox

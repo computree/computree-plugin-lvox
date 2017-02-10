@@ -31,11 +31,13 @@ public:
      * @param outDensityGrid : the density grid that will be modified with new density values
      * @param radius : max radius to search cells
      * @param power : power that will be used in the formula
+     * @param densityThreshold: ignore neighbor cells with density lower than threshold
      */
     LVOX3_InterpolateDistance(const lvox::Grid3Df* originalDensityGrid,
-                              lvox::Grid3Df* outDensityGrid,
+                              lvox::Grid3Df* const outDensityGrid,
                               double radius,
-                              int power);
+                              int power,
+                              float densityThreshold);
 
 protected:
     /**
@@ -44,10 +46,11 @@ protected:
     void doTheJob();
 
 private:
-    lvox::Grid3Df*      m_originalDensityGrid;
-    lvox::Grid3Df*      m_outDensityGrid;
-    double              m_radius;
-    int                 m_power;
+    const lvox::Grid3Df*      m_originalDensityGrid;
+    lvox::Grid3Df* const      m_outDensityGrid;
+    const double              m_radius;
+    const int                 m_power;
+    const float               m_densityThreshold;
 };
 
 #endif // LVOX3_INTERPOLATEDISTANCE_H

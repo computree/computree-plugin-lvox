@@ -88,6 +88,7 @@ void Grid_neighborsTest::testDistanceInterpolation_data()
 {
     QTest::addColumn<double>("radius");
     QTest::addColumn<int>("power");
+    QTest::addColumn<float>("epsilon");
     QTest::addColumn<float>("exp");
     QTest::addColumn<float>("initValue");
     QTest::addColumn<float>("spotValue");
@@ -95,12 +96,15 @@ void Grid_neighborsTest::testDistanceInterpolation_data()
     QTest::addColumn<size_t>("Y");
     QTest::addColumn<size_t>("Z");
 
+    const float eps1 = 1e-3f;
+    const float eps2 = 0.0f;
+
 	/*
 	 * The average of a uniform value is neutral.
 	 */
-    QTest::newRow("trivial1") << 1.1 << 0 << 0.5f << 0.5f << 0.5f << 0UL << 0UL << 0UL;
-    QTest::newRow("trivial2") << 1.1 << 2 << 0.5f << 0.5f << 0.5f << 0UL << 0UL << 0UL;
-    QTest::newRow("trivial3") << 1.8 << 2 << 0.5f << 0.5f << 0.5f << 0UL << 0UL << 0UL;
+    QTest::newRow("trivial1") << 1.1 << 0 << eps1 << 0.5f << 0.5f << 0.5f << 0UL << 0UL << 0UL;
+    QTest::newRow("trivial2") << 1.1 << 2 << eps1 << 0.5f << 0.5f << 0.5f << 0UL << 0UL << 0UL;
+    QTest::newRow("trivial3") << 1.8 << 2 << eps1 << 0.5f << 0.5f << 0.5f << 0UL << 0UL << 0UL;
 
 
     /*
@@ -120,21 +124,22 @@ void Grid_neighborsTest::testDistanceInterpolation_data()
     const float num1 = 1*b/1.0 + 5*a/1.0 + 12*a/2.0 + 8*a/3.0;
     const float num2 = 1*b/2.0 + 6*a/1.0 + 11*a/2.0 + 8*a/3.0;
     const float num3 = 1*b/3.0 + 6*a/1.0 + 12*a/2.0 + 7*a/3.0;
-    const float den = 6*1.0 + 12*1.0/2.0 + 8*1.0/3.0;
+    const float den1 = 6*1.0 + 12*1.0/2.0 + 8*1.0/3.0;
 
-    QTest::newRow("diag1") << 1.8 << 2 << num1/den << a << b << 5UL << 4UL << 4UL;
-    QTest::newRow("diag2") << 1.8 << 2 << num2/den << a << b << 5UL << 5UL << 4UL;
-    QTest::newRow("diag3") << 1.8 << 2 << num3/den << a << b << 5UL << 5UL << 5UL;
+    QTest::newRow("diag1") << 1.8 << 2 << eps1 << num1/den1 << a << b << 5UL << 4UL << 4UL;
+    QTest::newRow("diag2") << 1.8 << 2 << eps1 << num2/den1 << a << b << 5UL << 5UL << 4UL;
+    QTest::newRow("diag3") << 1.8 << 2 << eps1 << num3/den1 << a << b << 5UL << 5UL << 5UL;
 
 
     /*
-     * FIXME: cells with exactly a density of zero are not taken into
-     * account in the interpolation. Is that correct?
-     *
-     * TODO: Add epsilon threshold to consider a voxel.
+     * Verify correct behavior of epsilon threshold.
      */
+    const float zero = 0;
+    const float num4 = 1*b/1.0;
+    const float den2 = 1*1.0;
 
-    QTest::newRow("zero") << 1.8 << 2 << 0.5f << 0.0f << 0.5f << 5UL << 4UL << 4UL;
+    QTest::newRow("consider zeros") << 1.8 << 2 << eps2 << num4/den1 << zero << b << 5UL << 4UL << 4UL;
+    QTest::newRow("ignore zeros")   << 1.8 << 2 << eps1 << num4/den2 << zero << b << 5UL << 4UL << 4UL;
 }
 
 /*
@@ -144,6 +149,7 @@ void Grid_neighborsTest::testDistanceInterpolation()
 {
     QFETCH(double, radius);
     QFETCH(int, power);
+    QFETCH(float, epsilon);
     QFETCH(float, exp);
     QFETCH(float, initValue);
     QFETCH(float, spotValue);
@@ -158,7 +164,7 @@ void Grid_neighborsTest::testDistanceInterpolation()
 
     ingrid.data()->setValue(X, Y, Z, spotValue);
 
-    LVOX3_InterpolateDistance interpolator(ingrid.data(), outgrid.data(), radius, power);
+    LVOX3_InterpolateDistance interpolator(ingrid.data(), outgrid.data(), radius, power, epsilon);
 
     /*
      * Define one cell as nodata

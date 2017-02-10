@@ -52,8 +52,10 @@ protected:
     void compute();
 
 private:
+    double  m_interpolateDensityThreshold;
     double  m_interpolateRadius;
     int     m_interpolatePower;
+
 
     CT_AutoRenameModels m_outInterpolatedGridModelName;
 

@@ -24,8 +24,9 @@ class LVOX3_DistanceInterpolationVisitor : public LVOX3_PropagationVisitor
 {
 public:
     LVOX3_DistanceInterpolationVisitor(const lvox::Grid3Df* inDensityGrid,
-                                       const lvox::Grid3Df* outDensityGrid,
-                                       const int& power);
+                                       lvox::Grid3Df* const outDensityGrid,
+                                       int power,
+                                       float densityThreshold);
 
     /**
      * @brief Called when the propagation start
@@ -49,11 +50,12 @@ public:
     void finish(const LVOX3_PropagationVisitorContext& context);
 
 private:
-    lvox::Grid3Df*  m_inGrid;
-    lvox::Grid3Df*  m_outGrid;
-    int             m_power;
-    double          m_denominator;
-    double          m_numerator;
+    const lvox::Grid3Df*    m_inGrid;
+    lvox::Grid3Df* const    m_outGrid;
+    const int               m_power;
+    const float             m_densityThreshold;
+    double                  m_numerator;
+    double                  m_denominator;
 };
 
 #endif // LVOX3_DISTANCEINTERPOLATIONVISITOR_H
