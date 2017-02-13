@@ -8,7 +8,7 @@
 LVOX3_InterpolateTrustFactor::LVOX3_InterpolateTrustFactor(const lvox::Grid3Df* originalDensityGrid,
                                                            const lvox::Grid3Di* beforeGrid,
                                                            const lvox::Grid3Di* theoriticalsGrid,
-                                                           lvox::Grid3Df* outDensityGrid,
+                                                           lvox::Grid3Df* const outDensityGrid,
                                                            double radius,
                                                            qint32 effectiveRayThreshold,
                                                            qint32 endRayThreshold)

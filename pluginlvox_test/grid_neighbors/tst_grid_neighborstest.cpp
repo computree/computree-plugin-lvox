@@ -9,6 +9,7 @@
 #include "mk/tools/lvox3_gridtype.h"
 #include "mk/tools/traversal/propagation/lvox3_grid3dpropagationalgorithm.h"
 #include "mk/tools/traversal/propagation/visitor/lvox3_propagationvisitor.h"
+#include "mk/tools/traversal/propagation/visitor/lvox3_trustinterpolationvisitor.h"
 #include "mk/tools/worker/lvox3_interpolatedistance.h"
 #include "mk/tools/lvox3_errorcode.h"
 
@@ -24,6 +25,8 @@ private Q_SLOTS:
     void testGridVisitor_data();
     void testDistanceInterpolation();
     void testDistanceInterpolation_data();
+    void testTrustInterpolation();
+    void testTrustInterpolation_data();
 };
 
 Grid_neighborsTest::Grid_neighborsTest()
@@ -176,6 +179,48 @@ void Grid_neighborsTest::testDistanceInterpolation()
 
     float act = outgrid->valueAtIndex(idx);
     QCOMPARE(act, exp);
+}
+
+void Grid_neighborsTest::testTrustInterpolation()
+{
+
+    QFETCH(qint32, Nt);
+    QFETCH(qint32, Nb);
+    QFETCH(qint32, low);
+    QFETCH(qint32, high);
+    QFETCH(double, exp);
+    /*
+    int m = 40;
+    for (int Nb = 0; Nb < m; Nb++) {
+        double trust1 = LVOX3_TrustInterpolationVisitor::getTrustFactor(m, Nb, 10, 30);
+        qDebug() << m << Nb << trust1;
+    }
+    */
+    double act = LVOX3_TrustInterpolationVisitor::getTrustFactor(Nt, Nb, low, high);
+    QCOMPARE(act, exp);
+}
+
+void Grid_neighborsTest::testTrustInterpolation_data()
+{
+    QTest::addColumn<qint32>("Nt");
+    QTest::addColumn<qint32>("Nb");
+    QTest::addColumn<qint32>("low");
+    QTest::addColumn<qint32>("high");
+    QTest::addColumn<double>("exp");
+
+    /* Trusted factor according to blocked rays has this shape:
+     *
+     * -----
+     *      \
+     *       -----
+     * 0  10  30  40
+     *
+     * Test for specific values of blocked rays.
+     */
+
+    QTest::newRow("trusted")   << 40 << 0  << 10 << 30 << 1.0;
+    QTest::newRow("middle")    << 40 << 20 << 10 << 30 << 0.5;
+    QTest::newRow("untrusted") << 40 << 40 << 10 << 30 << 0.0;
 }
 
 QTEST_APPLESS_MAIN(Grid_neighborsTest)

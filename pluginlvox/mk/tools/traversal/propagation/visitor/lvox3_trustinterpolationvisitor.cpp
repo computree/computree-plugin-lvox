@@ -1,19 +1,20 @@
 #include "lvox3_trustinterpolationvisitor.h"
+#include <cmath>
+#include <cassert>
 
 LVOX3_TrustInterpolationVisitor::LVOX3_TrustInterpolationVisitor(const lvox::Grid3Df* inDensityGrid,
-                                                                 const lvox::Grid3Df* outDensityGrid,
+                                                                 lvox::Grid3Df* const outDensityGrid,
                                                                  const lvox::Grid3Di* inBeforeGrid,
-                                                                 const lvox::Grid3Di* inTheoriticalsGrid,
+                                                                 const lvox::Grid3Di* inTheoreticalsGrid,
                                                                  qint32 effectiveRayThreshold,
-                                                                 qint32 endRayThreshold)
+                                                                 qint32 endRayThreshold) :
+    m_inGrid(inDensityGrid), m_outGrid(outDensityGrid), m_beforeGrid(inBeforeGrid),
+    m_theoriticalsGrid(inTheoreticalsGrid), m_effectiveRayThreshold(effectiveRayThreshold),
+    m_endRayThreshold(endRayThreshold), m_denominator(0), m_numerator(0)
 {
-    m_inGrid = (lvox::Grid3Df*)inDensityGrid;
-    m_outGrid = (lvox::Grid3Df*)outDensityGrid;
-    m_beforeGrid = (lvox::Grid3Di*)inBeforeGrid;
-    m_theoriticalsGrid = (lvox::Grid3Di*)inTheoriticalsGrid;
-    m_effectiveRayThreshold = effectiveRayThreshold;
-    m_endRayThreshold = endRayThreshold;
-    m_diffEffectiveRay = m_endRayThreshold-m_effectiveRayThreshold;
+    // FIXME: what is the proper way to validate inputs?
+    // I would do a hard assert here supposing the inputs are validated from the UI.
+    assert(endRayThreshold > effectiveRayThreshold);
 }
 
 void LVOX3_TrustInterpolationVisitor::start(const LVOX3_PropagationVisitorContext &context)
@@ -24,25 +25,41 @@ void LVOX3_TrustInterpolationVisitor::start(const LVOX3_PropagationVisitorContex
     m_denominator = 0;
 }
 
+/**
+ * Static function for testing
+ */
+
+double LVOX3_TrustInterpolationVisitor::getTrustFactor(const qint32& Nt, const qint32& Nb,
+        const qint32& effectiveRayThreshold, const qint32& endRayThreshold)
+{
+    assert(endRayThreshold > effectiveRayThreshold);
+    double trustFactor = 0;
+    const qint32 Nt_minus_Nb = Nt - Nb;
+    const double diffEffectiveRay = (double)(endRayThreshold - effectiveRayThreshold);
+
+    if(Nt_minus_Nb > effectiveRayThreshold) {
+        if(Nt_minus_Nb < endRayThreshold) {
+            double ratio = (Nt_minus_Nb - effectiveRayThreshold) / diffEffectiveRay;
+            trustFactor = 0.5 * (std::sin(ratio * M_PI - M_PI_2) + 1);
+        } else {
+            trustFactor = 1;
+        }
+    }
+    return trustFactor;
+}
+
 void LVOX3_TrustInterpolationVisitor::visit(const LVOX3_PropagationVisitorContext &context)
 {
     if(context.m_distance > 0) {
         const lvox::Grid3DfType density = m_inGrid->valueAtIndex(context.m_cellIndex);
 
         if(density > 0) {
-            const qint32 Nt_minus_Nb = m_theoriticalsGrid->valueAtIndex(context.m_cellIndex) - m_beforeGrid->valueAtIndex(context.m_cellIndex);
+            const qint32 Nt = m_theoriticalsGrid->valueAtIndex(context.m_cellIndex);
+            const qint32 Nb = m_beforeGrid->valueAtIndex(context.m_cellIndex);
 
-            double trustFactor = 0;
+            const double trustFactor = getTrustFactor(Nt, Nb, m_effectiveRayThreshold, m_endRayThreshold);
 
-            if(Nt_minus_Nb >= m_effectiveRayThreshold) {
-                if(Nt_minus_Nb < m_endRayThreshold) {
-                    trustFactor = sin((Nt_minus_Nb-m_effectiveRayThreshold)/m_diffEffectiveRay);
-                } else {
-                    trustFactor = 1;
-                }
-            }
-
-            m_numerator += ((double)density)*trustFactor;
+            m_numerator += ((double)density) * trustFactor;
             m_denominator += trustFactor;
         }
     }
