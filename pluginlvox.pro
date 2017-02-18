@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 
-SUBDIRS += pluginlvox
+SUBDIRS += pluginlvox/plugin_lvox.pro
 SUBDIRS += pluginlvox_test
 
-pluginlvox_test.depends = pluginlvox
+# pluginlvox_test.depends = pluginlvox
+CONFIG += ordered
