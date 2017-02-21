@@ -27,6 +27,7 @@ private Q_SLOTS:
     void testDistanceInterpolation_data();
     void testTrustInterpolation();
     void testTrustInterpolation_data();
+    void testTrustInterpolationPlot();
 };
 
 Grid_neighborsTest::Grid_neighborsTest()
@@ -189,13 +190,7 @@ void Grid_neighborsTest::testTrustInterpolation()
     QFETCH(qint32, low);
     QFETCH(qint32, high);
     QFETCH(double, exp);
-    /*
-    int m = 40;
-    for (int Nb = 0; Nb < m; Nb++) {
-        double trust1 = LVOX3_TrustInterpolationVisitor::getTrustFactor(m, Nb, 10, 30);
-        qDebug() << m << Nb << trust1;
-    }
-    */
+
     double act = LVOX3_TrustInterpolationVisitor::getTrustFactor(Nt, Nb, low, high);
     QCOMPARE(act, exp);
 }
@@ -221,6 +216,28 @@ void Grid_neighborsTest::testTrustInterpolation_data()
     QTest::newRow("trusted")   << 40 << 0  << 10 << 30 << 1.0;
     QTest::newRow("middle")    << 40 << 20 << 10 << 30 << 0.5;
     QTest::newRow("untrusted") << 40 << 40 << 10 << 30 << 0.0;
+}
+
+/*
+ * Generate plot data and manually check its consistency
+ */
+#include <QFile>
+
+#ifndef SRCDIR
+#define SRCDIR "."
+#endif
+void Grid_neighborsTest::testTrustInterpolationPlot()
+{
+    int m = 40;
+
+    QFile f(SRCDIR "/trust.data");
+    QVERIFY(f.open(QIODevice::WriteOnly));
+    QTextStream data(&f);
+
+    for (int Nb = 0; Nb < m; Nb++) {
+        double trust1 = LVOX3_TrustInterpolationVisitor::getTrustFactor(m, Nb, 10, 30);
+        data << QString("%1 %2\n").arg(Nb).arg(trust1);
+    }
 }
 
 QTEST_APPLESS_MAIN(Grid_neighborsTest)
