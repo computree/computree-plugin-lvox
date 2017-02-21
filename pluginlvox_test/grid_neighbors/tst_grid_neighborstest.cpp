@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QVector>
 #include <QScopedPointer>
+#include <QFile>
 
 #include "ct_itemdrawable/ct_grid3d.h"
 #include "mk/tools/lvox3_gridtools.h"
@@ -12,6 +13,14 @@
 #include "mk/tools/traversal/propagation/visitor/lvox3_trustinterpolationvisitor.h"
 #include "mk/tools/worker/lvox3_interpolatedistance.h"
 #include "mk/tools/lvox3_errorcode.h"
+
+/*
+ * SRCDIR is defined by the compiler, but Eclipse doesn't
+ * know it and complains. Define a value here to make it happy.
+ */
+#ifndef SRCDIR
+#define SRCDIR "."
+#endif
 
 class Grid_neighborsTest : public QObject
 {
@@ -221,11 +230,6 @@ void Grid_neighborsTest::testTrustInterpolation_data()
 /*
  * Generate plot data and manually check its consistency
  */
-#include <QFile>
-
-#ifndef SRCDIR
-#define SRCDIR "."
-#endif
 void Grid_neighborsTest::testTrustInterpolationPlot()
 {
     int m = 40;
