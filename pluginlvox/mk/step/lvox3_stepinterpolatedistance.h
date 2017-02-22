@@ -52,12 +52,25 @@ protected:
     void compute();
 
 private:
-    double  m_interpolateDensityThreshold;
     double  m_interpolateRadius;
+
+    /**
+     * Distance interpolation
+     */
+    bool    m_enableInterpolateDistance;
+    double  m_interpolateDensityThreshold;
     int     m_interpolatePower;
 
+    /**
+     * Trust interpolation
+     */
+    bool    m_enableInterpolateTrust;
+    int     m_trustLowThreshold;
+    int     m_trustHighThreshold;
 
-    CT_AutoRenameModels m_outInterpolatedGridModelName;
+
+    CT_AutoRenameModels m_outInterpolatedDistanceGridModelName;
+    CT_AutoRenameModels m_outInterpolatedTrustGridModelName;
 
 private slots:
     /**
