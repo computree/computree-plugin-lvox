@@ -52,7 +52,7 @@ private:
     };
 
     QVector<InternalInput>  m_inputs;
-    QVector<double>         m_checksErrorCode;
+    QVector<mu::Parser*>    m_checksErrorParsers;
 
     std::string             m_finalFormula;
     CT_AbstractGrid3D*      m_output;

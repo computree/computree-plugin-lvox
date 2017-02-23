@@ -96,7 +96,8 @@ void LVOX3_StepComputeSky::compute()
             size_t index = 0;
             size_t nCells = hitGrid->nCells();
             size_t level, indice;
-            double maxSkyLevel = hitGrid->minZ();
+            int maxSkyLevel = 0;
+            double maxSkyZ = hitGrid->minZ();
 
             LVOX3_GridTools gridTools(hitGrid);
 
@@ -110,20 +111,22 @@ void LVOX3_StepComputeSky::compute()
                         gridTools.computeGridIndexForColLinLevel(col, lin, level, indice);
                         if(hitGrid->valueAtIndex(indice) > m_minimumNumberOfPoints) {
                             const double value = hitGrid->minZ()+((level+1)*m_gridResolution);
-                            maxSkyLevel = qMax(value, maxSkyLevel);
+                            maxSkyZ = qMax(value, maxSkyZ);
+                            maxSkyLevel = level;
+                            index += level;
                             break;
                         }
 
                         setProgress(50 + ((index*50)/nCells));
                         ++index;
-                    }while((level > 0) && !isStopped());
+                    }while((level > maxSkyLevel) && !isStopped());
                 }
             }
 
             for(size_t i=0; i<skyRaster->nCells(); ++i)
-                skyRaster->setValueAtIndex(i, maxSkyLevel);
+                skyRaster->setValueAtIndex(i, maxSkyZ);
 
-            skyRaster->setlevel(maxSkyLevel);
+            skyRaster->setlevel(maxSkyZ);
             skyRaster->computeMinMax();
 
             group->addItemDrawable(skyRaster);
@@ -131,7 +134,7 @@ void LVOX3_StepComputeSky::compute()
             skyRaster->addItemAttribute(new CT_StdItemAttributeT<double>(m_outZMaxModelName.completeName(),
                                                                     CT_AbstractCategory::staticInitDataZ(),
                                                                     outResult,
-                                                                    maxSkyLevel));
+                                                                    maxSkyZ));
             group->addItemDrawable(hitGrid);
         }
     }

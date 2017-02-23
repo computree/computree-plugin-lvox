@@ -209,11 +209,6 @@ private slots:
     void spinBoxDefaultValueChanged(double value);
 
     /**
-     * @brief User change error code
-     */
-    void spinBoxErrorCodeChanged(double value);
-
-    /**
      * @brief Update the label
      */
     void updateLabelConfigureOutGrid();

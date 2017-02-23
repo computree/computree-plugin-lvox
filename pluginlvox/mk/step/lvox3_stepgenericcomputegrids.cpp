@@ -86,7 +86,7 @@ SettingsNodeGroup* LVOX3_StepGenericComputeGrids::getAllSettings() const
             outputGroup->addGroup(checkGroup);
 
             checkGroup->addValue(new SettingsNodeValue("version", 1));
-            checkGroup->addValue(new SettingsNodeValue("errorCode", check.errorCode));
+            checkGroup->addValue(new SettingsNodeValue("errorFormula", check.getErrorFormulaInQStringFormat()));
             checkGroup->addValue(new SettingsNodeValue("formula", check.getFormulaInQStringFormat()));
         }
     }
@@ -133,7 +133,10 @@ bool LVOX3_StepGenericComputeGrids::setAllSettings(const SettingsNodeGroup* sett
 
         foreach (SettingsNodeGroup* checkG, checkGroups) {
 
-            READCHECKSETTINGS("errorCode", check.errorCode, toDouble());
+            READCHECKSETTINGS("errorFormula", formula, toString());
+
+            check.setErrorFormula(formula);
+
             READCHECKSETTINGS("formula", formula, toString());
 
             check.setFormula(formula);
@@ -193,22 +196,22 @@ lvox::PredefinedConfiguration LVOX3_StepGenericComputeGrids::createLVOXDensityPr
 
     lvox::CheckConfiguration check;
     check.setFormula("b == c");
-    check.errorCode = lvox::B_Equals_C;
+    check.setErrorFormula(QString().setNum(lvox::B_Equals_C));
 
     out.checks.append(check);
 
     check.setFormula("b < c");
-    check.errorCode = lvox::B_Inferior_C;
+    check.setErrorFormula(QString().setNum(lvox::B_Inferior_C));
 
     out.checks.append(check);
 
     check.setFormula("(b - c) < 10");
-    check.errorCode = lvox::B_Minus_C_Inferior_Threshold;
+    check.setErrorFormula(QString().setNum(lvox::B_Minus_C_Inferior_Threshold));
 
     out.checks.append(check);
 
     check.setFormula("a > (b - c)");
-    check.errorCode = lvox::A_Superior_B_Minus_C;
+    check.setErrorFormula(QString().setNum(lvox::A_Superior_B_Minus_C));
 
     out.checks.append(check);
 
@@ -245,12 +248,12 @@ lvox::PredefinedConfiguration LVOX3_StepGenericComputeGrids::createLVOXOcclusion
 
     lvox::CheckConfiguration check;
     check.setFormula("a <= 0");
-    check.errorCode = lvox::Zero_Division;
+    check.setErrorFormula(QString().setNum(lvox::Zero_Division));
 
     out.checks.append(check);
 
     check.setFormula("a < b");
-    check.errorCode = lvox::Nt_Inferior_Nb;
+    check.setErrorFormula(QString().setNum(lvox::Nt_Inferior_Nb));
 
     out.checks.append(check);
 

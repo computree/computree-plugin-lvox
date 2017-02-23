@@ -19,7 +19,7 @@ PredefinedMapperConfiguration::PredefinedMapperConfiguration(QWidget *parent) :
     ui->tableWidgetNameAndType->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->tableWidgetNameAndType->verticalHeader()->setDefaultSectionSize(24);
 
-    //ui->groupBoxMapperVar->setVisible(false);
+    ui->groupBoxMapperVar->setVisible(false);
 }
 
 PredefinedMapperConfiguration::~PredefinedMapperConfiguration()

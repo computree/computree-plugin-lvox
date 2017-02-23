@@ -280,7 +280,7 @@ void GenericComputeGridsConfiguration::saveConfiguration(int row)
             lvox::CheckConfiguration check;
 
             check.setFormula(ui->tableWidgetChecks->item(i, OUT_CHECK_FORMULA_COLUMN)->text());
-            check.errorCode = qobject_cast<QDoubleSpinBox*>(ui->tableWidgetChecks->cellWidget(i, OUT_CHECK_ERROR_CODE_COLUMN))->value();
+            check.setErrorFormula(ui->tableWidgetChecks->item(i, OUT_CHECK_ERROR_CODE_COLUMN)->text());
 
             c.checks.append(check);
         }
@@ -328,13 +328,9 @@ void GenericComputeGridsConfiguration::restoreConfiguration(int row)
         item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
         ui->tableWidgetChecks->setItem(row, OUT_CHECK_FORMULA_COLUMN, item);
 
-        QDoubleSpinBox* sp = new QDoubleSpinBox();
-        sp->setMinimum(-99999);
-        sp->setMaximum(99999);
-        sp->setValue(check.errorCode);
-        ui->tableWidgetChecks->setCellWidget(row, OUT_CHECK_ERROR_CODE_COLUMN, sp);
-
-        connect(sp, SIGNAL(valueChanged(double)), this, SLOT(spinBoxErrorCodeChanged(double)), Qt::QueuedConnection);
+        item = new QTableWidgetItem(lvox::CheckConfiguration::formulaToString(check.getErrorFormula()));
+        item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
+        ui->tableWidgetChecks->setItem(row, OUT_CHECK_ERROR_CODE_COLUMN, item);
 
         ++row;
     }
@@ -360,7 +356,7 @@ void GenericComputeGridsConfiguration::initTableHeaders()
 
     ui->tableWidgetInGrid->setHorizontalHeaderLabels(QStringList() << tr("Variable") << tr("Nom et Type"));
     ui->tableWidgetOutGrid->setHorizontalHeaderLabels(QStringList() << tr("Variable") << tr("Type") << tr("Nom") << tr("NA") << tr("Défaut"));
-    ui->tableWidgetChecks->setHorizontalHeaderLabels(QStringList() << tr("Si") << tr("Code d'erreur"));
+    ui->tableWidgetChecks->setHorizontalHeaderLabels(QStringList() << tr("Si") << tr("Formule d'erreur"));
 }
 
 void GenericComputeGridsConfiguration::adjustTableWidgetColumnsToContents()
@@ -463,7 +459,7 @@ void GenericComputeGridsConfiguration::on_tableWidgetChecks_cellChanged(int row,
     if(m_reset)
         return;
 
-    if(column == OUT_CHECK_FORMULA_COLUMN) {
+    if((column == OUT_CHECK_FORMULA_COLUMN) || (column == OUT_CHECK_ERROR_CODE_COLUMN)) {
         int r = ui->comboBoxOutGridToConfigure->currentIndex();
 
         if(r >= 0 && r < m_outputconfiguration.size()) {
@@ -472,7 +468,13 @@ void GenericComputeGridsConfiguration::on_tableWidgetChecks_cellChanged(int row,
             if(row >= 0 && row < conf.checks.size()) {
                 lvox::CheckConfiguration cConf = conf.checks.at(row);
 
-                cConf.setFormula(ui->tableWidgetChecks->item(row, column)->text());
+                const QString formula = ui->tableWidgetChecks->item(row, column)->text();
+
+                if(column == OUT_CHECK_FORMULA_COLUMN)
+                    cConf.setFormula(formula);
+                else if(column == OUT_CHECK_ERROR_CODE_COLUMN)
+                    cConf.setErrorFormula(formula);
+
                 conf.checks.replace(row, cConf);
 
                 m_outputconfiguration.replace(r, conf);
@@ -530,7 +532,6 @@ void GenericComputeGridsConfiguration::on_pushButtonAddCheck_clicked()
         saveConfiguration(r);
 
         lvox::CheckConfiguration c;
-        c.errorCode = -1;
 
         lvox::OutGridConfiguration conf = m_outputconfiguration.at(r);
         conf.checks.append(c);
@@ -674,30 +675,6 @@ void GenericComputeGridsConfiguration::spinBoxDefaultValueChanged(double value)
             c.gridDefaultValue = value;
 
             m_outputconfiguration.replace(i, c);
-            return;
-        }
-    }
-}
-
-void GenericComputeGridsConfiguration::spinBoxErrorCodeChanged(double value)
-{
-    if(m_reset)
-        return;
-
-    QObject* sp = sender();
-
-    int n = ui->tableWidgetChecks->rowCount();
-
-    for(int i=0; i<n; ++i) {
-        if(ui->tableWidgetChecks->cellWidget(i, OUT_CHECK_ERROR_CODE_COLUMN) == sp) {
-            int j = ui->comboBoxOutGridToConfigure->currentIndex();
-            lvox::OutGridConfiguration c = m_outputconfiguration.at(j);
-            lvox::CheckConfiguration check = c.checks.at(i);
-            check.errorCode = value;
-
-            c.checks.replace(i, check);
-            m_outputconfiguration.replace(j, c);
-
             return;
         }
     }

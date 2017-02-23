@@ -24,7 +24,7 @@ namespace lvox {
         }
 
         bool operator ==(const InGridConfiguration& other) const {
-            return (other.gridLetter == gridLetter) && (other.gridType == gridType);
+            return (other.gridType == gridType);
         }
 
         QString toString() const {
@@ -38,10 +38,9 @@ namespace lvox {
      * @brief Configuration for conditionnal structure (IF)
      */
     struct CheckConfiguration {
-        double      errorCode;
 
         CheckConfiguration() {
-            errorCode = -1;
+            errorFormula = "-1";
         }
 
         void setFormula(const QString& f) {
@@ -51,10 +50,18 @@ namespace lvox {
         const std::string& getFormula() const { return formula; }
         QString getFormulaInQStringFormat() const { return QString().fromStdString(formula); }
 
+        void setErrorFormula(const QString& f) {
+            errorFormula = f.simplified().toLower().toStdString();
+        }
+
+        const std::string& getErrorFormula() const { return errorFormula; }
+        QString getErrorFormulaInQStringFormat() const { return QString().fromStdString(errorFormula); }
+
         static QString formulaToString(std::string formula) { return QString().fromStdString(formula).toLower(); }
 
     private:
         std::string formula;
+        std::string errorFormula;
     };
 
     /**

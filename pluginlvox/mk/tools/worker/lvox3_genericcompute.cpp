@@ -18,7 +18,7 @@ LVOX3_GenericCompute::LVOX3_GenericCompute(const QList<Input>& inputs,
     m_output = output;
 
     m_checksParsers.reserve(checksFormula.size());
-    m_checksErrorCode.reserve(checksFormula.size());
+    m_checksErrorParsers.reserve(checksFormula.size());
     m_variables.reserve(26);
 
     for(int i=0; i<26; ++i)
@@ -33,7 +33,12 @@ LVOX3_GenericCompute::LVOX3_GenericCompute(const QList<Input>& inputs,
         initParser(*parser, c.getFormula());
 
         m_checksParsers.append(parser);
-        m_checksErrorCode.append(c.errorCode);
+
+        parser = new mu::Parser();
+        parser->SetDecSep(decimalPoint);
+
+        initParser(*parser, c.getErrorFormula());
+        m_checksErrorParsers.append(parser);
     }
 
     m_finalParser.SetDecSep(decimalPoint);
@@ -46,6 +51,7 @@ LVOX3_GenericCompute::LVOX3_GenericCompute(const QList<Input>& inputs,
 LVOX3_GenericCompute::~LVOX3_GenericCompute()
 {
     qDeleteAll(m_checksParsers.begin(), m_checksParsers.end());
+    qDeleteAll(m_checksErrorParsers.begin(), m_checksErrorParsers.end());
     qDeleteAll(m_variables.begin(), m_variables.end());
 }
 
@@ -77,7 +83,8 @@ void LVOX3_GenericCompute::doTheJob()
             // the check formula returns true
             if(checkVerified = (parser->Eval() != 0)) {
                 // we must set the error code
-                m_output->setValueAtIndexFromDouble(i, m_checksErrorCode[j]);
+                const double errorValue = m_checksErrorParsers[j]->Eval();
+                m_output->setValueAtIndexFromDouble(i, errorValue);
             }
         }
 

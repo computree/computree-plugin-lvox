@@ -135,7 +135,7 @@ void LoadFileConfiguration::editItem(QListWidgetItem *item)
     ui->checkBoxScannerClockwise->setChecked(c.clockWise);
     ui->checkBoxAngleInRadians->setChecked(c.radians);
 
-    ui->labelFilepath->setText(tr("<i>%1</i>").arg(c.filepath));
+    ui->labelFilepath->setText(tr("<i>%1</i>").arg(((item == NULL) ? tr("Aucun fichier sélectionné") : QFileInfo(c.filepath).baseName())));
 
     ui->doubleSpinBoxXPos->setValue(c.scannerPosition.x());
     ui->doubleSpinBoxYPos->setValue(c.scannerPosition.y());
@@ -253,8 +253,12 @@ bool LoadFileConfiguration::chooseFiles(QStringList& filepath, bool multiple)
 
     if(multiple)
         filepath.append(QFileDialog::getOpenFileNames(this, tr("Choisir un fichier"), "", tr("Fichiers compatibles (%1)").arg(formats)));
-    else
-        filepath.append(QFileDialog::getOpenFileName(this, tr("Choisir un fichier"), "", tr("Fichiers compatibles (%1)").arg(formats)));
+    else {
+        QString fp = QFileDialog::getOpenFileName(this, tr("Choisir un fichier"), "", tr("Fichiers compatibles (%1)").arg(formats));
+
+        if(!fp.isEmpty())
+            filepath.append(fp);
+    }
 
     return !filepath.isEmpty();
 }
@@ -347,8 +351,7 @@ void LoadFileConfiguration::on_listWidgetFiles_currentItemChanged(QListWidgetIte
     if((previous != NULL) && !previous->text().isEmpty())
         updateConfiguration(previous);
 
-    if((current != NULL) && !current->text().isEmpty())
-        editItem(current);
+    editItem(current);
 }
 
 void LoadFileConfiguration::on_listWidgetFiles_itemDoubleClicked(QListWidgetItem *item)

@@ -34,10 +34,7 @@
 LVOX3_StepComputeLvoxGrids::LVOX3_StepComputeLvoxGrids(CT_StepInitializeData &dataInit) : CT_AbstractStep(dataInit)
 {
     m_resolution = 0.5;
-    m_effectiveRayThreshold = 10;
     m_computeDistances = false;
-    m_useMNT = true;
-    m_useSky = true;
 
     m_gridMode = lvox::BoundingBoxOfTheScene;
     m_coordinates.x() = -20.0;
@@ -88,10 +85,7 @@ void LVOX3_StepComputeLvoxGrids::createPostConfigurationDialog()
     //              Attributes of LVox            //
     //********************************************//
     configDialog->addDouble(tr("Resolution of the grids"),tr("meters"),0.0001,10000,2, m_resolution );
-    configDialog->addInt(tr("Minimum number of effective ray in a voxel to take it into account"),tr(""),0,100000, m_effectiveRayThreshold );
     configDialog->addBool("", "", tr("Compute Distances"), m_computeDistances);
-    configDialog->addBool("", "", tr("Use the MNT (if present) to filter voxels that was below it"), m_useMNT );
-    configDialog->addBool("", "", tr("Use the MNC (if present) to filter voxels that was above it"), m_useSky );
     configDialog->addEmpty();
 
     configDialog->addText(tr("Reference for (minX, minY, minZ) corner of the grid :"),"", "");
