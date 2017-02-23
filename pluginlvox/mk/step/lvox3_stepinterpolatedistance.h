@@ -18,6 +18,12 @@ class LVOX3_StepInterpolateDistance : public CT_AbstractStep
     Q_OBJECT
 
 public:
+    enum InterpolationMethod {
+        Distance = 0,
+        Trust,
+        DistanceAndTrust
+    };
+
     LVOX3_StepInterpolateDistance(CT_StepInitializeData &dataInit);
 
     /**
@@ -52,12 +58,14 @@ protected:
     void compute();
 
 private:
+    QHash<QString, InterpolationMethod> m_interpolationMethodCollection;
+
     double  m_interpolateRadius;
+    QString m_interpolationMethod;
 
     /**
      * Distance interpolation
      */
-    bool    m_enableInterpolateDistance;
     double  m_interpolateDensityThreshold;
     int     m_interpolatePower;
 
@@ -69,8 +77,7 @@ private:
     int     m_trustHighThreshold;
 
 
-    CT_AutoRenameModels m_outInterpolatedDistanceGridModelName;
-    CT_AutoRenameModels m_outInterpolatedTrustGridModelName;
+    CT_AutoRenameModels m_outInterpolatedGridModelName;
 
 private slots:
     /**

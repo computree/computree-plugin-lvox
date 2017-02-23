@@ -27,13 +27,18 @@ using namespace std;
 LVOX3_StepInterpolateDistance::LVOX3_StepInterpolateDistance(CT_StepInitializeData &dataInit)
     : CT_AbstractStep(dataInit),
       m_interpolateRadius(1.0),
-      m_enableInterpolateDistance(true),
       m_interpolateDensityThreshold(0.0),
       m_interpolatePower(0),
-      m_enableInterpolateTrust(true),
       m_trustLowThreshold(10),
       m_trustHighThreshold(30)
 {
+    m_interpolationMethod = tr("Distance");
+
+    m_interpolationMethodCollection.insert(m_interpolationMethod, Distance);
+    m_interpolationMethodCollection.insert(tr("Trust"), Trust);
+
+    // TODO : change compute method to enable do this !
+    //m_interpolationMethodCollection.insert(tr("Distance and Trust"), DistanceAndTrust);
 }
 
 QString LVOX3_StepInterpolateDistance::getStepDescription() const
@@ -82,17 +87,16 @@ void LVOX3_StepInterpolateDistance::createInResultModelListProtected()
      * In lvox_stepcombinedentisygrids.cpp, an item attribute is requested with
      * addItemAttributeModel, but lvox3_stepgenericcomputegrids.cpp does not
      * add such attributes that would allow matching.
+     *
+     * FIX : No way to choose a default model. But warning ! you must not set it as optionnal because you can
+     *       use it potentially in your compute. The consequence is that the user must always
+     *       have it. No other solution for this. Otherwise we must create another step.
      */
-
     resultModel->addItemModel(DEF_SearchInGroup, DEF_Nt,
-            lvox::Grid3Di::staticGetType(), tr("theoretical"), "",
-            CT_InAbstractModel::C_ChooseOneIfMultiple,
-            CT_InAbstractModel::F_IsOptional);
+            lvox::Grid3Di::staticGetType(), tr("theoretical"));
 
     resultModel->addItemModel(DEF_SearchInGroup, DEF_Nb,
-            lvox::Grid3Di::staticGetType(), tr("before"), "",
-            CT_InAbstractModel::C_ChooseOneIfMultiple,
-            CT_InAbstractModel::F_IsOptional);
+            lvox::Grid3Di::staticGetType(), tr("before"));
 }
 
 void LVOX3_StepInterpolateDistance::createPostConfigurationDialog()
@@ -106,6 +110,11 @@ void LVOX3_StepInterpolateDistance::createPostConfigurationDialog()
      * - We should use a combobox instead of the checkbox for each algorithm.
      *   However, I haven't found a way to register a signal to it (not returned from the add)
      * - addWidget() is more generic, but is protected.
+     *
+     * FIX :
+     * - Use addStringChoice() to add a combobox
+     * - No way to enable/disable some widget if a specific action in the combox is choosed. The only way is
+     *   to do a custom configuration dialog but it is heavier to implement.
      */
     CT_StepConfigurableDialog *configDialog = newStandardPostConfigurationDialog();
 
@@ -116,12 +125,15 @@ void LVOX3_StepInterpolateDistance::createPostConfigurationDialog()
 
     configDialog->addEmpty();
 
-    configDialog->addBool(tr("Enable distance interpolation"), "", "", m_enableInterpolateDistance);
+    configDialog->addStringChoice(tr("Interpolation type"), "", m_interpolationMethodCollection.keys(), m_interpolationMethod);
+
+    configDialog->addEmpty();
+    configDialog->addText(tr("Parameter for distance interpolation"));
     configDialog->addInt(tr("Decay power"), tr(""), 0, 100, m_interpolatePower);
 
     configDialog->addEmpty();
 
-    configDialog->addBool(tr("Enable trust interpolation"), "", "", m_enableInterpolateTrust);
+    configDialog->addText(tr("Parameters for trust interpolation"));
     configDialog->addInt(tr("Lower bound"), tr("effective rays (Ni - Nb)"), 0, 1000, m_trustLowThreshold, tr("Voxel with lower effective rays are not trusted"));
     configDialog->addInt(tr("Higher bound"), tr("effective rays (Ni - Nb)"), 0, 1000, m_trustHighThreshold, tr("Voxel with higher effective rays are fully trusted"));
 
@@ -139,18 +151,15 @@ void LVOX3_StepInterpolateDistance::createOutResultModelListProtected()
      *
      * FIXME: depending on the interpolation algorithm selected by the user,
      * only one grid will be produced and the output name should be different.
+     *
+     * FIX : just use one and choose a name that can be used for all selected algorithm....
      */
     if(resultModel != NULL) {
 
         resultModel->addItemModel(DEF_SearchInGroup,
-                m_outInterpolatedDistanceGridModelName,
+                m_outInterpolatedGridModelName,
                 new lvox::Grid3Df(),
-                tr("Density - distance interpolation"));
-
-        resultModel->addItemModel(DEF_SearchInGroup,
-                m_outInterpolatedTrustGridModelName,
-                new lvox::Grid3Df(),
-                tr("Density - trust interpolation"));
+                tr("Density - interpolated"));
     }
 }
 
@@ -190,45 +199,46 @@ void LVOX3_StepInterpolateDistance::compute()
         if(!(grid_density && grid_nt && grid_nb))
             continue;
 
-        vector<unique_ptr<WorkItem>> work;
+        LVOX3_Worker *worker = NULL;
+        lvox::Grid3Df *out = NULL;
 
-        if (m_enableInterpolateDistance) {
-            lvox::Grid3Df *out = (lvox::Grid3Df*) grid_density->copy(
-                    m_outInterpolatedDistanceGridModelName.completeName(),
+        if (m_interpolationMethodCollection.value(m_interpolationMethod) == Distance) {
+            out = (lvox::Grid3Df*) grid_density->copy(
+                    m_outInterpolatedGridModelName.completeName(),
                     outResult, CT_ResultCopyModeList());
-            LVOX3_Worker *worker = new LVOX3_InterpolateDistance(
+            worker = new LVOX3_InterpolateDistance(
                     grid_density, out, m_interpolateRadius,
                     m_interpolatePower, m_interpolateDensityThreshold);
-            work.push_back(unique_ptr<WorkItem>(new WorkItem("Density interpolated (distance)", worker, out)));
         }
 
-        if (m_enableInterpolateTrust) {
-            lvox::Grid3Df *out = (lvox::Grid3Df*) grid_density->copy(
-                    m_outInterpolatedTrustGridModelName.completeName(),
+        if (m_interpolationMethodCollection.value(m_interpolationMethod) == Trust) {
+            out = (lvox::Grid3Df*) grid_density->copy(
+                    m_outInterpolatedGridModelName.completeName(),
                     outResult, CT_ResultCopyModeList());
-            LVOX3_Worker *worker = new LVOX3_InterpolateTrustFactor(
+            worker = new LVOX3_InterpolateTrustFactor(
                     grid_density, grid_nt, grid_nb, out, m_interpolateRadius,
                     m_trustLowThreshold, m_trustHighThreshold);
-            work.push_back(unique_ptr<WorkItem>(new WorkItem("Density interpolated (trust)", worker, out)));
         }
 
-        for (unique_ptr<WorkItem> &item: work) {
-            item->m_worker->compute();
-            item->m_result->computeMinMax();
+        if(worker != NULL) {
 
-            /*
-             * The object added knows its modelName and associated result group.
-             */
-            group->addItemDrawable(item->m_result);
+            connect(worker, SIGNAL(progressChanged(int)), this, SLOT(workerProgressChanged(int)), Qt::DirectConnection);
+
+            worker->compute();
+            out->computeMinMax();
+
+            group->addItemDrawable(out);
+
+            delete worker;
 
             /*
              * We change the model name to match the currently selected
              * interpolation method.
              *
              * FIXME: that actually doesn't work.
+             * FIX : you change the name of the itemdrawable so if you go in a table view you will show this name
              */
             //item->m_result->setDisplayableName(item->m_name);
-
         }
     }
 }
