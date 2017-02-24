@@ -157,6 +157,7 @@ void ComputeProfilesConfiguration::on_radioButtonAllGrid_toggled(bool checked)
     ui->spinBoxGenStep->setEnabled(!checked);
     ui->checkBoxPersonalized->setEnabled(!checked);
     ui->checkBoxZValuesInPourcent->setEnabled(!checked);
+    ui->comboBoxGen->setEnabled(!checked);
 
     if(checked)
         ui->checkBoxPersonalized->setChecked(false);

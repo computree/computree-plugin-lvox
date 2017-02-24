@@ -17,10 +17,6 @@
 #define DEF_SearchInGroup       "gr"
 #define DEF_Nt "theoretical"
 #define DEF_Nb "before"
-#define DEF_Ni "hits"
-#define DEF_inATTisNi "isNi"
-#define DEF_inATTisNt "isNt"
-#define DEF_inATTisNb "isNb"
 
 using namespace std;
 
@@ -134,8 +130,8 @@ void LVOX3_StepInterpolateDistance::createPostConfigurationDialog()
     configDialog->addEmpty();
 
     configDialog->addText(tr("Parameters for trust interpolation"));
-    configDialog->addInt(tr("Lower bound"), tr("effective rays (Ni - Nb)"), 0, 1000, m_trustLowThreshold, tr("Voxel with lower effective rays are not trusted"));
-    configDialog->addInt(tr("Higher bound"), tr("effective rays (Ni - Nb)"), 0, 1000, m_trustHighThreshold, tr("Voxel with higher effective rays are fully trusted"));
+    configDialog->addInt(tr("Lower bound"), tr("effective rays (Nt - Nb)"), 0, 1000, m_trustLowThreshold, tr("Voxel with lower effective rays are not trusted"));
+    configDialog->addInt(tr("Higher bound"), tr("effective rays (Nt - Nb)"), 0, 1000, m_trustHighThreshold, tr("Voxel with higher effective rays are fully trusted"));
 
 }
 
@@ -163,18 +159,6 @@ void LVOX3_StepInterpolateDistance::createOutResultModelListProtected()
     }
 }
 
-/*
- * WorkItem is a plain object used locally to hold multiple values for the compute method.
- * Owns the worker pointer.
- */
-struct WorkItem {
-    WorkItem(const QString &name, LVOX3_Worker *worker, lvox::Grid3Df *result) :
-        m_name(name), m_worker(worker), m_result(result) { }
-    QString m_name;
-    unique_ptr<LVOX3_Worker> m_worker;
-    lvox::Grid3Df *m_result;
-};
-
 void LVOX3_StepInterpolateDistance::compute()
 {
     CT_ResultGroup* outResult = getOutResultList().first();
@@ -192,12 +176,12 @@ void LVOX3_StepInterpolateDistance::compute()
         lvox::Grid3Di *grid_nt = dynamic_cast<lvox::Grid3Di*>(group->firstItemByINModelName(this, DEF_Nt));
         lvox::Grid3Di *grid_nb = dynamic_cast<lvox::Grid3Di*>(group->firstItemByINModelName(this, DEF_Nb));
 
+        if(!(grid_density && grid_nt && grid_nb))
+            continue;
+
         qDebug() << "density grid info: " << grid_density->getInfo();
         qDebug() << "theoric grid info: " << grid_nt->getInfo();
         qDebug() << "blocked grid info: " << grid_nb->getInfo();
-
-        if(!(grid_density && grid_nt && grid_nb))
-            continue;
 
         LVOX3_Worker *worker = NULL;
         lvox::Grid3Df *out = NULL;

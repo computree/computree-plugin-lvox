@@ -62,23 +62,26 @@ public:
     void finish(const LVOX3_PropagationVisitorContext& context);
 
     /**
-     * Main trust factor computation
-     * @param Nt: theoretical rays
-     * @param Nb: blocked rays
-     * @param effectiveRayThreshold: minimum number of rays
-     * @param endRayThreshold: threshold for fully trusted value
+     * @brief Main trust factor computation
+     * @param Nt : theoretical rays
+     * @param Nb : blocked rays
+     * @param effectiveRayThreshold : minimum number of rays
+     * @param endRayThreshold : threshold for fully trusted value
+     * @param diffEffectiveRay : endRayThreshold - effectiveRayThreshold
      */
     static double getTrustFactor(const qint32& Nt, const qint32& Nb,
-            const qint32& effectiveRayThreshold, const qint32& endRayThreshold);
+                                 const qint32& effectiveRayThreshold, const qint32& endRayThreshold,
+                                 const qint32& diffEffectiveRay);
 private:
-    const lvox::Grid3Df*  m_inGrid;
-    lvox::Grid3Df* const  m_outGrid;
-    const lvox::Grid3Di*  m_beforeGrid;
-    const lvox::Grid3Di*  m_theoriticalsGrid;
-    qint32          m_effectiveRayThreshold;
-    qint32          m_endRayThreshold;
-    double          m_denominator;
-    double          m_numerator;
+    const lvox::Grid3Df*    m_inGrid;
+    lvox::Grid3Df* const    m_outGrid;
+    const lvox::Grid3Di*    m_beforeGrid;
+    const lvox::Grid3Di*    m_theoriticalsGrid;
+    qint32                  m_effectiveRayThreshold;
+    qint32                  m_endRayThreshold;
+    qint32                  m_diffEffectiveRay;
+    double                  m_denominator;
+    double                  m_numerator;
 };
 
 #endif // LVOX3_TRUSTINTERPOLATIONVISITOR_H

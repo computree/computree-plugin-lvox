@@ -40,7 +40,7 @@ LVOX3_StepComputeProfiles::LVOX3_StepComputeProfiles(CT_StepInitializeData &data
 
 QString LVOX3_StepComputeProfiles::getStepDescription() const
 {
-    return tr("5 - Créer des profils verticaux à partir de voxels (LVOX 3)");
+    return tr("5 - Créer des profils à partir de voxels (LVOX 3)");
 }
 
 CT_VirtualAbstractStep* LVOX3_StepComputeProfiles::createNewInstance(CT_StepInitializeData &dataInit)

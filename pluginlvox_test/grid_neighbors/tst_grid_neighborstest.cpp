@@ -200,7 +200,7 @@ void Grid_neighborsTest::testTrustInterpolation()
     QFETCH(qint32, high);
     QFETCH(double, exp);
 
-    double act = LVOX3_TrustInterpolationVisitor::getTrustFactor(Nt, Nb, low, high);
+    double act = LVOX3_TrustInterpolationVisitor::getTrustFactor(Nt, Nb, low, high, high-low);
     QCOMPARE(act, exp);
 }
 
@@ -238,8 +238,12 @@ void Grid_neighborsTest::testTrustInterpolationPlot()
     QVERIFY(f.open(QIODevice::WriteOnly));
     QTextStream data(&f);
 
+    const qint32 lb = 10;
+    const qint32 up = 30;
+    const qint32 diff = up-lb;
+	
     for (int Nb = 0; Nb < m; Nb++) {
-        double trust1 = LVOX3_TrustInterpolationVisitor::getTrustFactor(m, Nb, 10, 30);
+        double trust1 = LVOX3_TrustInterpolationVisitor::getTrustFactor(m, Nb, lb, up, diff);
         data << QString("%1 %2\n").arg(Nb).arg(trust1);
     }
 }

@@ -3,6 +3,8 @@
 # Project created by QtCreator 2017-02-07T15:10:56
 #
 #-------------------------------------------------
+MUST_USE_OPENCV = 1
+
 CT_PREFIX_INSTALL = ../../..
 CT_PREFIX = ../../../computreev3
 
