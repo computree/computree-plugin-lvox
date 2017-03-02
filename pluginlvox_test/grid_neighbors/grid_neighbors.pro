@@ -3,6 +3,8 @@
 # Project created by QtCreator 2017-02-07T15:10:56
 #
 #-------------------------------------------------
+COMPUTREE += ctlibio
+
 MUST_USE_OPENCV = 1
 
 CT_PREFIX_INSTALL = ../../..
@@ -10,9 +12,7 @@ CT_PREFIX = ../../../computreev3
 
 include(../../../computreev3/shared.pri)
 include($${PLUGIN_SHARED_DIR}/include.pri)
-
-# FIXME: this include doesn't add the ctlibio to LIBS, adding it manually
-#include($${CT_PREFIX}/include_ct_library.pri)
+include($${CT_PREFIX}/include_ct_library.pri)
 
 # FIXME: use the include_all.pri, should not define manually this variable
 # but required, otherwise the build fails with error: ‘CT_Image2D’ does not name a type
@@ -37,4 +37,4 @@ TEMPLATE = app
 SOURCES += tst_grid_neighborstest.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
-LIBS += -L$${PLUGINSHARED_DESTDIR} -L$${PLUGINSHARED_DESTDIR}/plugins/ -lplug_lvoxv2 -lctlibio
+LIBS += -L$${PLUGINSHARED_DESTDIR}/plugins/ -lplug_lvoxv2
