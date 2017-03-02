@@ -3,10 +3,9 @@ COMPUTREE += ctlibio
 MUST_USE_OPENCV = 1
 
 CT_PREFIX = ../../computreev3
-include($${CT_PREFIX}/all_check_dependencies.pri) # Just verify if there is problems with dependencies, do nothing else
+#include($${CT_PREFIX}/all_check_dependencies.pri) # Just verify if there is problems with dependencies, do nothing else
 include($${CT_PREFIX}/shared.pri)
 include($${PLUGIN_SHARED_DIR}/include.pri)
-include($${CT_PREFIX}/include_ct_library.pri)
 
 contains ( QT_VERSION, "^5.*" ) {
     LIBS += -lQt5Concurrent
