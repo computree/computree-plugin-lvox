@@ -1,4 +1,4 @@
 TEMPLATE = subdirs
 
-SUBDIRS += \
-    grid_neighbors
+SUBDIRS += grid_neighbors
+SUBDIRS += scanners
