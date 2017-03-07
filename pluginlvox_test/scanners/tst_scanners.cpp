@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include "Eigen/Dense"
+#include "Eigen/Geometry"
 
 #include "ct_global/ct_context.h"
 #include "ct_defines.h"
@@ -37,6 +38,7 @@ public:
 private Q_SLOTS:
     void testTLS();
     void testPointCloudShootingPattern();
+    void testProjection();
 };
 
 ScannersTest::ScannersTest()
@@ -87,6 +89,43 @@ void ScannersTest::testPointCloudShootingPattern()
 	CT_Shot s2 = p->getShotAt(1);
 	Vector3d cross = s1.getDirection().cross(s2.getDirection());
 	QVERIFY2(cross.norm() > 0, "shots are not expected to be parallel");
+}
+
+void ScannersTest::testProjection()
+{
+	Vector3d origin(10, 10, 10);
+	Vector3d direction(1, 1, 0);
+	Vector3d u(1, 1, 0);
+	Vector3d v(0, 1, 0);
+	Vector3d w(0, 0, 1);
+
+	direction.normalize();
+
+	Hyperplane<double, 3> plane(direction, origin);
+	Vector3d pu = plane.projection(u);
+	Vector3d pv = plane.projection(v);
+
+	Quaterniond q = Quaterniond::FromTwoVectors(w, direction);
+	Translation3d t(origin);
+	Affine3d trans = q * t;
+	Vector3d ur = q * u;
+
+	std::cout << ur << std::endl;
+	std::cout << ur.dot(direction) << std::endl;
+
+
+	//std::cout << p3 << std::endl;
+	//std::cout << plane.signedDistance(p3) << std::endl;
+
+	/*
+	Vector3d a(1, 0, 0);
+	a.normalize();
+	Vector3d b(1.5, 2.5, 0);
+	std::cout << a << std::endl;
+	std::cout << b << std::endl;
+	std::cout << a.dot(b) << std::endl;
+	std::cout << b.dot(a) << std::endl;
+	*/
 }
 
 QTEST_APPLESS_MAIN(ScannersTest)
