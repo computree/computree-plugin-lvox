@@ -34,18 +34,15 @@ void LVOX3_ComputeTheoriticals::doTheJob()
     // Creates traversal algorithm
     LVOX3_Grid3DWooTraversalAlgorithm<lvox::Grid3DiType> algo(m_outputTheoriticalGrid, true, list);
 
-    const Eigen::Vector3d& origin = m_pattern->getOrigin();
-    Eigen::Vector3d direction;
-
     const size_t nShot = m_pattern->getNumberOfShots();
 
     setProgressRange(0, (m_outputDeltaTheoriticalGrid != NULL) ? nShot+1 : nShot);
 
     for(size_t i=0; (i<nShot) && !mustCancel(); ++i) {
-        m_pattern->getShotDirectionAt(i, direction);
+        const CT_Shot shot = m_pattern->getShotAt(i);
 
         // algo already check if the ray touch the grid or not so we don't have to do twice !
-        algo.compute(origin, direction);
+        algo.compute(shot.getOrigin(), shot.getDirection());
 
         setProgress(i);
     }
