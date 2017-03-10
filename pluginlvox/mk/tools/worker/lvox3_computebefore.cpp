@@ -4,6 +4,7 @@
 #include "mk/tools/traversal/woo/visitor/lvox3_countvisitor.h"
 #include "mk/tools/traversal/woo/visitor/lvox3_distancevisitor.h"
 #include "mk/tools/lvox3_errorcode.h"
+#include "mk/tools/lvox3_gridtools.h"
 
 #include "ct_itemdrawable/tools/gridtools/ct_grid3dwootraversalalgorithm.h"
 #include "ct_iterator/ct_pointiterator.h"
@@ -40,14 +41,17 @@ void LVOX3_ComputeBefore::doTheJob()
     setProgressRange(0, (m_shotDeltaDistance != NULL) ? n_points+1 : n_points);
     size_t i = 0;
 
-    const Eigen::Vector3d& shotOrigin = m_pattern->getOrigin();
-
     CT_PointIterator itP(m_pointCloudIndex);
+
+    LVOX3_GridTools gridTool(m_before);
 
     while (itP.hasNext()
            && !mustCancel())
     {
+        size_t indice;
         const CT_Point &point = itP.next().currentPoint();
+        gridTool.computeGridIndexForPoint(point, indice);
+        Eigen::Vector3d shotOrigin = m_pattern->getShotAt(indice).getOrigin();
 
         // algo already check if the beam touch the grid or not so we don't have to do twice !
         algo.compute(point, point - shotOrigin);

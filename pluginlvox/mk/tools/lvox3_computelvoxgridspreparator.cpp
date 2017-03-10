@@ -61,7 +61,11 @@ LVOX3_ComputeLVOXGridsPreparator::Result LVOX3_ComputeLVOXGridsPreparator::prepa
             tc.mnt = (CT_AbstractImage2D*)mnt;
             tc.sky = (CT_AbstractImage2D*)sky;
 
-            const Eigen::Vector3d& origin = tc.pattern->getOrigin();
+            /*
+             * FIXME: center coordinate may not be enough to compute the
+             * bounding box of the parallel shooting pattern.
+             */
+            const Eigen::Vector3d& origin = tc.pattern->getCenterCoordinate();
 
             res.elementsToCompute.insert(group, tc);
 

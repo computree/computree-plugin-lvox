@@ -26,12 +26,8 @@ void LVOX3_ComputeHits::doTheJob()
     Eigen::Vector3d bottom, top, in, out;
 
     const size_t n_points = m_pointCloudIndex->size();
-    Eigen::Vector3d scanPos;
 
     bool computeDistance = (m_shotInDistance != NULL) || (m_shotOutDistance != NULL);
-
-    if(computeDistance)
-        scanPos = m_pattern->getOrigin();
 
     setProgressRange(0, computeDistance ? n_points+1 : n_points);
 
@@ -55,8 +51,9 @@ void LVOX3_ComputeHits::doTheJob()
             if (computeDistance)
             {
                 gridTool.computeCellBottomLeftTopRightCornerAtColLinLevel(pointCol, pointLin, pointLevel, bottom, top);
-
-                if (LVOX3_RayBoxIntersectionMath::getIntersectionOfRay(bottom, top, scanPos, point - scanPos, in, out))
+                CT_Shot shot = m_pattern->getShotAt(indice);
+                Eigen::Vector3d shotOrig = shot.getOrigin();
+                if (LVOX3_RayBoxIntersectionMath::getIntersectionOfRay(bottom, top, shotOrig, point - shotOrig, in, out))
                 {
                     if(m_shotInDistance != NULL)
                         m_shotInDistance->addValueAtIndex(indice, (in-point).norm());
