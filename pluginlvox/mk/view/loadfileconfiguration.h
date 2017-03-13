@@ -25,18 +25,21 @@ class LoadFileConfiguration : public CT_AbstractConfigurableWidget
 
 public:
     struct Configuration {
-        Configuration() {
-            clockWise = true;
-            radians = false;
-        }
-
+        Configuration() :
+            clockWise(true),
+            radians(false),
+            filepath(),
+            scannerPosition(0., 0., 0.),
+            scannerResolution(0.036, 0.036),
+            scannerThetaRange(0., 360.),
+            scannerPhiRange(0, 180.) {}
         bool clockWise;
         bool radians;
         QString filepath;
         Eigen::Vector3d scannerPosition;
         Eigen::Vector2d scannerResolution;
-        Eigen::Vector2d scannerThetaStartEnd;
-        Eigen::Vector2d scannerPhiStartEnd;
+        Eigen::Vector2d scannerThetaRange;
+        Eigen::Vector2d scannerPhiRange;
     };
 
     explicit LoadFileConfiguration(QWidget *parent = 0);
@@ -146,6 +149,11 @@ private slots:
      * @brief Call it to modify the current item in the list (it will show a QFileDialog to choose another file)
      */
     void modifySelectedFile();
+
+    /**
+     * @brief import a file with multiple scans
+     */
+    void importFile();
 
     /**
      * @brief Remove the current item in the list

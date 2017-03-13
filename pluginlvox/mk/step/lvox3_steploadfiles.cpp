@@ -77,10 +77,10 @@ SettingsNodeGroup* LVOX3_StepLoadFiles::getAllSettings() const
         groupFile->addValue(new SettingsNodeValue("scannerPositionZ", c.scannerPosition.z()));
         groupFile->addValue(new SettingsNodeValue("scannerResolutionX", c.scannerResolution.x()));
         groupFile->addValue(new SettingsNodeValue("scannerResolutionY", c.scannerResolution.y()));
-        groupFile->addValue(new SettingsNodeValue("scannerThetaStart", c.scannerThetaStartEnd.x()));
-        groupFile->addValue(new SettingsNodeValue("scannerThetaEnd", c.scannerThetaStartEnd.y()));
-        groupFile->addValue(new SettingsNodeValue("scannerPhiStart", c.scannerPhiStartEnd.x()));
-        groupFile->addValue(new SettingsNodeValue("scannerPhiEnd", c.scannerPhiStartEnd.y()));
+        groupFile->addValue(new SettingsNodeValue("scannerThetaStart", c.scannerThetaRange.x()));
+        groupFile->addValue(new SettingsNodeValue("scannerThetaEnd", c.scannerThetaRange.y()));
+        groupFile->addValue(new SettingsNodeValue("scannerPhiStart", c.scannerPhiRange.x()));
+        groupFile->addValue(new SettingsNodeValue("scannerPhiEnd", c.scannerPhiRange.y()));
 
         group->addGroup(groupFile);
     }
@@ -147,10 +147,10 @@ bool LVOX3_StepLoadFiles::setAllSettings(const SettingsNodeGroup* settings)
             SETTING_READ("scannerPositionZ", c.scannerPosition.z(), toDouble);
             SETTING_READ("scannerResolutionX", c.scannerResolution.x(), toDouble);
             SETTING_READ("scannerResolutionY", c.scannerResolution.y(), toDouble);
-            SETTING_READ("scannerThetaStart", c.scannerThetaStartEnd.x(), toDouble);
-            SETTING_READ("scannerThetaEnd", c.scannerThetaStartEnd.y(), toDouble);
-            SETTING_READ("scannerPhiStart", c.scannerPhiStartEnd.x(), toDouble);
-            SETTING_READ("scannerPhiEnd", c.scannerPhiStartEnd.y(), toDouble);
+            SETTING_READ("scannerThetaStart", c.scannerThetaRange.x(), toDouble);
+            SETTING_READ("scannerThetaEnd", c.scannerThetaRange.y(), toDouble);
+            SETTING_READ("scannerPhiStart", c.scannerPhiRange.x(), toDouble);
+            SETTING_READ("scannerPhiEnd", c.scannerPhiRange.y(), toDouble);
 
             confs.append(c);
         }
@@ -182,28 +182,24 @@ bool LVOX3_StepLoadFiles::postConfigure()
     c.setConfiguration(m_configuration);
     c.setScannerConfigurationForced(m_useUserScannerConfiguration);
 
-    if(CT_ConfigurableWidgetToDialog::exec(&c) == QDialog::Accepted) {
+    if(CT_ConfigurableWidgetToDialog::exec(&c) == QDialog::Rejected)
+        return false;
 
-        QList<LoadFileConfiguration::Configuration> configs = c.getConfiguration();
-        CT_AbstractReader* reader = c.getReaderToUse()->copy();
+    QList<LoadFileConfiguration::Configuration> configs = c.getConfiguration();
+    CT_AbstractReader* reader = c.getReaderToUse()->copy();
 
-        if(reader->setFilePath(configs.first().filepath)) {
-            reader->setFilePathCanBeModified(false);
-            bool ok = reader->configure();
-            reader->setFilePathCanBeModified(true);
+    if(reader->setFilePath(configs.first().filepath)) {
+        reader->setFilePathCanBeModified(false);
+        bool ok = reader->configure();
+        reader->setFilePathCanBeModified(true);
 
-            if(ok) {
-                delete m_reader;
-                m_reader = reader;
-
-                m_configuration = configs;
-
-                m_useUserScannerConfiguration = c.isScannerConfigurationForced();
-
-                setSettingsModified(true);
-
-                return true;
-            }
+        if(ok) {
+            delete m_reader;
+            m_reader = reader;
+            m_configuration = configs;
+            m_useUserScannerConfiguration = c.isScannerConfigurationForced();
+            setSettingsModified(true);
+            return true;
         }
     }
 
@@ -310,12 +306,12 @@ void LVOX3_StepLoadFiles::compute()
                 CT_Scanner *scanner = new CT_Scanner(DEF_outScannerForced, out_res, i,
                                                      config.scannerPosition,
                                                      Eigen::Vector3d(0,0,1),
-                                                     config.scannerThetaStartEnd.y()-config.scannerThetaStartEnd.x(),
-                                                     config.scannerPhiStartEnd.y()-config.scannerPhiStartEnd.x(),
+                                                     config.scannerThetaRange.y()-config.scannerThetaRange.x(),
+                                                     config.scannerPhiRange.y()-config.scannerPhiRange.x(),
                                                      config.scannerResolution.x(),
                                                      config.scannerResolution.y(),
-                                                     config.scannerThetaStartEnd.x(),
-                                                     config.scannerPhiStartEnd.x(),
+                                                     config.scannerThetaRange.x(),
+                                                     config.scannerPhiRange.x(),
                                                      config.clockWise,
                                                      config.radians);
 

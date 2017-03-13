@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>838</width>
-    <height>581</height>
+    <height>630</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -40,7 +40,7 @@
        <property name="title">
         <string> Chemin des fichiers </string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <widget class="QLabel" name="label_2">
           <property name="text">
@@ -49,46 +49,67 @@
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="listWidgetFiles">
-          <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;- &lt;span style=&quot; font-weight:600;&quot;&gt;Ajouter&lt;/span&gt; un chemin de fichier en cliquant sur le bouton &amp;quot;Ajouter&amp;quot;.&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-weight:600;&quot;&gt;Modifier&lt;/span&gt; un chemin de fichier en sélectionnant la ligne et en appuyant sur le bouton &amp;quot;Modifier&amp;quot;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-weight:600;&quot;&gt;Supprimer&lt;/span&gt; un chemin de fichier en sélectionnant la ligne et en appuyant sur le bouton &amp;quot;Supprimer&amp;quot;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
           <item>
-           <widget class="QPushButton" name="pushButtonAddFile">
-            <property name="text">
-             <string>Ajouter</string>
+           <widget class="QListWidget" name="listWidgetFiles">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;- &lt;span style=&quot; font-weight:600;&quot;&gt;Ajouter&lt;/span&gt; un chemin de fichier en cliquant sur le bouton &amp;quot;Ajouter&amp;quot;.&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-weight:600;&quot;&gt;Modifier&lt;/span&gt; un chemin de fichier en sélectionnant la ligne et en appuyant sur le bouton &amp;quot;Modifier&amp;quot;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-weight:600;&quot;&gt;Supprimer&lt;/span&gt; un chemin de fichier en sélectionnant la ligne et en appuyant sur le bouton &amp;quot;Supprimer&amp;quot;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButtonModifyFile">
-            <property name="text">
-             <string>Modifier</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButtonDeleteFile">
-            <property name="text">
-             <string>Supprimer</string>
-            </property>
-           </widget>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QPushButton" name="pushButtonAddFile">
+              <property name="text">
+               <string>Ajouter</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonModifyFile">
+              <property name="text">
+               <string>Modifier</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonImportFile">
+              <property name="text">
+               <string>Importer</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonDeleteFile">
+              <property name="text">
+               <string>Supprimer</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonDeleteAllFile">
+              <property name="text">
+               <string>Tout supprimer</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
          </layout>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButtonDeleteAllFile">
-          <property name="text">
-           <string>Tout supprimer</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>

@@ -16,6 +16,7 @@ LoadFileConfiguration::LoadFileConfiguration(QWidget *parent) :
 
     connect(ui->pushButtonAddFile, SIGNAL(clicked(bool)), this, SLOT(addFile()));
     connect(ui->pushButtonModifyFile, SIGNAL(clicked(bool)), this, SLOT(modifySelectedFile()));
+    connect(ui->pushButtonImportFile, SIGNAL(clicked(bool)), this, SLOT(importFile()));
     connect(ui->pushButtonDeleteFile, SIGNAL(clicked(bool)), this, SLOT(removeSelectedFile()));
     connect(ui->pushButtonDeleteAllFile, SIGNAL(clicked(bool)), this, SLOT(removeAllFile()));
 
@@ -61,8 +62,11 @@ void LoadFileConfiguration::setConfiguration(const QList<LoadFileConfiguration::
         ui->listWidgetFiles->addItem(item);
     }
 
-    if(!configs.isEmpty())
-        ui->listWidgetFiles->setCurrentItem(ui->listWidgetFiles->item(ui->listWidgetFiles->count()-1));
+    if(!configs.isEmpty()) {
+        int last = ui->listWidgetFiles->count() - 1;
+        QListWidgetItem* item = ui->listWidgetFiles->item(last);
+        ui->listWidgetFiles->setCurrentItem(item);
+    }
 }
 
 void LoadFileConfiguration::setScannerConfigurationForced(bool enable)
@@ -144,11 +148,11 @@ void LoadFileConfiguration::editItem(QListWidgetItem *item)
     ui->doubleSpinBoxHRes->setValue(c.scannerResolution.x());
     ui->doubleSpinBoxVRes->setValue(c.scannerResolution.y());
 
-    ui->doubleSpinBoxStartPhi->setValue(c.scannerPhiStartEnd.x());
-    ui->doubleSpinBoxEndPhi->setValue(c.scannerPhiStartEnd.y());
+    ui->doubleSpinBoxStartPhi->setValue(c.scannerPhiRange.x());
+    ui->doubleSpinBoxEndPhi->setValue(c.scannerPhiRange.y());
 
-    ui->doubleSpinBoxStartTheta->setValue(c.scannerThetaStartEnd.x());
-    ui->doubleSpinBoxEndTheta->setValue(c.scannerThetaStartEnd.y());
+    ui->doubleSpinBoxStartTheta->setValue(c.scannerThetaRange.x());
+    ui->doubleSpinBoxEndTheta->setValue(c.scannerThetaRange.y());
 }
 
 void LoadFileConfiguration::updateConfiguration(QListWidgetItem *item)
@@ -168,11 +172,11 @@ void LoadFileConfiguration::updateConfiguration(QListWidgetItem *item)
     c.scannerResolution.x() = ui->doubleSpinBoxHRes->value();
     c.scannerResolution.y() = ui->doubleSpinBoxVRes->value();
 
-    c.scannerPhiStartEnd.x() = ui->doubleSpinBoxStartPhi->value();
-    c.scannerPhiStartEnd.y() = ui->doubleSpinBoxEndPhi->value();
+    c.scannerPhiRange.x() = ui->doubleSpinBoxStartPhi->value();
+    c.scannerPhiRange.y() = ui->doubleSpinBoxEndPhi->value();
 
-    c.scannerThetaStartEnd.x() = ui->doubleSpinBoxStartTheta->value();
-    c.scannerThetaStartEnd.y() = ui->doubleSpinBoxEndTheta->value();
+    c.scannerThetaRange.x() = ui->doubleSpinBoxStartTheta->value();
+    c.scannerThetaRange.y() = ui->doubleSpinBoxEndTheta->value();
 
     m_filesScannerConfiguration.insert(item, c);
 }
@@ -208,6 +212,51 @@ void LoadFileConfiguration::addFile()
 
         ui->listWidgetFiles->setCurrentItem(ui->listWidgetFiles->item(ui->listWidgetFiles->count()-1));
     }
+}
+
+#include <QDebug>
+#include "loadfileconfigutil.h"
+
+void LoadFileConfiguration::importFile()
+{
+    // FIXME: set sensible default directory
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    dialog.setNameFilter(tr("Scene (*.in)"));
+    dialog.setViewMode(QFileDialog::Detail);
+
+    if (dialog.exec() == QDialog::Rejected)
+        return;
+
+    QStringList fileNames = dialog.selectedFiles();
+    QList<ConfItem> conf;
+    try {
+        LoadFileConfigUtil::loadInFile(fileNames.at(0), conf);
+        // FIXME: this should be a per-scanner config
+        ui->checkBoxForceScannerInformation->setChecked(true);
+    } catch (LvoxConfigError err) {
+        QString msg(tr("<b>Failed to load file %1</b></br><p>%2<p>"));
+        msg = msg.arg(fileNames.at(0)).arg(err.m_msg);
+        QMessageBox::critical(this, tr("Import error"), msg);
+        return;
+    }
+
+    QStringList notValid;
+    for (const ConfItem& item: conf) {
+        QFileInfo info(item.filepath);
+        if (!info.exists() || !info.isFile()) {
+            notValid.append(item.filepath);
+        }
+    }
+    if (!notValid.isEmpty()) {
+        QString msg(tr("<b>%n Files(s) not found:</b></br><p>%1<p>", "", notValid.count()));
+        QString notValidList = notValid.join("</br>");
+        msg = msg.arg(notValidList);
+        QMessageBox::critical(this, tr("Import error"), msg);
+        return;
+    }
+
+    setConfiguration(conf);
 }
 
 void LoadFileConfiguration::modifySelectedFile()
