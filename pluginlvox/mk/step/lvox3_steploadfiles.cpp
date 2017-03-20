@@ -307,10 +307,8 @@ void LVOX3_StepLoadFiles::compute()
                             size_t nfiltered = orig->size() - filtered->size();
                             PS_LOG->addInfoMessage(this, tr("%n point(s) filtered", "", nfiltered));
                         }
-                        group->addItemDrawable(scene);
-                    } else {
-                        delete item;
                     }
+                    group->addItemDrawable(item);
                 }
             }
 
