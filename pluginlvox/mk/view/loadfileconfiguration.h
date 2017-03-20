@@ -71,6 +71,16 @@ public:
     bool isScannerConfigurationForced() const;
 
     /**
+     * @brief enable or disable filter points at origin
+     */
+    void setFilterPointsOrigin(bool enable);
+
+    /**
+     * @brief returns if the user requested filtering points at origin
+     */
+    bool isFilterPointsOrigin() const;
+
+    /**
      * @brief Returns all configuration
      */
     QList<Configuration> getConfiguration() const;

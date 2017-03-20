@@ -9,23 +9,35 @@
 #include "ct_result/ct_resultgroup.h"
 #include "ct_itemdrawable/ct_standarditemgroup.h"
 #include "ct_itemdrawable/ct_scanner.h"
+#include "ct_itemdrawable/ct_scene.h"
 #include "ct_model/tools/ct_modelsearchhelper.h"
 
 #include "ct_view/tools/ct_configurablewidgettodialog.h"
 #include "ct_reader/abstract/ct_abstractreader.h"
 #include "ct_reader/ct_standardreaderseparator.h"
 #include "ct_abstractstepplugin.h"
+#include "mk/tools/lvox3_filterpointcloud.h"
 
-#define SETTING_READ(NAME, NAMEVAR, TYPE) value = groupFile->firstValueByTagName(NAME); if(value == NULL) { delete reader; return false; } NAMEVAR = value->value().TYPE();
+#define SETTING_READ(NAME, NAMEVAR, TYPE)           \
+do {                                                \
+    value = groupFile->firstValueByTagName(NAME);   \
+    if(value == NULL) {                             \
+        delete reader;                              \
+        return false;                               \
+    }                                               \
+    NAMEVAR = value->value().TYPE();                \
+} while(0)
 
 #define DEF_outResult                "LVOX3_SLF_result"
 #define DEF_outGroup                 "LVOX3_SLF_group"
 #define DEF_outScannerForced         "LVOX3_SLF_scanner"
 
-LVOX3_StepLoadFiles::LVOX3_StepLoadFiles(CT_StepInitializeData &dataInit) : CT_AbstractStepCanBeAddedFirst(dataInit)
+LVOX3_StepLoadFiles::LVOX3_StepLoadFiles(CT_StepInitializeData &dataInit) :
+    CT_AbstractStepCanBeAddedFirst(dataInit)
 {
     m_reader = NULL;
     m_useUserScannerConfiguration = false;
+    m_filterPointsOrigin = true;
 }
 
 LVOX3_StepLoadFiles::~LVOX3_StepLoadFiles()
@@ -52,6 +64,7 @@ SettingsNodeGroup* LVOX3_StepLoadFiles::getAllSettings() const
 
     SettingsNodeGroup *group = new SettingsNodeGroup("LVOX3_StepLoadFiles");
     group->addValue(new SettingsNodeValue("useScannerConfiguration", m_useUserScannerConfiguration));
+    group->addValue(new SettingsNodeValue("filterPointsOrigin", m_filterPointsOrigin));
 
     SettingsNodeGroup* groupReader = new SettingsNodeGroup("Reader");
 
@@ -102,11 +115,13 @@ bool LVOX3_StepLoadFiles::setAllSettings(const SettingsNodeGroup* settings)
         QList<LoadFileConfiguration::Configuration> confs;
 
         bool useUserScannerConfiguration;
+        bool filterPointsOrigin;
         CT_AbstractReader* reader = NULL;
 
         SettingsNodeValue* value;
         SettingsNodeGroup* groupFile = listG.first();
         SETTING_READ("useScannerConfiguration", useUserScannerConfiguration, toBool);
+        SETTING_READ("filterPointsOrigin", filterPointsOrigin, toBool);
 
         QList<SettingsNodeGroup*> listConfiguration = groupFile->groupsByTagName("File");
 
@@ -159,6 +174,7 @@ bool LVOX3_StepLoadFiles::setAllSettings(const SettingsNodeGroup* settings)
         m_reader = reader;
 
         m_useUserScannerConfiguration = useUserScannerConfiguration;
+        m_filterPointsOrigin = filterPointsOrigin;
         m_configuration = confs;
 
         return true;
@@ -181,6 +197,7 @@ bool LVOX3_StepLoadFiles::postConfigure()
     c.setCurrentReaderByClassName(m_reader != NULL ? m_reader->GetReaderClassName() : "");
     c.setConfiguration(m_configuration);
     c.setScannerConfigurationForced(m_useUserScannerConfiguration);
+    c.setFilterPointsOrigin(m_filterPointsOrigin);
 
     if(CT_ConfigurableWidgetToDialog::exec(&c) == QDialog::Rejected)
         return false;
@@ -198,6 +215,7 @@ bool LVOX3_StepLoadFiles::postConfigure()
             m_reader = reader;
             m_configuration = configs;
             m_useUserScannerConfiguration = c.isScannerConfigurationForced();
+            m_filterPointsOrigin = c.isFilterPointsOrigin();
             setSettingsModified(true);
             return true;
         }
@@ -279,10 +297,20 @@ void LVOX3_StepLoadFiles::compute()
                 QListIterator<CT_AbstractSingularItemDrawable*> itI(items);
 
                 while(itI.hasNext()) {
-
-
-
-                    group->addItemDrawable(itI.next());
+                    CT_AbstractSingularItemDrawable* item = itI.next();
+                    if (CT_Scene *scene = dynamic_cast<CT_Scene*>(item)) {
+                        if (m_filterPointsOrigin) {
+                            CT_PCIR orig = scene->getPointCloudIndexRegistered();
+                            CT_PCIR filtered = CT_FilterPointCloud::apply(
+                                        orig, CT_FilterPointCloud::filter_not_origin);
+                            scene->setPointCloudIndexRegistered(filtered);
+                            size_t nfiltered = orig->size() - filtered->size();
+                            PS_LOG->addInfoMessage(this, tr("%n point(s) filtered", "", nfiltered));
+                        }
+                        group->addItemDrawable(scene);
+                    } else {
+                        delete item;
+                    }
                 }
             }
 

@@ -79,6 +79,16 @@ bool LoadFileConfiguration::isScannerConfigurationForced() const
     return ui->checkBoxForceScannerInformation->isChecked();
 }
 
+void LoadFileConfiguration::setFilterPointsOrigin(bool enable)
+{
+    ui->checkBoxFilterPointsOrigin->setChecked(enable);
+}
+
+bool LoadFileConfiguration::isFilterPointsOrigin() const
+{
+    return ui->checkBoxFilterPointsOrigin->isChecked();
+}
+
 QList<LoadFileConfiguration::Configuration> LoadFileConfiguration::getConfiguration() const
 {
     return m_filesScannerConfiguration.values();

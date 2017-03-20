@@ -77,6 +77,7 @@ protected:
 
 private:
     bool                                            m_useUserScannerConfiguration;
+    bool                                            m_filterPointsOrigin;
     CT_AbstractReader*                              m_reader;
     QList<LoadFileConfiguration::Configuration>     m_configuration;
 
