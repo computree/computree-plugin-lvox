@@ -87,7 +87,8 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     mk/tools/traversal/propagation/visitor/lvox3_distanceinterpolationvisitor.h \
     mk/tools/traversal/propagation/visitor/lvox3_trustinterpolationvisitor.h \
     mk/tools/worker/lvox3_interpolatetrustfactor.h \
-    mk/view/loadfileconfigutil.h
+    mk/view/loadfileconfigutil.h \
+    mk/tools/lvox3_filterpointcloud.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -150,7 +151,8 @@ SOURCES += \
     mk/tools/traversal/propagation/visitor/lvox3_distanceinterpolationvisitor.cpp \
     mk/tools/traversal/propagation/visitor/lvox3_trustinterpolationvisitor.cpp \
     mk/tools/worker/lvox3_interpolatetrustfactor.cpp \
-    mk/view/loadfileconfigutil.cpp
+    mk/view/loadfileconfigutil.cpp \
+    mk/tools/lvox3_filterpointcloud.cpp
 
 include(muParser/muparser.pri)
 

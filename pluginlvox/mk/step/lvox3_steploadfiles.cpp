@@ -278,8 +278,12 @@ void LVOX3_StepLoadFiles::compute()
                 QList<CT_AbstractSingularItemDrawable*> items = m_reader->takeItemDrawableOfModel(model->uniqueName(), out_res, modelCreation);
                 QListIterator<CT_AbstractSingularItemDrawable*> itI(items);
 
-                while(itI.hasNext())
+                while(itI.hasNext()) {
+
+
+
                     group->addItemDrawable(itI.next());
+                }
             }
 
             QListIterator<CT_OutStdGroupModel*> itG(m_reader->outGroupsModel());

@@ -16,6 +16,7 @@
 #include "ct_cloud/tools/iglobalcloudlistener.h"
 #include "ct_cloud/tools/ct_globalcloudmanagerproxy.h"
 #include "ctlibio/readers/ct_reader_points_ascii.h"
+#include "mk/tools/lvox3_filterpointcloud.h"
 
 #include <functional>
 
@@ -79,20 +80,7 @@ FilterpointsTest::FilterpointsTest()
     monitor = new MonitoringCloudListener();
 }
 
-typedef std::function<bool (const CT_Point& pt)> CT_PointFilter;
 typedef std::function<void (const CT_Point& pt)> CT_PointCallback;
-
-static const CT_PointFilter point_not_origin = [](const CT_Point& pt)
-{
-    static const Eigen::Vector3d origin(0, 0, 0);
-    return (pt != origin);
-};
-
-static const CT_PointFilter point_all = [](const CT_Point& pt)
-{
-    Q_UNUSED(pt);
-    return true;
-};
 
 void foreach_point(CT_PCIR pcir, CT_PointFilter filter, CT_PointCallback fn)
 {
@@ -108,7 +96,7 @@ void foreach_point(CT_PCIR pcir, CT_PointFilter filter, CT_PointCallback fn)
 
 void foreach_point(CT_PCIR pcir, CT_PointCallback fn)
 {
-    foreach_point(pcir, point_all, fn);
+    foreach_point(pcir, CT_FilterPointCloud::filter_default, fn);
 }
 
 size_t count_points(CT_PCIR pcir, CT_PointFilter filter)
@@ -218,6 +206,7 @@ void FilterpointsTest::testLoadPoints()
     QVERIFY2(reader->readFile(), "failed to read file");
 
     QListIterator<CT_OutStdSingularItemModel*> it(reader->outItemDrawableModels());
+    bool found_scene = false;
     while(it.hasNext()) {
         CT_OutStdSingularItemModel *model = it.next();
         QList<CT_AbstractSingularItemDrawable*> items =
@@ -227,9 +216,13 @@ void FilterpointsTest::testLoadPoints()
             QScopedPointer<CT_AbstractSingularItemDrawable> item(itI.next());
 
             if (CT_Scene *scene = dynamic_cast<CT_Scene*>(item.data())) {
+                found_scene = true;
                 CT_PCIR pcir = scene->getPointCloudIndexRegistered();
-                CT_PCIR pcir2 = filter_cloud_copy_variable(pcir, point_not_origin);
-                scene->setPointCloudIndexRegistered(pcir2);
+                CT_PCIR pcir_filtered = CT_FilterPointCloud::apply(
+                            pcir, CT_FilterPointCloud::filter_not_origin);
+                scene->setPointCloudIndexRegistered(pcir_filtered);
+                QCOMPARE(pcir->size(), 10UL);
+                QCOMPARE(pcir_filtered->size(), 5UL);
                 /*
                  * Assign scene to an out result to register the result. The
                  * object CT_AbstractSingularItemDrawable keeps a ref on the
@@ -239,7 +232,7 @@ void FilterpointsTest::testLoadPoints()
             }
         }
     }
-
+    QVERIFY(found_scene);
     QCOMPARE(proxy.getGlobalPointCloud()->memoryUsed(), 0UL);
     QCOMPARE(monitor->m_max_size, 15UL);
 }
@@ -287,23 +280,28 @@ void FilterpointsTest::testFilterBenchmark()
     switch(filter_method) {
     case FILTER_COPY_FIXED:
         QBENCHMARK_ONCE {
-            result = filter_cloud_copy_fixed(pcir, point_not_origin);
-
+            result = filter_cloud_copy_fixed(
+                        pcir, CT_FilterPointCloud::filter_not_origin);
         }
+        QCOMPARE(result->size(), (unsigned long) n - (n / mod));
         break;
     case FILTER_COPY_VARIABLE:
         QBENCHMARK_ONCE {
-            result = filter_cloud_copy_variable(pcir, point_not_origin);
+            result = filter_cloud_copy_variable(
+                        pcir, CT_FilterPointCloud::filter_not_origin);
         }
+        QCOMPARE(result->size(), (unsigned long) n - (n / mod));
         break;
     case FILTER_INPLACE:
         QBENCHMARK_ONCE {
-            result = filter_cloud_inplace(pcir, point_not_origin);
+            result = filter_cloud_inplace(
+                        pcir, CT_FilterPointCloud::filter_not_origin);
         }
         break;
     default:
         break;
     }
+    // FIXME: uncomment once the resize works
     //QCOMPARE(result->size(), (unsigned long) n - (n / mod));
 }
 
