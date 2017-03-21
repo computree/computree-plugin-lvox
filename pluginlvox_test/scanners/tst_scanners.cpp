@@ -48,6 +48,7 @@ private Q_SLOTS:
     void testBoudingBox();
     void testTheoreticalGrid();
     void testPolarCoordinates();
+    void testAngleBenchmark();
 
 private:
     CT_PCIR m_pcir;
@@ -286,6 +287,11 @@ ThetaPhiBounds thetaPhiBounds(const Vector3d& orig, const std::vector<Vector3d>&
     return bounds;
 }
 
+double angle(Vector3d& v1, Vector3d& v2)
+{
+    return std::atan2(v1.cross(v2).norm(), v1.dot(v2));
+}
+
 void ScannersTest::testPolarCoordinates()
 {
     Vector3d scan(4, 4, 1);
@@ -311,8 +317,30 @@ void ScannersTest::testPolarCoordinates()
     qDebug() << thetaPhiBounds(scan, pts1);
     qDebug() << thetaPhiBounds(scan, pts2);
     qDebug() << thetaPhiBounds(scan, pts3);
+
+
+    Vector3d p1(1, 2, 0);
+    Vector3d p2(-1, 2, 0);
+    Vector3d p3(-1, -2, 0);
+    Vector3d p4(1, -2, 0);
+
+    // angle between two vectors is always in the interval [0, 180]
+
+    qDebug() << qRadiansToDegrees(angle(p1, p2));
+    qDebug() << qRadiansToDegrees(angle(p1, p3));
+    qDebug() << qRadiansToDegrees(angle(p1, p4));
+
 }
 
+void ScannersTest::testAngleBenchmark()
+{
+    // About 100ns on Intel i7-4600U
+    Vector3d p1(1, 2, 0);
+    Vector3d p2(-1, 2, 0);
+    QBENCHMARK {
+        volatile double a = angle(p1, p2);
+    }
+}
 
 QTEST_APPLESS_MAIN(ScannersTest)
 
