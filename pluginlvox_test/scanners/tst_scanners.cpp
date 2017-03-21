@@ -40,6 +40,7 @@ private Q_SLOTS:
     void testTLS();
     void testPointCloudShootingPattern();
     void testParallelShootingPattern();
+    void testBoudingBox();
 
 private:
     CT_PCIR m_pcir;
@@ -116,6 +117,29 @@ void ScannersTest::testParallelShootingPattern()
     Vector3d cross2 = s2.getDirection().cross(direction);
     QCOMPARE(cross1.norm(), 0.);
     QCOMPARE(cross2.norm(), 0.);
+}
+
+void ScannersTest::testBoudingBox()
+{
+    AlignedBox3d b1(Vector3d(-1, -2, -3), Vector3d(1, 2, 3));
+    AlignedBox3d b2(Vector3d(-3, -2, -1), Vector3d(3, 2, 3));
+    b1.extend(b2);
+    Vector3d sizes = b1.sizes();
+    QVERIFY(sizes == Vector3d(6, 4, 6));
+    QVERIFY(b1.center() == Vector3d(0, 0, 0));
+
+    /*
+     * Top/Bottom really means Front/Back
+     */
+    QVERIFY(b1.corner(AlignedBox3d::BottomLeftFloor) == Vector3d(-3, -2, -3));
+    QVERIFY(b1.corner(AlignedBox3d::BottomRightFloor) == Vector3d(3, -2, -3));
+    QVERIFY(b1.corner(AlignedBox3d::TopLeftFloor) == Vector3d(-3, 2, -3));
+    QVERIFY(b1.corner(AlignedBox3d::TopRightFloor) == Vector3d(3, 2, -3));
+
+    QVERIFY(b1.corner(AlignedBox3d::BottomLeftCeil) == Vector3d(-3, -2, 3));
+    QVERIFY(b1.corner(AlignedBox3d::BottomRightCeil) == Vector3d(3, -2, 3));
+    QVERIFY(b1.corner(AlignedBox3d::TopLeftCeil) == Vector3d(-3, 2, 3));
+    QVERIFY(b1.corner(AlignedBox3d::TopRightCeil) == Vector3d(3, 2, 3));
 }
 
 QTEST_APPLESS_MAIN(ScannersTest)
