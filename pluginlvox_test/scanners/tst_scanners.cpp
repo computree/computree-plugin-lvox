@@ -18,6 +18,11 @@
 #include "ct_itemdrawable/tools/scanner/ct_shootingpatternfrompointcloud.h"
 #include "ct_itemdrawable/tools/scanner/ct_parallelshootingpatternfrompointcloud.h"
 #include "ct_cloudindex/registered/abstract/ct_abstractnotmodifiablecloudindexregisteredt.h"
+#include "mk/tools/worker/lvox3_computetheoriticals.h"
+#include "mk/tools/lvox3_gridtype.h"
+#include "mk/tools/lvox3_errorcode.h"
+#include "mk/tools/worker/lvox3_computeall.h"
+#include "mk/tools/traversal/woo/lvox3_grid3dwootraversalalgorithm.h"
 
 using namespace Eigen;
 
@@ -41,6 +46,8 @@ private Q_SLOTS:
     void testPointCloudShootingPattern();
     void testParallelShootingPattern();
     void testBoudingBox();
+    void testTheoreticalGrid();
+    void testPolarCoordinates();
 
 private:
     CT_PCIR m_pcir;
@@ -141,6 +148,171 @@ void ScannersTest::testBoudingBox()
     QVERIFY(b1.corner(AlignedBox3d::TopLeftCeil) == Vector3d(-3, 2, 3));
     QVERIFY(b1.corner(AlignedBox3d::TopRightCeil) == Vector3d(3, 2, 3));
 }
+
+class DebugVisitor : public LVOX3_Grid3DVoxelWooVisitor
+{
+public:
+    DebugVisitor() {}
+    void visit(const LVOX3_Grid3DVoxelWooVisitorContext& context) {
+        qDebug() << "visit: " << context.colLinLevel.x() << context.colLinLevel.y() << context.colLinLevel.z();
+    }
+};
+
+void ScannersTest::testTheoreticalGrid()
+{
+    /*
+        const Eigen::Vector3d& origin,
+                               double hFov, double vFov,
+                               double hRes, double vRes,
+                               double initTheta, double initPhi,
+                               const Eigen::Vector3d& zVector = Eigen::Vector3d(0,0,1),
+                               bool clockWise = true,
+                               bool radians = false
+    */
+
+    double z = 10;
+    CT_ThetaPhiShootingPattern pattern(
+        Vector3d(5., 1., z),
+        90, 180,
+        10, 10,
+        0., 0.);
+
+    std::cout << pattern << std::endl;
+
+    lvox::Grid3Di grid(NULL, NULL,
+            10., 10., 10.,
+            10UL, 10UL, 10UL,
+            1, lvox::Max_Error_Code, 0);
+    qDebug() << "grid.nCells()" << grid.nCells();
+
+    Vector3d min, max;
+    grid.getBoundingBox(min, max);
+    std::cout << min << "\n" << max << std::endl;
+
+    QVector<LVOX3_Grid3DVoxelWooVisitor*> visitors;
+    visitors.append(new DebugVisitor());
+    LVOX3_Grid3DWooTraversalAlgorithm<lvox::Grid3DiType> algo(&grid, true, visitors);
+
+    size_t n = pattern.getNumberOfShots();
+    qDebug() << "number of shots" << n;
+    for (size_t i = 0; i < n; i++) {
+        const CT_Shot& shot = pattern.getShotAt(i);
+        algo.compute(shot.getOrigin(), shot.getDirection());
+    }
+
+    /*
+     * It is mandatory to allocate the object here with "new", the
+     * workersManager calls "delete" on all workers in its destructor.
+     */
+//    LVOX3_ComputeTheoriticals *worker = new LVOX3_ComputeTheoriticals(&pattern, &grid);
+//    LVOX3_ComputeAll workersManager;
+//    workersManager.addWorker(0, worker);
+//    workersManager.compute();
+
+}
+
+#include <vector>
+
+QDebug operator<<(QDebug debug, const Vector3d &v)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << '(' << v.x() << ", " << v.y() << ", " << v.z() << ')';
+
+    return debug;
+}
+
+class MiniMaxi {
+public:
+    MiniMaxi() :
+        m_mini(std::numeric_limits<double>::max()),
+        m_maxi(std::numeric_limits<double>::min()) {}
+    void update(double value) {
+        m_mini = std::min(value, m_mini);
+        m_maxi = std::max(value, m_maxi);
+    }
+    double min() const { return m_mini; }
+    double max() const { return m_maxi; }
+private:
+    double m_mini;
+    double m_maxi;
+};
+
+QDebug operator<<(QDebug debug, const MiniMaxi &mm)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << '[' << mm.min() << ", " << mm.max() << ']';
+
+    return debug;
+}
+
+class ThetaPhiBounds {
+public:
+    ThetaPhiBounds(const Vector3d& orig) :
+        m_origin(orig) { }
+    void extend(const Vector3d& pt) {
+        Vector3d v = pt - m_origin;
+        double r = v.norm();
+        double theta = std::acos(v.z() / r);
+        double phi = std::atan2(v.y(), v.x());
+        qDebug() << "update" << pt << qRadiansToDegrees(theta) << qRadiansToDegrees(phi);
+
+        m_thetaBounds.update(theta);
+        m_phiBounds.update(phi);
+    }
+    MiniMaxi theta() const { return m_thetaBounds; }
+    MiniMaxi phi() const { return m_phiBounds; }
+private:
+    const Vector3d m_origin;
+    MiniMaxi m_thetaBounds;
+    MiniMaxi m_phiBounds;
+};
+
+QDebug operator<<(QDebug debug, const ThetaPhiBounds &b)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << '(' << b.theta() << ", " << b.phi() << ')';
+
+    return debug;
+}
+
+ThetaPhiBounds thetaPhiBounds(const Vector3d& orig, const std::vector<Vector3d>& pts)
+{
+    ThetaPhiBounds bounds(orig);
+    for (int i = 0; i < pts.size(); i++) {
+        bounds.extend(pts[i]);
+    }
+    qDebug() << "theta bounds: " << qRadiansToDegrees(bounds.theta().min()) << qRadiansToDegrees(bounds.theta().max());
+    qDebug() << "phi   bounds: " << qRadiansToDegrees(bounds.phi().min()) << qRadiansToDegrees(bounds.phi().max());
+    return bounds;
+}
+
+void ScannersTest::testPolarCoordinates()
+{
+    Vector3d scan(4, 4, 1);
+    std::vector<Vector3d> pts1 = {
+        Vector3d(8, 3, 0),
+        Vector3d(9, 5, 2),
+        Vector3d(9, 7, 3),
+    };
+
+    std::vector<Vector3d> pts2 = {
+        Vector3d(5, 5, 0),
+        Vector3d(5, 5, 2),
+        Vector3d(5, 7, 3),
+    };
+
+    std::vector<Vector3d> pts3 = {
+        Vector3d(5, 5, 1),
+        Vector3d(3, 5, 1),
+        Vector3d(3, 3, 1),
+        Vector3d(5, 3, 1),
+    };
+
+    qDebug() << thetaPhiBounds(scan, pts1);
+    qDebug() << thetaPhiBounds(scan, pts2);
+    qDebug() << thetaPhiBounds(scan, pts3);
+}
+
 
 QTEST_APPLESS_MAIN(ScannersTest)
 
