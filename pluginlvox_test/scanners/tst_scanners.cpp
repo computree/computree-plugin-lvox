@@ -25,6 +25,7 @@
 #include "mk/tools/traversal/woo/lvox3_grid3dwootraversalalgorithm.h"
 
 using namespace Eigen;
+using namespace std;
 
 /*
  * SRCDIR is defined by the compiler, but Eclipse doesn't
@@ -49,6 +50,9 @@ private Q_SLOTS:
     void testTheoreticalGrid();
     void testPolarCoordinates();
     void testAngleBenchmark();
+    void testComputeFieldOfView();
+    void testMiniMaxi();
+    void testCrossProductSign();
 
 private:
     CT_PCIR m_pcir;
@@ -178,7 +182,7 @@ void ScannersTest::testTheoreticalGrid()
         10, 10,
         0., 0.);
 
-    std::cout << pattern << std::endl;
+    cout << pattern << endl;
 
     lvox::Grid3Di grid(NULL, NULL,
             10., 10., 10.,
@@ -188,7 +192,7 @@ void ScannersTest::testTheoreticalGrid()
 
     Vector3d min, max;
     grid.getBoundingBox(min, max);
-    std::cout << min << "\n" << max << std::endl;
+    cout << min << "\n" << max << endl;
 
     QVector<LVOX3_Grid3DVoxelWooVisitor*> visitors;
     visitors.append(new DebugVisitor());
@@ -226,13 +230,14 @@ class MiniMaxi {
 public:
     MiniMaxi() :
         m_mini(std::numeric_limits<double>::max()),
-        m_maxi(std::numeric_limits<double>::min()) {}
+        m_maxi(-std::numeric_limits<double>::max()) {}
     void update(double value) {
         m_mini = std::min(value, m_mini);
         m_maxi = std::max(value, m_maxi);
     }
     double min() const { return m_mini; }
     double max() const { return m_maxi; }
+    double len() const { return m_maxi - m_mini; }
 private:
     double m_mini;
     double m_maxi;
@@ -253,12 +258,18 @@ public:
     void extend(const Vector3d& pt) {
         Vector3d v = pt - m_origin;
         double r = v.norm();
-        double theta = std::acos(v.z() / r);
-        double phi = std::atan2(v.y(), v.x());
-        qDebug() << "update" << pt << qRadiansToDegrees(theta) << qRadiansToDegrees(phi);
-
+        double theta = acos(v.z() / r);
+        double phi = atan2(v.y(), v.x());
         m_thetaBounds.update(theta);
         m_phiBounds.update(phi);
+    }
+    static double phiAngle(Vector3d& v1, Vector3d v2) {
+        return atan2(v1.y(), v1.x()) - atan2(v2.y(), v2.x());
+    }
+    double thetaAngle() {
+        //double r = v.norm();
+        //double theta = acos(v.z() / r) - acos(...);
+        return 0.0;
     }
     MiniMaxi theta() const { return m_thetaBounds; }
     MiniMaxi phi() const { return m_phiBounds; }
@@ -276,10 +287,10 @@ QDebug operator<<(QDebug debug, const ThetaPhiBounds &b)
     return debug;
 }
 
-ThetaPhiBounds thetaPhiBounds(const Vector3d& orig, const std::vector<Vector3d>& pts)
+ThetaPhiBounds thetaPhiBounds(const Vector3d& orig, const vector<Vector3d>& pts)
 {
     ThetaPhiBounds bounds(orig);
-    for (int i = 0; i < pts.size(); i++) {
+    for (uint i = 0; i < pts.size(); i++) {
         bounds.extend(pts[i]);
     }
     qDebug() << "theta bounds: " << qRadiansToDegrees(bounds.theta().min()) << qRadiansToDegrees(bounds.theta().max());
@@ -287,27 +298,47 @@ ThetaPhiBounds thetaPhiBounds(const Vector3d& orig, const std::vector<Vector3d>&
     return bounds;
 }
 
-double angle(Vector3d& v1, Vector3d& v2)
+void ScannersTest::testMiniMaxi()
 {
-    return std::atan2(v1.cross(v2).norm(), v1.dot(v2));
+    MiniMaxi mm;
+    QVERIFY(mm.min() > 0);
+    QVERIFY(mm.max() < 0);
+    mm.update(42);
+    QCOMPARE(mm.min(), 42.);
+    QCOMPARE(mm.max(), 42.);
+    mm.update(-42);
+    QCOMPARE(mm.min(), -42.);
+    QCOMPARE(mm.max(), 42.);
+}
+
+double absAngle(Vector3d& v1, Vector3d& v2)
+{
+    Vector3d c = v1.cross(v2);
+    Vector3d up(0, 0, 1);
+    double sign = up.dot(c);
+    double angle = atan2(c.norm(), v1.dot(v2));
+    if (sign < 0) {
+        angle = -angle;
+    }
+    return angle;
 }
 
 void ScannersTest::testPolarCoordinates()
 {
     Vector3d scan(4, 4, 1);
-    std::vector<Vector3d> pts1 = {
+    vector<Vector3d> pts1 = {
         Vector3d(8, 3, 0),
         Vector3d(9, 5, 2),
         Vector3d(9, 7, 3),
     };
 
-    std::vector<Vector3d> pts2 = {
+    vector<Vector3d> pts2 = {
         Vector3d(5, 5, 0),
         Vector3d(5, 5, 2),
         Vector3d(5, 7, 3),
     };
 
-    std::vector<Vector3d> pts3 = {
+    vector<Vector3d> pts3 = {
         Vector3d(5, 5, 1),
         Vector3d(3, 5, 1),
         Vector3d(3, 3, 1),
@@ -325,10 +356,10 @@ void ScannersTest::testPolarCoordinates()
     Vector3d p4(1, -2, 0);
 
     // angle between two vectors is always in the interval [0, 180]
-
-    qDebug() << qRadiansToDegrees(angle(p1, p2));
-    qDebug() << qRadiansToDegrees(angle(p1, p3));
-    qDebug() << qRadiansToDegrees(angle(p1, p4));
+    qDebug() << qRadiansToDegrees(absAngle(p1, p2));
+    qDebug() << qRadiansToDegrees(absAngle(p1, p3));
+    qDebug() << qRadiansToDegrees(absAngle(p1, p4));
+    qDebug() << qRadiansToDegrees(absAngle(p4, p1));
 
 }
 
@@ -338,8 +369,85 @@ void ScannersTest::testAngleBenchmark()
     Vector3d p1(1, 2, 0);
     Vector3d p2(-1, 2, 0);
     QBENCHMARK {
-        volatile double a = angle(p1, p2);
+        volatile double a = absAngle(p1, p2);
     }
+}
+
+void computeFieldOfView(AlignedBox3d& box, Vector3d& scan)
+{
+    // get the center of the box
+    Vector3d center = box.center();
+    Vector3d scanToCenter = center - scan;
+
+    cout << "center: " << center.transpose() << endl;
+    cout << "scanToCenter:    " << scanToCenter.transpose() << endl;
+
+    vector<AlignedBox3d::CornerType> corners = {
+        AlignedBox3d::BottomLeftFloor,
+        AlignedBox3d::BottomRightFloor,
+        AlignedBox3d::TopLeftFloor,
+        AlignedBox3d::TopRightFloor,
+        AlignedBox3d::BottomLeftCeil,
+        AlignedBox3d::BottomRightCeil,
+        AlignedBox3d::TopLeftCeil,
+        AlignedBox3d::TopRightCeil
+    };
+
+    MiniMaxi mmPhi;
+    for (uint i = 0; i < corners.size(); i++) {
+        Vector3d corner = box.corner(corners[i]);
+        Vector3d scanToCorner = corner - scan;
+        double phiRelative = absAngle(scanToCenter, scanToCorner);
+        qDebug() << corner << scanToCorner;
+        qDebug() << "phi rel:" << qRadiansToDegrees(phiRelative);
+        mmPhi.update(phiRelative);
+    }
+    Vector3d xAxis(1, 0, 0);
+    double rotate = absAngle(xAxis, scanToCenter);
+    qDebug() << "phi rel range:"
+             << qRadiansToDegrees(mmPhi.min())
+             << qRadiansToDegrees(mmPhi.max())
+             << qRadiansToDegrees(mmPhi.len())
+             << qRadiansToDegrees(rotate);
+}
+
+void ScannersTest::testComputeFieldOfView()
+{
+    /*
+     * Create a bouding box of 10 units and calculate the angles from various
+     * points arround (think of a rubik's cube). A translation is applied to the
+     * box to verify that the algorithm does not assume the box is at the
+     * origin.
+     *
+     *      X  X  X
+     *       +---+
+     *      X|   |X
+     *       +---+
+     *      X  X  X
+     */
+
+    AlignedBox3d ibox(Vector3d(2, 2, 2), Vector3d(12, 12, 12));
+    vector<Vector3d> pos = {
+        Vector3d(14, 7, 7),
+        Vector3d(7, 14, 7),
+    };
+
+    for (uint i = 0; i < pos.size(); i++) {
+        computeFieldOfView(ibox, pos[i]);
+    }
+
+}
+
+void ScannersTest::testCrossProductSign()
+{
+    Vector3d v1(1, 0, 0);
+    Vector3d v2(0, 1, 0);
+    Vector3d v3(0, -1, 0);
+
+    double a1 = absAngle(v1, v2);
+    double a2 = absAngle(v1, v3);
+    QCOMPARE(a1, M_PI_2);
+    QCOMPARE(a2, -M_PI_2);
 }
 
 QTEST_APPLESS_MAIN(ScannersTest)
