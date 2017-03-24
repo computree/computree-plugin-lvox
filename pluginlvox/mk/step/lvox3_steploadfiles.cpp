@@ -345,6 +345,11 @@ void LVOX3_StepLoadFiles::compute()
                                                      config.clockWise,
                                                      config.radians);
 
+                // DEBUG
+                CT_ShootingPattern *p = scanner->getShootingPattern();
+                if (CT_ThetaPhiShootingPattern *thetaphi = dynamic_cast<CT_ThetaPhiShootingPattern*>(p)) {
+                    //std::cout << *thetaphi << std::endl;
+                }
                 group->addItemDrawable(scanner);
             }
 

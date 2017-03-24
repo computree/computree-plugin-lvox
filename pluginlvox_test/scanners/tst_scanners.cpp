@@ -56,7 +56,6 @@ private Q_SLOTS:
     void testParallelShootingPattern();
     void testBoudingBox();
     void testTheoreticalGrid();
-    void testCrossProductSign();
 
 private:
     CT_PCIR m_pcir;
@@ -216,18 +215,6 @@ void ScannersTest::testTheoreticalGrid()
 //    workersManager.addWorker(0, worker);
 //    workersManager.compute();
 
-}
-
-void ScannersTest::testCrossProductSign()
-{
-    Vector3d v1(1, 0, 0);
-    Vector3d v2(0, 1, 0);
-    Vector3d v3(0, -1, 0);
-
-    double a1 = absAngle(v1, v2);
-    double a2 = absAngle(v1, v3);
-    QCOMPARE(a1, M_PI_2);
-    QCOMPARE(a2, -M_PI_2);
 }
 
 QTEST_APPLESS_MAIN(ScannersTest)
