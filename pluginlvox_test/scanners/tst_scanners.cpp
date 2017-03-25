@@ -3,6 +3,7 @@
 #include <QString>
 #include <QVector>
 #include <QFile>
+#include <QTextStream>
 
 #include <memory>
 #include <cmath>
@@ -56,6 +57,7 @@ private Q_SLOTS:
     void testParallelShootingPattern();
     void testBoudingBox();
     void testTheoreticalGrid();
+    void testThetaPhiShootingPattern();
 
 private:
     CT_PCIR m_pcir;
@@ -111,6 +113,8 @@ void ScannersTest::testPointCloudShootingPattern()
     QVERIFY(p.getNumberOfShots() == 2);
     CT_Shot s1 = p.getShotAt(0);
     CT_Shot s2 = p.getShotAt(1);
+    QVERIFY(s1.getOrigin() == origin);
+    QVERIFY(s2.getOrigin() == origin);
     Vector3d cross = s1.getDirection().cross(s2.getDirection());
     QVERIFY2(cross.norm() > 0, "shots are not expected to be parallel");
 }
@@ -215,6 +219,68 @@ void ScannersTest::testTheoreticalGrid()
 //    workersManager.addWorker(0, worker);
 //    workersManager.compute();
 
+}
+
+double normalizeAngle(double rad)
+{
+    static const double two_pi = M_PI * 2;
+    if (rad > two_pi || rad < 0)
+        rad -= two_pi * std::floor(rad / two_pi);
+    return rad;
+}
+
+void ScannersTest::testThetaPhiShootingPattern()
+{
+    double val = 0.1;
+    QCOMPARE(normalizeAngle(val), val);
+    QCOMPARE(normalizeAngle(M_PI * 2), M_PI * 2);
+    QCOMPARE(normalizeAngle(val + M_PI), val + M_PI);
+    QCOMPARE(normalizeAngle(val + M_PI * 2), val);
+    QCOMPARE(normalizeAngle(val + M_PI * 3), val + M_PI);
+    QCOMPARE(normalizeAngle(val + M_PI * 4), val);
+    QCOMPARE(normalizeAngle(-val), 2 * M_PI - val);
+    QCOMPARE(normalizeAngle(-val - M_PI * 3), M_PI - val);
+
+    /* Shooting pattern */
+    /*
+    CT_ThetaPhiShootingPattern pattern(Vector3d::Zero(),
+        90, 180, 10, 10, 90, 0, Vector3d(0, 0, 1), false, true);
+    */
+
+    /*
+     * Using the mathematical convention: theta is the angle against the X axis
+     * and phi is the angle against the Z axis.
+     */
+    double t0 = normalizeAngle(qDegreesToRadians(0.));
+    double t1 = normalizeAngle(qDegreesToRadians(180.));
+    double p0 = normalizeAngle(qDegreesToRadians(45.));
+    double p1 = normalizeAngle(qDegreesToRadians(190.));
+    double hfov = t1 - t0;
+    double vfov = p1 - p0;
+
+    qDebug() << t0 << t1 << p0 << p1
+             << qRadiansToDegrees(hfov) << qRadiansToDegrees(vfov);
+
+    double rays = 100;
+    double dt = hfov / rays;
+    double dp = vfov / rays;
+
+    QFile outFile("rays.asc");
+    outFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    QTextStream out(&outFile);
+    for (int i = 0; i < rays; i++) {
+        double theta = t0 + dt * i;
+        for (int j = 0; j < rays; j++) {
+            double phi = p0 + dp * j;
+            // converting to cartesian
+            double x = std::sin(phi) * std::cos(theta);
+            double y = std::sin(phi) * std::sin(theta);
+            double z = std::cos(phi);
+            qDebug() << qRadiansToDegrees(theta) << qRadiansToDegrees(phi)
+                     << x << y << z;
+            out << x << " " << y << " " << z << "\n";
+        }
+    }
 }
 
 QTEST_APPLESS_MAIN(ScannersTest)

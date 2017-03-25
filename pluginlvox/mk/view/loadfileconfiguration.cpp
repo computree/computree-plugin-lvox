@@ -423,15 +423,5 @@ void LoadFileConfiguration::on_listWidgetFiles_itemDoubleClicked(QListWidgetItem
 
 void LoadFileConfiguration::on_comboBoxReaderType_currentIndexChanged(int index)
 {
-    if((index != m_currentReaderIndex) && (ui->listWidgetFiles->count() > 0)) {
-        int ret = QMessageBox::warning(this, tr("Attention"), tr("Si vous changer de lecteur de fichiers "
-                                                                 "la liste des fichiers va être vider automatiquement.\r\n\r\n"
-                                                                 "Voulez vous continuer ?"), QMessageBox::Yes | QMessageBox::No);
-
-        if(ret == QMessageBox::Yes) {
-            removeAllFile();
-            m_currentReaderIndex = index;
-        } else
-            ui->comboBoxReaderType->setCurrentIndex(m_currentReaderIndex);
-    }
+    ui->comboBoxReaderType->setCurrentIndex(index);
 }

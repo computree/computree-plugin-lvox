@@ -297,13 +297,6 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_10">
-            <property name="text">
-             <string>Verticale</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="doubleSpinBoxHRes">
             <property name="toolTip">
@@ -330,105 +323,117 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Verticale</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
          <widget class="QLabel" name="label_11">
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Angle d'ouverture&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Angles d'ouverture&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
         <item>
-         <layout class="QGridLayout" name="gridLayout_3">
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item row="1" column="0">
-           <widget class="QDoubleSpinBox" name="doubleSpinBoxStartPhi">
-            <property name="decimals">
-             <number>6</number>
-            </property>
-            <property name="minimum">
-             <double>-360.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>360.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLabel" name="label_16">
-            <property name="maximumSize">
-             <size>
-              <width>10</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>à</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QDoubleSpinBox" name="doubleSpinBoxEndPhi">
-            <property name="decimals">
-             <number>6</number>
-            </property>
-            <property name="minimum">
-             <double>-360.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>360.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="3">
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="0" column="0">
            <widget class="QLabel" name="label_17">
-            <property name="text">
-             <string>Verticaux</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0" colspan="3">
-           <widget class="QLabel" name="label_12">
             <property name="text">
              <string>Horizontaux</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QDoubleSpinBox" name="doubleSpinBoxStartTheta">
-            <property name="decimals">
-             <number>6</number>
-            </property>
-            <property name="minimum">
-             <double>-360.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>360.000000000000000</double>
-            </property>
-           </widget>
+          <item row="1" column="0">
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="0">
+             <widget class="QDoubleSpinBox" name="doubleSpinBoxStartTheta">
+              <property name="decimals">
+               <number>6</number>
+              </property>
+              <property name="minimum">
+               <double>-360.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>360.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_18">
+              <property name="text">
+               <string>à</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QDoubleSpinBox" name="doubleSpinBoxEndTheta">
+              <property name="decimals">
+               <number>6</number>
+              </property>
+              <property name="minimum">
+               <double>-360.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>360.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
-          <item row="3" column="2">
-           <widget class="QDoubleSpinBox" name="doubleSpinBoxEndTheta">
-            <property name="decimals">
-             <number>6</number>
-            </property>
-            <property name="minimum">
-             <double>-360.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>360.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLabel" name="label_18">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_12">
             <property name="text">
-             <string>à</string>
+             <string>Verticaux</string>
             </property>
            </widget>
+          </item>
+          <item row="3" column="0">
+           <layout class="QGridLayout" name="gridLayout_4">
+            <item row="0" column="0">
+             <widget class="QDoubleSpinBox" name="doubleSpinBoxStartPhi">
+              <property name="decimals">
+               <number>6</number>
+              </property>
+              <property name="minimum">
+               <double>-360.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>360.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_16">
+              <property name="maximumSize">
+               <size>
+                <width>10</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>à</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QDoubleSpinBox" name="doubleSpinBoxEndPhi">
+              <property name="decimals">
+               <number>6</number>
+              </property>
+              <property name="minimum">
+               <double>-360.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>360.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>

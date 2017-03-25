@@ -41,9 +41,9 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 LIBS += -L$${PLUGINSHARED_DESTDIR}/plugins/ -lplug_lvoxv2
 
 DISTFILES += \
-    conf.in \
-    conf.json \
-    bad_file.in
+    bad_file.in \
+    ok.in \
+    file.asc
 
 HEADERS +=
 
