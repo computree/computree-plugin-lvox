@@ -218,11 +218,7 @@ void FilterpointsTest::testLoadPoints()
             if (CT_Scene *scene = dynamic_cast<CT_Scene*>(item.data())) {
                 found_scene = true;
                 CT_PCIR pcir = scene->getPointCloudIndexRegistered();
-                CT_PCIR pcir_filtered = CT_FilterPointCloud::apply(
-                            pcir, CT_FilterPointCloud::filter_not_origin);
-                scene->setPointCloudIndexRegistered(pcir_filtered);
-                QCOMPARE(pcir->size(), 10UL);
-                QCOMPARE(pcir_filtered->size(), 5UL);
+                QCOMPARE(pcir->size(), 5UL);
                 /*
                  * Assign scene to an out result to register the result. The
                  * object CT_AbstractSingularItemDrawable keeps a ref on the
@@ -234,7 +230,7 @@ void FilterpointsTest::testLoadPoints()
     }
     QVERIFY(found_scene);
     QCOMPARE(proxy.getGlobalPointCloud()->memoryUsed(), 0UL);
-    QCOMPARE(monitor->m_max_size, 15UL);
+    QCOMPARE(monitor->m_max_size, 5UL);
 }
 
 CT_PCIR createPointCloud(int n, int mod)
