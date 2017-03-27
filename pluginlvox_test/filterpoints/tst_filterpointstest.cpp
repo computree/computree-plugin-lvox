@@ -16,6 +16,7 @@
 #include "ct_cloud/tools/iglobalcloudlistener.h"
 #include "ct_cloud/tools/ct_globalcloudmanagerproxy.h"
 #include "ctlibio/readers/ct_reader_points_ascii.h"
+#include "ctlibio/readers/ct_reader_ascrgb.h"
 #include "mk/tools/lvox3_filterpointcloud.h"
 
 #include <functional>
@@ -28,7 +29,8 @@ public:
     FilterpointsTest();
 
 private Q_SLOTS:
-    void testLoadPoints();
+    void testLoadPoints_ASCII();
+    void testLoadPoints_ASCRGB();
     void testFilterBenchmark_data();
     void testFilterBenchmark();
 };
@@ -180,10 +182,56 @@ CT_PCIR filter_cloud_inplace(CT_PCIR orig, CT_FilterPoint filter)
     return orig;
 }
 
-void FilterpointsTest::testLoadPoints()
+CT_Scene *findScene(CT_AbstractReader *reader)
+{
+    QListIterator<CT_OutStdSingularItemModel*> it(reader->outItemDrawableModels());
+    while(it.hasNext()) {
+        CT_OutStdSingularItemModel *model = it.next();
+
+        /*
+         * Beware: takeItemDrawableOfModel assumes that the client takes
+         * the ownership of the object. The CT_AbstractSingularItemDrawable
+         * keeps a ref on the cloud point. If the item leaks, then the refcount
+         * never reaches zero and then the entire cloud point leaks.
+         */
+
+        QList<CT_AbstractSingularItemDrawable*> items =
+                reader->itemDrawableOfModel(model->uniqueName());
+        QMutableListIterator<CT_AbstractSingularItemDrawable*> itI(items);
+        while(itI.hasNext()) {
+            CT_AbstractSingularItemDrawable* item = itI.next();
+            if (CT_Scene *scene = dynamic_cast<CT_Scene*>(item)) {
+                return scene;
+            }
+        }
+    }
+    return nullptr;
+}
+
+void checkReader(CT_AbstractReader *reader, QString fname, ulong expSize)
 {
     monitor->reset();
+    QString path(SRCDIR + fname);
+    reader->init();
+    reader->setFilePath(path);
+    reader->setFilterPoint([](const CT_Point &pt){
+        return (pt != Eigen::Vector3d::Zero());
+    });
 
+    CT_GlobalCloudManagerProxy proxy;
+    QVERIFY2(reader->readFile(), "failed to read file");
+    CT_Scene *scene = findScene(reader);
+    QVERIFY(scene != nullptr);
+    QCOMPARE(scene->getPointCloudIndexRegistered()->size(), expSize);
+    QCOMPARE(proxy.getGlobalPointCloud()->memoryUsed(), 12 * expSize);
+    delete reader;
+    QCOMPARE(proxy.getGlobalPointCloud()->memoryUsed(), 0UL);
+    QCOMPARE(monitor->m_max_size, expSize);
+    monitor->reset();
+}
+
+void FilterpointsTest::testLoadPoints_ASCII()
+{
     //QSharedPointer<CT_Reader_Points_ASCII> reader(new CT_Reader_Points_ASCII());
     CT_Reader_Points_ASCII *reader = new CT_Reader_Points_ASCII();
     reader->setXColumnIndex(0);
@@ -199,42 +247,13 @@ void FilterpointsTest::testLoadPoints()
     reader->setHasHeader(true);
     reader->setValueSeparator(" ");
 
-    QString path(SRCDIR "/mini.asc");
-    reader->init();
-    reader->setFilePath(path);
-    reader->setFilterPoint([](const CT_Point &pt){
-        return (pt != Eigen::Vector3d::Zero());
-    });
+    checkReader(reader, "./mini.asc", 5);
+}
 
-    CT_GlobalCloudManagerProxy proxy;
-    QVERIFY2(reader->readFile(), "failed to read file");
-
-    QListIterator<CT_OutStdSingularItemModel*> it(reader->outItemDrawableModels());
-    bool found_scene = false;
-    while(it.hasNext()) {
-        CT_OutStdSingularItemModel *model = it.next();
-        QList<CT_AbstractSingularItemDrawable*> items =
-                reader->takeItemDrawableOfModel(model->uniqueName());
-        QMutableListIterator<CT_AbstractSingularItemDrawable*> itI(items);
-        while(itI.hasNext()) {
-            QScopedPointer<CT_AbstractSingularItemDrawable> item(itI.next());
-
-            if (CT_Scene *scene = dynamic_cast<CT_Scene*>(item.data())) {
-                found_scene = true;
-                CT_PCIR pcir = scene->getPointCloudIndexRegistered();
-                QCOMPARE(pcir->size(), 5UL);
-                /*
-                 * Assign scene to an out result to register the result. The
-                 * object CT_AbstractSingularItemDrawable keeps a ref on the
-                 * cloud point. If the item leaks, then the refcount never
-                 * reaches zero and then the entire cloud point leaks.
-                 */
-            }
-        }
-    }
-    QVERIFY(found_scene);
-    QCOMPARE(proxy.getGlobalPointCloud()->memoryUsed(), 0UL);
-    QCOMPARE(monitor->m_max_size, 5UL);
+void FilterpointsTest::testLoadPoints_ASCRGB()
+{
+    CT_Reader_ASCRGB *reader = new CT_Reader_ASCRGB();
+    checkReader(reader, "./mini.asc", 5);
 }
 
 CT_PCIR createPointCloud(int n, int mod)
