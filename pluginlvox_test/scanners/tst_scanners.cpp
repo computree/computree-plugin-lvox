@@ -58,6 +58,7 @@ private Q_SLOTS:
     void testBoudingBox();
     void testTheoreticalGrid();
     void testThetaPhiShootingPattern();
+    void testAlignedBoxes();
 
 private:
     CT_PCIR m_pcir;
@@ -281,6 +282,38 @@ void ScannersTest::testThetaPhiShootingPattern()
             out << x << " " << y << " " << z << "\n";
         }
     }
+}
+
+void ScannersTest::testAlignedBoxes()
+{
+    Vector3d p0(-10, -10, -10);
+    Vector3d p1(-5, -5, -5);
+    Vector3d p2(10, 10, 10);
+    Vector3d p3(20, 20, 20);
+
+    AlignedBox3d temp;
+    const AlignedBox3d p0p1(p0, p1);
+    const AlignedBox3d p0p2(p0, p2);
+    const AlignedBox3d p1p2(p1, p2);
+    const AlignedBox3d p1p3(p1, p3);
+    const AlignedBox3d p2p3(p2, p3);
+    const AlignedBox3d p0p3(p0, p3);
+
+    QVERIFY(p0p1.contains(p1));
+    QVERIFY(!p0p1.contains(p2));
+    QVERIFY(!p0p1.contains(p3));
+
+    temp = p0p1;
+    temp = temp.extend(p2);
+    QVERIFY(temp.contains(p1));
+    QVERIFY(temp.contains(p2));
+    QVERIFY(!temp.contains(p3));
+
+    temp = p0p2.intersection(p1p3);
+    QVERIFY(temp.isApprox(p1p2));
+
+    temp = p0p2.merged(p1p3);
+    QVERIFY(temp.isApprox(p0p3));
 }
 
 QTEST_APPLESS_MAIN(ScannersTest)
