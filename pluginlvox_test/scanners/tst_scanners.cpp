@@ -314,6 +314,14 @@ void ScannersTest::testAlignedBoxes()
 
     temp = p0p2.merged(p1p3);
     QVERIFY(temp.isApprox(p0p3));
+
+    AlignedBox3d exp(Vector3d(-6, -6, -6), Vector3d(11, 11, 11));
+    temp = p1p2;
+    Vector3d v1 = p1p2.min().array() - 1;
+    Vector3d v2 = p1p2.max().array() + 1;
+    temp.extend(v1);
+    temp.extend(v2);
+    QVERIFY(temp.isApprox(exp));
 }
 
 QTEST_APPLESS_MAIN(ScannersTest)

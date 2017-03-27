@@ -26,20 +26,9 @@ LVOX3_ComputeLVOXGridsPreparator::Result LVOX3_ComputeLVOXGridsPreparator::prepa
                                                                                    const QString& gridFilePath)
 {
     Result res;
-
-    double dNumericsLimit = std::numeric_limits<double>::max();
-
-    // Global limits of generated grids
-    res.minBBox = Eigen::Vector3d(dNumericsLimit, dNumericsLimit, dNumericsLimit);
-    res.maxBBox = res.minBBox * -1;
-
-    Eigen::Vector3d minScene = res.minBBox;
-    Eigen::Vector3d maxScene = res.maxBBox;
-
-    Eigen::Vector3d minShootingPattern = res.minBBox;
-    Eigen::Vector3d maxShootingPattern = res.maxBBox;
-
-    Eigen::Vector3d sceneBBOXMin, sceneBBOXMax;
+    Eigen::AlignedBox3d sceneBox;
+    Eigen::AlignedBox3d scannerBox;
+    Eigen::AlignedBox3d voxelBox;
 
     // on va rechercher tous les groupes contenant des nuages de points (qui ont été choisi par l'utilisateur)
     while (itGrp.hasNext())
@@ -61,84 +50,88 @@ LVOX3_ComputeLVOXGridsPreparator::Result LVOX3_ComputeLVOXGridsPreparator::prepa
             tc.mnt = (CT_AbstractImage2D*)mnt;
             tc.sky = (CT_AbstractImage2D*)sky;
 
-            /*
+            res.elementsToCompute.insert(group, tc);
+
+            /* Union of all scanners
+             *
              * FIXME: center coordinate may not be enough to compute the
              * bounding box of the parallel shooting pattern.
              */
-            const Eigen::Vector3d& origin = tc.pattern->getCenterCoordinate();
+            const Eigen::Vector3d& scanPos = tc.pattern->getCenterCoordinate();
+            scannerBox.extend(scanPos);
 
-            res.elementsToCompute.insert(group, tc);
-
+            /* Union of all scenes */
+            Eigen::Vector3d sceneBBOXMin, sceneBBOXMax;
             scene->getBoundingBox(sceneBBOXMin, sceneBBOXMax);
-
-            if (sceneBBOXMin.x() < minScene.x()) {minScene.x() = sceneBBOXMin.x();}
-            if (sceneBBOXMin.y() < minScene.y()) {minScene.y() = sceneBBOXMin.y();}
-            if (sceneBBOXMin.z() < minScene.z()) {minScene.z() = sceneBBOXMin.z();}
-            if (sceneBBOXMax.x() > maxScene.x()) {maxScene.x() = sceneBBOXMax.x();}
-            if (sceneBBOXMax.y() > maxScene.y()) {maxScene.y() = sceneBBOXMax.y();}
-            if (sceneBBOXMax.z() > maxScene.z()) {maxScene.z() = sceneBBOXMax.z();}
-
-            if (origin.x() < minShootingPattern.x()) {minShootingPattern.x() = origin.x();}
-            if (origin.y() < minShootingPattern.y()) {minShootingPattern.y() = origin.y();}
-            if (origin.z() < minShootingPattern.z()) {minShootingPattern.z() = origin.z();}
-
-            if (origin.x() > maxShootingPattern.x()) {maxShootingPattern.x() = origin.x();}
-            if (origin.y() > maxShootingPattern.y()) {maxShootingPattern.y() = origin.y();}
-            if (origin.z() > maxShootingPattern.z()) {maxShootingPattern.z() = origin.z();}
+            sceneBox.extend(sceneBBOXMin);
+            sceneBox.extend(sceneBBOXMax);
         }
     }
 
     PS_LOG->addInfoMessage(LogInterface::trace, "Mode " + lvox::gridModeToString(gridMode));
+    Eigen::Vector3d gridLengths = gridResolution * coord.dimension;
 
-    bool mustBeControledAndAdjustedIfNecessary = false;
+    switch(gridMode) {
+    case lvox::BoundingBoxOfTheScene:
+        voxelBox.extend(sceneBox);
+        break;
+    case lvox::RelativeToCoordinates:
+        voxelBox.extend(coord.coordinate);
+        voxelBox.extend(sceneBox.max());
+        break;
+    case lvox::RelativeToCoordinatesAndCustomDimensions:
+        // custom bounding box, where useless voxels are removed
+        voxelBox.extend(coord.coordinate);
+        voxelBox.extend(coord.coordinate + gridLengths);
+        voxelBox.clamp(sceneBox);
+        break;
+    case lvox::CenteredOnCoordinatesAndCustomDimensions:
+        voxelBox.extend(coord.coordinate - gridLengths);
+        voxelBox.extend(coord.coordinate + gridLengths);
+        break;
+    case lvox::FromGridFileParameters:
+        Q_UNUSED(gridFilePath);
+        PS_LOG->addInfoMessage(LogInterface::step, "LArchitect bounding box not supported");
+        return res;
+        break;
+    default:
+        break;
+    }
 
-    const Eigen::Vector3d minAdjusted(qMin(minScene.x(), minShootingPattern.x()),
-                                      qMin(minScene.y(), minShootingPattern.y()),
-                                      qMin(minScene.z(), minShootingPattern.z()));
+    // extends the bounding box to include the scanner
+    if (!voxelBox.contains(scannerBox)) {
+        PS_LOG->addMessage(LogInterface::warning, LogInterface::step,
+                           QObject::tr("Les dimensions de la grille ont été "
+                                       "élargies grille pour inclure les "
+                                       "scanneurs"));
+        voxelBox.extend(scannerBox);
+    }
 
-    const Eigen::Vector3d maxAdjusted(qMax(maxScene.x(), maxShootingPattern.x()),
-                                      qMax(maxScene.y(), maxShootingPattern.y()),
-                                      qMax(maxScene.z(), maxShootingPattern.z()));
+    // Add padding around the grid
+    Eigen::Vector3d v1 = voxelBox.min().array() - gridResolution;
+    Eigen::Vector3d v2 = voxelBox.max().array() + gridResolution;
+    voxelBox.extend(v1);
+    voxelBox.extend(v2);
 
-    if (gridMode == lvox::BoundingBoxOfTheScene) {
+    res.minBBox = voxelBox.min();
+    res.maxBBox = voxelBox.max();
 
-        res.minBBox.x() = qMin(minScene.x(), minShootingPattern.x());
-        res.minBBox.y() = qMin(minScene.y(), minShootingPattern.y());
-        res.minBBox.z() = qMin(minScene.z(), minShootingPattern.z());
+    PS_LOG->addMessage(LogInterface::info, LogInterface::step,
+                       QObject::tr("Voxel bounding box: (%1,%2,%3), (%4,%5,%6)")
+                        .arg(res.minBBox.x(), 5, 'g', 1)
+                        .arg(res.minBBox.y(), 5, 'g', 1)
+                        .arg(res.minBBox.z(), 5, 'g', 1)
+                        .arg(res.maxBBox.x(), 5, 'g', 1)
+                        .arg(res.maxBBox.y(), 5, 'g', 1)
+                        .arg(res.maxBBox.z(), 5, 'g', 1)
+                       );
 
-        res.maxBBox.x() = qMax(maxScene.x(), maxShootingPattern.x());
-        res.maxBBox.y() = qMax(maxScene.y(), maxShootingPattern.y());
-        res.maxBBox.z() = qMax(maxScene.z(), maxShootingPattern.z());
+    res.valid = true;
+    return res;
+}
 
-        res.minBBox.array() -= gridResolution;
-        res.maxBBox.array() += gridResolution;
-
-    } else if (gridMode == lvox::RelativeToCoordinates) {
-
-        res.minBBox = coord.coordinate;
-        res.maxBBox.array() += gridResolution;
-
-        mustBeControledAndAdjustedIfNecessary = true;
-
-    } else if (gridMode == lvox::RelativeToCoordinatesAndCustomDimensions) {
-
-        res.minBBox = coord.coordinate;
-        res.maxBBox = res.minBBox + (gridResolution * coord.dimension);
-
-        mustBeControledAndAdjustedIfNecessary = true;
-
-    } else if (gridMode == lvox::CenteredOnCoordinatesAndCustomDimensions)   {
-
-        res.minBBox = coord.coordinate - (gridResolution * coord.dimension);
-        res.maxBBox = coord.coordinate + (gridResolution * coord.dimension);
-
-        mustBeControledAndAdjustedIfNecessary = true;
-
-    } else if (gridMode == lvox::FromGridFileParameters) {
-
-        bool ok = false;
-
-#ifdef CT_LARCHIHEADER_H
+/* legacy untested LArchitect code CT_LARCHIHEADER_H */
+#if 0
         QFileInfo fileInfo(gridFilePath);
 
         if (fileInfo.exists())
@@ -184,38 +177,4 @@ LVOX3_ComputeLVOXGridsPreparator::Result LVOX3_ComputeLVOXGridsPreparator::prepa
                 }
             }
         }
-#else
-        Q_UNUSED(gridFilePath);
 #endif
-        if(!ok)
-            return res;
-      }
-
-    if(mustBeControledAndAdjustedIfNecessary) {
-
-        bool adjusted = false;
-
-        while ((res.minBBox.x()+gridResolution) < minAdjusted.x()) {res.minBBox.x() += gridResolution; adjusted = true;}
-        while ((res.minBBox.y()+gridResolution) < minAdjusted.y()) {res.minBBox.y() += gridResolution; adjusted = true;}
-        while ((res.minBBox.z()+gridResolution) < minAdjusted.z()) {res.minBBox.z() += gridResolution; adjusted = true;}
-
-        while (res.minBBox.x() > minAdjusted.x()) {res.minBBox.x() -= gridResolution; adjusted = true;}
-        while (res.minBBox.y() > minAdjusted.y()) {res.minBBox.y() -= gridResolution; adjusted = true;}
-        while (res.minBBox.z() > minAdjusted.z()) {res.minBBox.z() -= gridResolution; adjusted = true;}
-
-        while ((res.maxBBox.x()-gridResolution) > maxAdjusted.x()) {res.maxBBox.x() -= gridResolution; adjusted = true;}
-        while ((res.maxBBox.y()-gridResolution) > maxAdjusted.y()) {res.maxBBox.y() -= gridResolution; adjusted = true;}
-        while ((res.maxBBox.z()-gridResolution) > maxAdjusted.z()) {res.maxBBox.z() -= gridResolution; adjusted = true;}
-
-        while (res.maxBBox.x() < maxAdjusted.x()) {res.maxBBox.x() += gridResolution; adjusted = true;}
-        while (res.maxBBox.y() < maxAdjusted.y()) {res.maxBBox.y() += gridResolution; adjusted = true;}
-        while (res.maxBBox.z() < maxAdjusted.z()) {res.maxBBox.z() += gridResolution; adjusted = true;}
-
-        if ((gridMode != lvox::RelativeToCoordinates) && adjusted)
-            PS_LOG->addMessage(LogInterface::warning, LogInterface::step, QObject::tr("Dimensions spécifiées ne contenant pas les positions de scans : la grille a du être élargie !"));
-    }
-
-    res.valid = true;
-
-    return res;
-}
