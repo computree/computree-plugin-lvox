@@ -274,6 +274,20 @@ void LVOX3_StepLoadFiles::compute()
 
     QListIterator<LoadFileConfiguration::Configuration> it(m_configuration);
 
+    /*
+     * Configure the filter of the reader based on the selected option
+     */
+    if (m_filterPointsOrigin) {
+        m_reader->setFilterPoint([](const CT_Point &pt){
+            return (pt != Eigen::Vector3d::Zero());
+        });
+    } else {
+        m_reader->setFilterPoint(CT_AbstractReader::filter_point_all);
+    }
+
+    /*
+     * Load all files
+     */
     while(it.hasNext())
     {
         const LoadFileConfiguration::Configuration& config = it.next();
@@ -298,16 +312,6 @@ void LVOX3_StepLoadFiles::compute()
 
                 while(itI.hasNext()) {
                     CT_AbstractSingularItemDrawable* item = itI.next();
-                    if (CT_Scene *scene = dynamic_cast<CT_Scene*>(item)) {
-                        if (m_filterPointsOrigin) {
-                            CT_PCIR orig = scene->getPointCloudIndexRegistered();
-                            CT_PCIR filtered = CT_FilterPointCloud::apply(
-                                        orig, CT_FilterPointCloud::filter_not_origin);
-                            scene->setPointCloudIndexRegistered(filtered);
-                            size_t nfiltered = orig->size() - filtered->size();
-                            PS_LOG->addInfoMessage(this, tr("%n point(s) filtered", "", nfiltered));
-                        }
-                    }
                     group->addItemDrawable(item);
                 }
             }
@@ -345,11 +349,6 @@ void LVOX3_StepLoadFiles::compute()
                                                      config.clockWise,
                                                      config.radians);
 
-                // DEBUG
-                CT_ShootingPattern *p = scanner->getShootingPattern();
-                if (CT_ThetaPhiShootingPattern *thetaphi = dynamic_cast<CT_ThetaPhiShootingPattern*>(p)) {
-                    //std::cout << *thetaphi << std::endl;
-                }
                 group->addItemDrawable(scanner);
             }
 

@@ -17,6 +17,7 @@
 #include "ct_cloud/tools/ct_globalcloudmanagerproxy.h"
 #include "ctlibio/readers/ct_reader_points_ascii.h"
 #include "ctlibio/readers/ct_reader_ascrgb.h"
+#include "ctlibio/readers/ct_reader_xyb.h"
 #include "mk/tools/lvox3_filterpointcloud.h"
 
 #include <functional>
@@ -31,6 +32,7 @@ public:
 private Q_SLOTS:
     void testLoadPoints_ASCII();
     void testLoadPoints_ASCRGB();
+    void testLoadPoints_XYB();
     void testFilterBenchmark_data();
     void testFilterBenchmark();
 };
@@ -254,6 +256,12 @@ void FilterpointsTest::testLoadPoints_ASCRGB()
 {
     CT_Reader_ASCRGB *reader = new CT_Reader_ASCRGB();
     checkReader(reader, "./mini.asc", 5);
+}
+
+void FilterpointsTest::testLoadPoints_XYB()
+{
+    CT_Reader_XYB *reader = new CT_Reader_XYB();
+    checkReader(reader, "./mini.xyb", 5);
 }
 
 CT_PCIR createPointCloud(int n, int mod)
