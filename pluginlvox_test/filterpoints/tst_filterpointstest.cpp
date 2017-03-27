@@ -82,7 +82,7 @@ FilterpointsTest::FilterpointsTest()
 
 typedef std::function<void (const CT_Point& pt)> CT_PointCallback;
 
-void foreach_point(CT_PCIR pcir, CT_PointFilter filter, CT_PointCallback fn)
+void foreach_point(CT_PCIR pcir, CT_FilterPoint filter, CT_PointCallback fn)
 {
     CT_PointIterator it(pcir);
     while(it.hasNext()) {
@@ -99,7 +99,7 @@ void foreach_point(CT_PCIR pcir, CT_PointCallback fn)
     foreach_point(pcir, CT_FilterPointCloud::filter_default, fn);
 }
 
-size_t count_points(CT_PCIR pcir, CT_PointFilter filter)
+size_t count_points(CT_PCIR pcir, CT_FilterPoint filter)
 {
     size_t count = 0;
     foreach_point(pcir, filter,
@@ -111,7 +111,7 @@ size_t count_points(CT_PCIR pcir, CT_PointFilter filter)
     return count;
 }
 
-CT_PCIR filter_cloud_copy_fixed(CT_PCIR orig, CT_PointFilter filter)
+CT_PCIR filter_cloud_copy_fixed(CT_PCIR orig, CT_FilterPoint filter)
 {
     // Compute the size of the new cloud
     size_t count = count_points(orig, filter);
@@ -133,7 +133,7 @@ CT_PCIR filter_cloud_copy_fixed(CT_PCIR orig, CT_PointFilter filter)
 }
 
 
-CT_PCIR filter_cloud_copy_variable(CT_PCIR orig, CT_PointFilter filter)
+CT_PCIR filter_cloud_copy_variable(CT_PCIR orig, CT_FilterPoint filter)
 {
     // copy only the non-filtered points in the new point cloud
     CT_AbstractUndefinedSizePointCloud *cloud = PS_REPOSITORY->createNewUndefinedSizePointCloud();
@@ -146,7 +146,7 @@ CT_PCIR filter_cloud_copy_variable(CT_PCIR orig, CT_PointFilter filter)
     return PS_REPOSITORY->registerUndefinedSizePointCloud(cloud);
 }
 
-CT_PCIR filter_cloud_inplace(CT_PCIR orig, CT_PointFilter filter)
+CT_PCIR filter_cloud_inplace(CT_PCIR orig, CT_FilterPoint filter)
 {
     /*
      * Maintain src and dst indices. When a filtered element is reached,
@@ -184,7 +184,8 @@ void FilterpointsTest::testLoadPoints()
 {
     monitor->reset();
 
-    QSharedPointer<CT_Reader_Points_ASCII> reader(new CT_Reader_Points_ASCII());
+    //QSharedPointer<CT_Reader_Points_ASCII> reader(new CT_Reader_Points_ASCII());
+    CT_Reader_Points_ASCII *reader = new CT_Reader_Points_ASCII();
     reader->setXColumnIndex(0);
     reader->setYColumnIndex(1);
     reader->setZColumnIndex(2);
@@ -201,6 +202,9 @@ void FilterpointsTest::testLoadPoints()
     QString path(SRCDIR "/mini.asc");
     reader->init();
     reader->setFilePath(path);
+    reader->setFilterPoint([](const CT_Point &pt){
+        return (pt != Eigen::Vector3d::Zero());
+    });
 
     CT_GlobalCloudManagerProxy proxy;
     QVERIFY2(reader->readFile(), "failed to read file");

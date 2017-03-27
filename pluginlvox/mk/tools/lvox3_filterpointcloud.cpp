@@ -15,7 +15,7 @@ CT_FilterPointCloud::CT_FilterPointCloud()
 {
 }
 
-CT_PCIR CT_FilterPointCloud::apply(CT_PCIR pcir, CT_PointFilter filter)
+CT_PCIR CT_FilterPointCloud::apply(CT_PCIR pcir, CT_FilterPoint filter)
 {
     CT_AbstractUndefinedSizePointCloud *cloud = PS_REPOSITORY->createNewUndefinedSizePointCloud();
     CT_PointIterator it(pcir);
@@ -29,14 +29,14 @@ CT_PCIR CT_FilterPointCloud::apply(CT_PCIR pcir, CT_PointFilter filter)
     return PS_REPOSITORY->registerUndefinedSizePointCloud(cloud);
 }
 
-const CT_PointFilter CT_FilterPointCloud::filter_not_origin = [](const CT_Point& pt)
+const CT_FilterPoint CT_FilterPointCloud::filter_not_origin = [](const CT_Point& pt)
 {
     static const Eigen::Vector3d origin(0, 0, 0);
     return (pt != origin);
 };
 
 
-const CT_PointFilter CT_FilterPointCloud::filter_default = [](const CT_Point& pt)
+const CT_FilterPoint CT_FilterPointCloud::filter_default = [](const CT_Point& pt)
 {
     Q_UNUSED(pt);
     return true;

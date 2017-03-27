@@ -9,7 +9,7 @@
 /**
  * @brief CT_PointFilter return true to keep the point, false otherwise
  */
-typedef std::function<bool (const CT_Point& pt)> CT_PointFilter;
+typedef std::function<bool (const CT_Point& pt)> CT_FilterPoint;
 
 class CT_FilterPointCloud
 {
@@ -22,10 +22,10 @@ public:
      * @param filter filter function
      * @return the filtered point cloud
      */
-    static CT_PCIR apply(CT_PCIR pcir, CT_PointFilter filter);
+    static CT_PCIR apply(CT_PCIR pcir, CT_FilterPoint filter);
 
-    static const CT_PointFilter filter_not_origin;
-    static const CT_PointFilter filter_default;
+    static const CT_FilterPoint filter_not_origin;
+    static const CT_FilterPoint filter_default;
 
 };
 
