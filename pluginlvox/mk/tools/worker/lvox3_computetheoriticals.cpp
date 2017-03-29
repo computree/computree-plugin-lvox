@@ -5,7 +5,7 @@
 #include "mk/tools/traversal/woo/visitor/lvox3_distancevisitor.h"
 #include "mk/tools/lvox3_errorcode.h"
 
-LVOX3_ComputeTheoriticals::LVOX3_ComputeTheoriticals(const CT_ShootingPattern* pattern,
+LVOX3_ComputeTheoriticals::LVOX3_ComputeTheoriticals(CT_ShootingPattern* pattern,
                                                      lvox::Grid3Di* theoricals,
                                                      lvox::Grid3Df* shotDeltaDistance) : LVOX3_Worker()
 {

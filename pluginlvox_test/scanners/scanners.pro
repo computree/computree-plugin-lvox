@@ -37,4 +37,4 @@ TEMPLATE = app
 SOURCES += tst_scanners.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
-LIBS += -L$${PLUGINSHARED_DESTDIR}/plugins/ -lplug_lvoxv2
+LIBS += -L$${PLUGINSHARED_DESTDIR}/plugins/ -lplug_lvoxv2 -ltbb

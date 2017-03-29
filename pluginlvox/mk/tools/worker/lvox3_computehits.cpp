@@ -7,7 +7,7 @@
 #include "mk/tools/lvox3_rayboxintersectionmath.h"
 #include "mk/tools/lvox3_errorcode.h"
 
-LVOX3_ComputeHits::LVOX3_ComputeHits(const CT_ShootingPattern* pattern,
+LVOX3_ComputeHits::LVOX3_ComputeHits(CT_ShootingPattern* pattern,
                                      const CT_AbstractPointCloudIndex* pointCloudIndex,
                                      lvox::Grid3Di* hits,
                                      lvox::Grid3Df* shotInDistance,

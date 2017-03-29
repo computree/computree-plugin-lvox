@@ -6,6 +6,8 @@
 #ifndef LVOX3_GRID3DWOOTRAVERSALALGORITHM_H
 #define LVOX3_GRID3DWOOTRAVERSALALGORITHM_H
 
+#include <QElapsedTimer>
+
 #include "ct_itemdrawable/ct_grid3d.h"
 #include "ct_itemdrawable/tools/scanner/ct_shot.h"
 #include "ct_itemdrawable/tools/gridtools/ct_abstractgrid3dbeamvisitor.h"
@@ -46,6 +48,9 @@ public:
         m_chooseAxis[7] = 0;
 
         m_gridTools = new LVOX3_GridTools(grid);
+        timeInit = 0;
+        timeTraverse = 0;
+        m_timer.start();
     }
 
     ~LVOX3_Grid3DWooTraversalAlgorithm()
@@ -53,92 +58,107 @@ public:
         delete m_gridTools;
     }
 
-    void compute(const Eigen::Vector3d& origin, const Eigen::Vector3d& direction) const
+    bool isRayIntersecting(const Eigen::Vector3d& origin, const Eigen::Vector3d& direction) {
+        Eigen::Vector3d start, end;
+        return LVOX3_RayBoxIntersectionMath::getIntersectionOfRay(m_gridBottom, m_gridTop, origin, direction, start, end);
+    }
+
+    void compute(const Eigen::Vector3d& origin, const Eigen::Vector3d& direction)
     {
+        qint64 t0, t1, t2;
         Eigen::Vector3d start, end;
 
-        if(LVOX3_RayBoxIntersectionMath::getIntersectionOfRay(m_gridBottom, m_gridTop, origin, direction, start, end))
-        {
-            int i;
+        if (!LVOX3_RayBoxIntersectionMath::getIntersectionOfRay(
+                    m_gridBottom, m_gridTop, origin, direction, start, end))
+            return;
+        m_timer.restart();
+        t0 = m_timer.nsecsElapsed();
+        LVOX3_Grid3DVoxelWooVisitorContext context(origin, direction);
+        context.nearImpactPointWithGrid = start;
+        context.farImpactPointWithGrid = end;
 
-            LVOX3_Grid3DVoxelWooVisitorContext context(origin, direction);
-            context.nearImpactPointWithGrid = start;
-            context.farImpactPointWithGrid = end;
+        Eigen::Vector3d stepAxis, boundary, tMax, tDel;
 
-            Eigen::Vector3d stepAxis, boundary, tMax, tDel;
+        m_gridTools->computeGridIndexForPoint(context.nearImpactPointWithGrid, context.colLinLevel.x(), context.colLinLevel.y(), context.colLinLevel.z(), context.currentVoxelIndex);
 
-            m_gridTools->computeGridIndexForPoint(context.nearImpactPointWithGrid, context.colLinLevel.x(), context.colLinLevel.y(), context.colLinLevel.z(), context.currentVoxelIndex);
-
-            for (i = 0 ; i < 3 ; ++i) {
-                if(context.farImpactPointWithGrid(i) > context.nearImpactPointWithGrid(i)) {
-                    stepAxis(i) = 1;
-                    boundary(i) = ((context.colLinLevel(i)+1)*m_gridResolution) + m_gridBottom(i);
-                } else {
-                    stepAxis(i) = -1;
-                    boundary(i) = (context.colLinLevel(i)*m_gridResolution) + m_gridBottom(i);
-                }
-
-                if(direction(i) != 0) {
-                    tMax(i) = fabs((boundary(i) - context.nearImpactPointWithGrid(i)) / direction(i));
-                    tDel(i) = fabs(m_gridResolution / direction(i));
-                } else {
-                    tMax(i) = MAX_DOUBLE_VALUE;
-                    tDel(i) = MAX_DOUBLE_VALUE;
-                }
+        for (int i = 0 ; i < 3 ; ++i) {
+            if(context.farImpactPointWithGrid(i) > context.nearImpactPointWithGrid(i)) {
+                stepAxis(i) = 1;
+                boundary(i) = ((context.colLinLevel(i)+1)*m_gridResolution) + m_gridBottom(i);
+            } else {
+                stepAxis(i) = -1;
+                boundary(i) = (context.colLinLevel(i)*m_gridResolution) + m_gridBottom(i);
             }
 
-            if (m_visitFirstVoxelTouched)
-            {
-                if(!lvox::FilterCode::isFiltered(m_grid->valueAtIndex(context.currentVoxelIndex))) {
-                    for (int i = 0 ; i < m_numberOfVisitors ; ++i)
-                        m_visitorList.at(i)->visit(context);
-                } else {
-                    return;
-                }
-            }
-
-            while ( 1 )
-            {
-                // Finds along which axis to do the next step
-                const quint8 bits =	(( tMax(0) < tMax(1) ) << 2) +
-                                    (( tMax(0) < tMax(2) ) << 1) +
-                                    (( tMax(1) < tMax(2) ));
-
-                const quint8 nextStepAxis = m_chooseAxis[bits];
-
-                context.colLinLevel(nextStepAxis) += stepAxis(nextStepAxis);
-
-                // Checks if the currentvoxel is outside the grid, the algorithm has finished
-                if (context.colLinLevel.x() >= m_grid->xdim()) { return; }
-                if (context.colLinLevel.y() >= m_grid->ydim()) { return; }
-                if (context.colLinLevel.z() >= m_grid->zdim()) { return; }
-
-                // Add the index of the voxel to the list
-                m_gridTools->computeGridIndexForColLinLevel(context.colLinLevel.x(), context.colLinLevel.y(), context.colLinLevel.z(), context.currentVoxelIndex);
-
-                if(!lvox::FilterCode::isFiltered(m_grid->valueAtIndex(context.currentVoxelIndex))) {
-                    for (int i = 0 ; i < m_numberOfVisitors ; ++i)
-                        m_visitorList.at(i)->visit(context);
-                } else {
-                    return;
-                }
-
-                // Updating tmax of this axis (increasing by deltaT)
-                tMax(nextStepAxis) = tMax(nextStepAxis) + tDel(nextStepAxis);
+            if(direction(i) != 0) {
+                tMax(i) = fabs((boundary(i) - context.nearImpactPointWithGrid(i)) / direction(i));
+                tDel(i) = fabs(m_gridResolution / direction(i));
+            } else {
+                tMax(i) = MAX_DOUBLE_VALUE;
+                tDel(i) = MAX_DOUBLE_VALUE;
             }
         }
+        t1 = m_timer.nsecsElapsed();
+
+        if (m_visitFirstVoxelTouched)
+        {
+            if(!lvox::FilterCode::isFiltered(m_grid->valueAtIndex(context.currentVoxelIndex))) {
+                for (int i = 0 ; i < m_numberOfVisitors ; ++i)
+                    m_visitorList.at(i)->visit(context);
+            } else {
+                return;
+            }
+        }
+
+        while ( 1 )
+        {
+            // Finds along which axis to do the next step
+            const quint8 bits =	(( tMax(0) < tMax(1) ) << 2) +
+                                (( tMax(0) < tMax(2) ) << 1) +
+                                (( tMax(1) < tMax(2) ));
+
+            const quint8 nextStepAxis = m_chooseAxis[bits];
+
+            context.colLinLevel(nextStepAxis) += stepAxis(nextStepAxis);
+
+            if (context.colLinLevel.x() >= m_grid->xdim()) { return; }
+            if (context.colLinLevel.y() >= m_grid->ydim()) { return; }
+            if (context.colLinLevel.z() >= m_grid->zdim()) { return; }
+
+            // Add the index of the voxel to the list
+            m_gridTools->computeGridIndexForColLinLevel(context.colLinLevel.x(), context.colLinLevel.y(), context.colLinLevel.z(), context.currentVoxelIndex);
+
+            if(!lvox::FilterCode::isFiltered(m_grid->valueAtIndex(context.currentVoxelIndex))) {
+                for (int i = 0 ; i < m_numberOfVisitors ; ++i)
+                    m_visitorList.at(i)->visit(context);
+            } else {
+                return;
+            }
+
+            // Updating tmax of this axis (increasing by deltaT)
+            tMax(nextStepAxis) = tMax(nextStepAxis) + tDel(nextStepAxis);
+        }
+        t2 = m_timer.nsecsElapsed();
+
+        timeInit += t1 - t0;
+        timeTraverse += t2 - t1;
     }
+
+    qint64 timeInit;
+    qint64 timeTraverse;
 
 private:
     LVOX3_GridTools*                            m_gridTools;
     const CT_Grid3D<T>*                         m_grid;
     Eigen::Vector3d                             m_gridBottom;
     Eigen::Vector3d                             m_gridTop;
+    Eigen::AlignedBox3d                         m_box;
     double                                      m_gridResolution;
     bool                                        m_visitFirstVoxelTouched;
-    QVector<LVOX3_Grid3DVoxelWooVisitor* >         m_visitorList;
+    QVector<LVOX3_Grid3DVoxelWooVisitor* >      m_visitorList;
     int                                         m_numberOfVisitors;
     quint8                                      m_chooseAxis[8];
+    QElapsedTimer                               m_timer;
 
     static const double MAX_DOUBLE_VALUE;
 };

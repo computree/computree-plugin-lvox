@@ -23,7 +23,11 @@
 #include "mk/tools/lvox3_gridtype.h"
 #include "mk/tools/lvox3_errorcode.h"
 #include "mk/tools/worker/lvox3_computeall.h"
+#include "mk/tools/traversal/woo/visitor/lvox3_countvisitor.h"
 #include "mk/tools/traversal/woo/lvox3_grid3dwootraversalalgorithm.h"
+#include "tools/lvox_grid3dexporter.h"
+
+#include <tbb/tbb.h>
 
 using namespace Eigen;
 using namespace std;
@@ -59,9 +63,11 @@ private Q_SLOTS:
     void testTheoreticalGrid();
     void testThetaPhiShootingPattern();
     void testAlignedBoxes();
+    void testParallelWoo();
 
 private:
     CT_PCIR m_pcir;
+
 };
 
 ScannersTest::ScannersTest()
@@ -171,45 +177,113 @@ public:
     }
 };
 
+class NullVisitor : public LVOX3_Grid3DVoxelWooVisitor
+{
+public:
+    NullVisitor() {}
+    void visit(const LVOX3_Grid3DVoxelWooVisitorContext& context) {
+    }
+};
+
+double elapsed(std::function<void ()> bench)
+{
+    QElapsedTimer timer;
+    timer.start();
+    bench();
+    return timer.elapsed();
+}
+
+void showStat(QString msg, double val, double ref)
+{
+    qDebug() << msg << val << QString::number(val / ref, 'f', 2);
+}
+
 void ScannersTest::testTheoreticalGrid()
 {
-    /*
-        const Eigen::Vector3d& origin,
-                               double hFov, double vFov,
-                               double hRes, double vRes,
-                               double initTheta, double initPhi,
-                               const Eigen::Vector3d& zVector = Eigen::Vector3d(0,0,1),
-                               bool clockWise = true,
-                               bool radians = false
-    */
-
-    double z = 10;
     CT_ThetaPhiShootingPattern pattern(
-        Vector3d(5., 1., z),
-        90, 180,
-        10, 10,
-        0., 0.);
+        Vector3d(15, 0, 15),
+        180.0, 60.0,
+        0.1, 0.1,
+        0.0, 60.,
+        Vector3d(0, 0, 1), false, false);
 
     lvox::Grid3Di grid(NULL, NULL,
             10., 10., 10.,
-            10UL, 10UL, 10UL,
-            1, lvox::Max_Error_Code, 0);
+            100UL, 100UL, 100UL,
+            0.1, lvox::Max_Error_Code, 0);
     qDebug() << "grid.nCells()" << grid.nCells();
 
     Vector3d min, max;
     grid.getBoundingBox(min, max);
-    cout << min << "\n" << max << endl;
+    QVERIFY(min.isApprox(Vector3d(10, 10, 10)));
+    QVERIFY(max.isApprox(Vector3d(20, 20, 20)));
 
-    QVector<LVOX3_Grid3DVoxelWooVisitor*> visitors;
-    visitors.append(new DebugVisitor());
-    LVOX3_Grid3DWooTraversalAlgorithm<lvox::Grid3DiType> algo(&grid, true, visitors);
+    QVector<LVOX3_Grid3DVoxelWooVisitor*> visitorsNull;
+    NullVisitor nullVisitor;
+    visitorsNull.append(&nullVisitor);
+    LVOX3_Grid3DWooTraversalAlgorithm<lvox::Grid3DiType> algoNull(&grid, true, visitorsNull);
+
+    QVector<LVOX3_Grid3DVoxelWooVisitor*> visitorsReal;
+    LVOX3_CountVisitor<lvox::Grid3DiType> countVisitor(&grid);
+    visitorsReal.append(&countVisitor);
+    LVOX3_Grid3DWooTraversalAlgorithm<lvox::Grid3DiType> algoReal(&grid, true, visitorsReal);
 
     size_t n = pattern.getNumberOfShots();
+    size_t nh = pattern.getNHRays();
+    size_t nv = pattern.getNVRays();
     qDebug() << "number of shots" << n;
-    for (size_t i = 0; i < n; i++) {
-        const CT_Shot& shot = pattern.getShotAt(i);
-        algo.compute(shot.getOrigin(), shot.getDirection());
-    }
+
+    double timeGenerateShots = elapsed([&]() {
+        for (uint i = 0; i < nh; i++) {
+            for (uint j = 0; j < nv; j++) {
+                CT_Shot shot = pattern.getShotAt(i, j);
+                Q_UNUSED(shot);
+            }
+        }
+    });
+
+    int nbIntersect = 0;
+    double timeRayIntersect = elapsed([&]() {
+        for (uint i = 0; i < nh; i++) {
+            for (uint j = 0; j < nv; j++) {
+                const CT_Shot& shot = pattern.getShotAt(i, j);
+                bool intersect = algoNull.isRayIntersecting(shot.getOrigin(), shot.getDirection());
+                if (intersect) {
+                    nbIntersect++;
+                }
+            }
+        }
+    });
+
+    double timeWooNullVisitor = elapsed([&]() {
+        for (uint i = 0; i < nh; i++) {
+            for (uint j = 0; j < nv; j++) {
+                const CT_Shot& shot = pattern.getShotAt(i, j);
+                algoNull.compute(shot.getOrigin(), shot.getDirection());
+            }
+        }
+    });
+
+    double timeWooTraverse = elapsed([&]() {
+        for (uint j = 0; j < nv; j++) {
+            for (uint i = 0; i < nh; i++) {
+                const CT_Shot& shot = pattern.getShotAt(i, j);
+                algoReal.compute(shot.getOrigin(), shot.getDirection());
+            }
+        }
+    });
+
+    showStat("generate shots", timeGenerateShots, timeWooTraverse);
+    showStat("ray intersect", timeRayIntersect, timeWooTraverse);
+    showStat("null visitor", timeWooNullVisitor, timeWooTraverse);
+    showStat("all", timeWooTraverse, timeWooTraverse);
+
+    ulong total = algoReal.timeInit + algoReal.timeTraverse;
+    showStat("stage init", algoReal.timeInit, total);
+    showStat("stage traverse", algoReal.timeTraverse, total);
+
+    qDebug() << grid.valueAtIndex(809);
+    QVERIFY(grid.valueAtIndex(809) == 34);
 
     /*
      * It is mandatory to allocate the object here with "new", the
@@ -219,6 +293,60 @@ void ScannersTest::testTheoreticalGrid()
 //    LVOX3_ComputeAll workersManager;
 //    workersManager.addWorker(0, worker);
 //    workersManager.compute();
+
+}
+
+void ScannersTest::testParallelWoo()
+{
+    CT_ThetaPhiShootingPattern pattern(
+        Vector3d(15, 0, 15),
+        180.0, 60.0,
+        0.1, 0.1,
+        0.0, 60.,
+        Vector3d(0, 0, 1), false, false);
+
+    lvox::Grid3Di grid(NULL, NULL,
+            10., 10., 10.,
+            100UL, 100UL, 100UL,
+            0.1, lvox::Max_Error_Code, 0);
+    qDebug() << "grid.nCells()" << grid.nCells();
+
+    Vector3d min, max;
+    grid.getBoundingBox(min, max);
+    QVERIFY(min.isApprox(Vector3d(10, 10, 10)));
+    QVERIFY(max.isApprox(Vector3d(20, 20, 20)));
+
+    QVector<LVOX3_Grid3DVoxelWooVisitor*> visitorsNull;
+    NullVisitor nullVisitor;
+    visitorsNull.append(&nullVisitor);
+    LVOX3_Grid3DWooTraversalAlgorithm<lvox::Grid3DiType> algoNull(&grid, true, visitorsNull);
+
+    size_t nh = pattern.getNHRays();
+    size_t nv = pattern.getNVRays();
+
+    auto process_range = [&](uint i0, uint i1, uint j0, uint j1){
+        for (uint i = i0; i < i1; i++) {
+            for (uint j = j0; j < j1; j++) {
+                const CT_Shot& shot = pattern.getShotAt(i, j);
+                algoNull.compute(shot.getOrigin(), shot.getDirection());
+            }
+        }
+    };
+
+    double serial = elapsed([&](){
+        process_range(0, nh, 0, nv);
+    });
+
+    double parallel = elapsed([&](){
+        tbb::parallel_for(tbb::blocked_range2d<int, int>(0, nh, 0, nv),
+            [&](const tbb::blocked_range2d<int, int>& r){
+                process_range(r.rows().begin(), r.rows().end(), r.cols().begin(), r.cols().end());
+            }
+        );
+    });
+
+    showStat("serial", serial, serial);
+    showStat("parallel", parallel, serial);
 
 }
 

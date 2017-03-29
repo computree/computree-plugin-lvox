@@ -30,7 +30,7 @@ public:
      * @param shotInDistance  : store it the distance between the first intersection point of the shot and the voxel AND the hitted point
      * @param shotOutDistance  : store it the distance between the second intersection point of the shot and the voxel AND the hitted point
      */
-    LVOX3_ComputeHits(const CT_ShootingPattern* pattern,
+    LVOX3_ComputeHits(CT_ShootingPattern* pattern,
                       const CT_AbstractPointCloudIndex* pointCloudIndex,
                       lvox::Grid3Di* hits,
                       lvox::Grid3Df* shotInDistance = NULL,
@@ -43,7 +43,7 @@ protected:
     void doTheJob();
 
 private:
-    const CT_ShootingPattern*           m_pattern;
+    CT_ShootingPattern*           m_pattern;
     const CT_AbstractPointCloudIndex*   m_pointCloudIndex;
     lvox::Grid3Di*                  m_hits;
     lvox::Grid3Df*                   m_shotInDistance;
