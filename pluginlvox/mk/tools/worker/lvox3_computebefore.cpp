@@ -43,15 +43,11 @@ void LVOX3_ComputeBefore::doTheJob()
 
     CT_PointIterator itP(m_pointCloudIndex);
 
-    LVOX3_GridTools gridTool(m_before);
-
     while (itP.hasNext()
            && !mustCancel())
     {
-        size_t indice;
         const CT_Point &point = itP.next().currentPoint();
-        gridTool.computeGridIndexForPoint(point, indice);
-        Eigen::Vector3d shotOrigin = m_pattern->getShotAt(indice).getOrigin();
+        Eigen::Vector3d shotOrigin = m_pattern->getShotForPoint(point).getOrigin();
 
         // algo already check if the beam touch the grid or not so we don't have to do twice !
         algo.compute(point, point - shotOrigin);
