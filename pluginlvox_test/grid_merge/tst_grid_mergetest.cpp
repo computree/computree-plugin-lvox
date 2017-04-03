@@ -226,7 +226,20 @@ void Grid_mergeTest::testCase1()
     delete gs;
 }
 
-struct GridStruct {
+struct VoxelData {
+    VoxelData() {}
+    void load(GridSet *g, size_t idx) {
+        nt = g->nt->valueAtIndex(idx);
+        nb = g->nb->valueAtIndex(idx);
+        ni = g->ni->valueAtIndex(idx);
+        rd = g->rd->valueAtIndex(idx);
+    }
+    void commit(GridSet *g, size_t idx) {
+        g->nt->setValueAtIndex(idx, nt);
+        g->nb->setValueAtIndex(idx, nb);
+        g->ni->setValueAtIndex(idx, ni);
+        g->rd->setValueAtIndex(idx, rd);
+    }
     int nt;
     int nb;
     int ni;
@@ -240,13 +253,9 @@ void mergeMaxDensity(GridSet* merged, vector<GridSet*> *gs)
 
     GridSet *a = gs->at(0);
     size_t n = a->rd->nCells();
+    VoxelData item;
     for (size_t idx = 0; idx < n; idx++) {
-        // default values
-        GridStruct item;
-        item.nt = a->nt->valueAtIndex(idx);
-        item.nb = a->nb->valueAtIndex(idx);
-        item.ni = a->ni->valueAtIndex(idx);
-        item.rd = a->rd->valueAtIndex(idx);
+        item.load(a, idx);
         for (uint gi = 0; gi < gs->size(); gi++) {
             GridSet *set = gs->at(gi);
             double val = set->rd->valueAtIndex(idx);
@@ -257,10 +266,7 @@ void mergeMaxDensity(GridSet* merged, vector<GridSet*> *gs)
                 item.rd = set->rd->valueAtIndex(idx);
             }
         }
-        merged->nt->setValueAtIndex(idx, item.nt);
-        merged->nb->setValueAtIndex(idx, item.nb);
-        merged->ni->setValueAtIndex(idx, item.ni);
-        merged->rd->setValueAtIndex(idx, item.rd);
+        item.commit(merged, idx);
     }
 }
 
@@ -271,13 +277,10 @@ void mergeMaxConfidence(GridSet* merged, vector<GridSet*> *gs)
 
     GridSet *a = gs->at(0);
     size_t n = a->rd->nCells();
+    VoxelData item;
     for (size_t idx = 0; idx < n; idx++) {
         // default values
-        GridStruct item;
-        item.nt = a->nt->valueAtIndex(idx);
-        item.nb = a->nb->valueAtIndex(idx);
-        item.ni = a->ni->valueAtIndex(idx);
-        item.rd = a->rd->valueAtIndex(idx);
+        item.load(a, idx);
         for (uint gi = 0; gi < gs->size(); gi++) {
             GridSet *set = gs->at(gi);
             int nt = set->nt->valueAtIndex(idx);
@@ -294,6 +297,59 @@ void mergeMaxConfidence(GridSet* merged, vector<GridSet*> *gs)
         merged->nb->setValueAtIndex(idx, item.nb);
         merged->ni->setValueAtIndex(idx, item.ni);
         merged->rd->setValueAtIndex(idx, item.rd);
+    }
+}
+
+#include <functional>
+class VoxelReducer {
+public:
+    VoxelReducer() {}
+    virtual ~VoxelReducer() {}
+    void init(VoxelData &data) {
+        m_data = data;
+    }
+    virtual void join(const VoxelData &rhs) = 0;
+    VoxelData& value() { return m_data; }
+    VoxelData m_data;
+};
+
+class VoxelReducerMaxRDI : public VoxelReducer {
+public:
+    VoxelReducerMaxRDI() : VoxelReducer() {}
+    void join(const VoxelData &rhs) {
+       if (rhs.rd > m_data.rd) {
+           m_data = rhs;
+       }
+   }
+};
+
+class VoxelReducerMaxTrust : public VoxelReducer {
+public:
+    VoxelReducerMaxTrust() : VoxelReducer() {}
+    void join(const VoxelData &rhs) {
+       if ((rhs.nt - rhs.nb) > (m_data.nt - m_data.nb)) {
+           m_data = rhs;
+       }
+   }
+};
+void mergeGeneric(GridSet* merged, vector<GridSet*> *gs, VoxelReducer &reducer)
+{
+    if (gs->empty())
+        return;
+
+    GridSet *a = gs->at(0);
+    size_t n = a->rd->nCells();
+    VoxelData item, rhs;
+    for (size_t idx = 0; idx < n; idx++) {
+        // default values
+        item.load(a, idx);
+        reducer.init(item);
+        for (uint gi = 0; gi < gs->size(); gi++) {
+            GridSet *set = gs->at(gi);
+            rhs.load(set, idx);
+            reducer.join(rhs);
+        }
+        reducer.value().commit(merged, idx);
     }
 }
 
@@ -326,8 +382,26 @@ void Grid_mergeTest::testCase2()
     }
 
     {
+        VoxelReducerMaxRDI reducer;
+        GridSet *merged = new GridSet(*a);
+        mergeGeneric(merged, gs, reducer);
+        GridSet::dumpGrid(merged->rd.get());
+        QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)0.5);
+        delete merged;
+    }
+
+    {
         GridSet *merged = new GridSet(*a);
         mergeMaxConfidence(merged, gs);
+        GridSet::dumpGrid(merged->rd.get());
+        QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)0.4);
+        delete merged;
+    }
+
+    {
+        VoxelReducerMaxTrust reducer;
+        GridSet *merged = new GridSet(*a);
+        mergeGeneric(merged, gs, reducer);
         GridSet::dumpGrid(merged->rd.get());
         QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)0.4);
         delete merged;
