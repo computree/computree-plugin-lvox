@@ -14,6 +14,7 @@ include($${CT_PREFIX}/include_ct_library.pri)
 DEFINES += USE_OPENCV
 
 INCLUDEPATH += ../../pluginlvox/
+INCLUDEPATH += ../../pluginlvox/muParser/include
 
 # rpath works only on Unix
 QMAKE_RPATHDIR += $${PLUGINSHARED_DESTDIR}
