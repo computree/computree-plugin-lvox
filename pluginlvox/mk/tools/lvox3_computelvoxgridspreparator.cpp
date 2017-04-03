@@ -118,12 +118,12 @@ LVOX3_ComputeLVOXGridsPreparator::Result LVOX3_ComputeLVOXGridsPreparator::prepa
 
     PS_LOG->addMessage(LogInterface::info, LogInterface::step,
                        QObject::tr("Voxel bounding box: (%1,%2,%3), (%4,%5,%6)")
-                        .arg(res.minBBox.x(), 5, 'g', 1)
-                        .arg(res.minBBox.y(), 5, 'g', 1)
-                        .arg(res.minBBox.z(), 5, 'g', 1)
-                        .arg(res.maxBBox.x(), 5, 'g', 1)
-                        .arg(res.maxBBox.y(), 5, 'g', 1)
-                        .arg(res.maxBBox.z(), 5, 'g', 1)
+                        .arg(res.minBBox.x(), 5, 'f', 1)
+                        .arg(res.minBBox.y(), 5, 'f', 1)
+                        .arg(res.minBBox.z(), 5, 'f', 1)
+                        .arg(res.maxBBox.x(), 5, 'f', 1)
+                        .arg(res.maxBBox.y(), 5, 'f', 1)
+                        .arg(res.maxBBox.z(), 5, 'f', 1)
                        );
 
     res.valid = true;
