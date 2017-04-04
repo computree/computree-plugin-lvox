@@ -90,9 +90,15 @@ void LVOX3_StepInterpolateDistance::createInResultModelListProtected()
      */
     resultModel->addItemModel(DEF_SearchInGroup, DEF_Nt,
             lvox::Grid3Di::staticGetType(), tr("theoretical"));
+    resultModel->addItemAttributeModel(DEF_Nt, "niFlagModelName",
+                                       QList<QString>() << "LVOX_GRD_NT",
+                                       CT_AbstractCategory::ANY, tr("isNt"));
 
     resultModel->addItemModel(DEF_SearchInGroup, DEF_Nb,
             lvox::Grid3Di::staticGetType(), tr("before"));
+    resultModel->addItemAttributeModel(DEF_Nb, "nbFlagModelName",
+                                       QList<QString>() << "LVOX_GRD_NB",
+                                       CT_AbstractCategory::ANY, tr("isNb"));
 }
 
 void LVOX3_StepInterpolateDistance::createPostConfigurationDialog()
