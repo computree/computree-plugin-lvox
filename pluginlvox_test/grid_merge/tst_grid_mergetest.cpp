@@ -141,9 +141,13 @@ public:
     Grid_mergeTest();
 
 private Q_SLOTS:
-    void testCase1();
-    void testCase2();
-    void testCase3();
+    void testCreateGrids();
+    void testMergeMaxRDI();
+    void testMergeMaxTrust();
+    void testMergeMaxTrustRatio();
+    void testMergeMaxNi();
+    void testMergeSumRatio();
+    void testGenericGridMerge();
 };
 
 Grid_mergeTest::Grid_mergeTest()
@@ -164,7 +168,7 @@ void dumpGridIndexes(Grid3Di* g) {
         }
     }
 }
-void Grid_mergeTest::testCase1()
+void Grid_mergeTest::testCreateGrids()
 {
     Vector3d exp(10.05, 10.15, 10.25);
     Vector3d act = GridSet::mid(Vector3d(0, 1, 2), 10, 0.1);
@@ -246,16 +250,28 @@ struct VoxelData {
     float rd;
 };
 
+class VoxelReducerOptions {
+public:
+    VoxelReducerOptions() :
+        ignoreVoxelZeroDensity(true),
+        effectiveRaysThreshold(10) {}
+    bool ignoreVoxelZeroDensity;
+    int effectiveRaysThreshold;
+};
+
 class VoxelReducer {
 public:
     VoxelReducer() {}
+    VoxelReducer(VoxelReducerOptions& opts) :
+        m_opts(opts) {}
     virtual ~VoxelReducer() {}
-    void init(VoxelData &data) {
+    virtual void init(VoxelData &data) {
         m_data = data;
     }
     virtual void join(const VoxelData &rhs) = 0;
-    VoxelData& value() { return m_data; }
+    virtual VoxelData& value() { return m_data; }
     VoxelData m_data;
+    VoxelReducerOptions m_opts;
 };
 
 class VoxelReducerMaxRDI : public VoxelReducer {
@@ -282,6 +298,9 @@ class VoxelReducerMaxTrustRatio : public VoxelReducer {
 public:
     VoxelReducerMaxTrustRatio() : VoxelReducer() {}
     void join(const VoxelData &rhs) {
+        if (m_opts.ignoreVoxelZeroDensity && rhs.rd <= 0) {
+            return;
+        }
         float ratioSelf = 0;
         float ratioOther = 0;
         if (rhs.nt > 0) {
@@ -295,6 +314,98 @@ public:
         }
     }
 };
+
+class VoxelReducerMaxNi : public VoxelReducer {
+public:
+    VoxelReducerMaxNi() : VoxelReducer() {}
+    void join(const VoxelData &rhs) {
+        if (rhs.ni > m_data.ni) {
+            m_data = rhs;
+        }
+    }
+};
+
+class VoxelReducerSumRatio : public VoxelReducer {
+public:
+    VoxelReducerSumRatio() : VoxelReducer() {}
+    void join(const VoxelData &rhs) {
+        if ((m_data.nt - m_data.nb) > m_opts.effectiveRaysThreshold) {
+            m_data.nt += rhs.nt;
+            m_data.ni += rhs.ni;
+            m_data.nb += rhs.nb;
+        }
+    }
+    VoxelData& value() {
+        m_data.rd = 0;
+        if ((m_data.nt - m_data.nb) > 0) {
+            m_data.rd = (float)m_data.ni / (m_data.nt - m_data.nb);
+        }
+        return m_data;
+    }
+};
+
+void Grid_mergeTest::testMergeMaxRDI()
+{
+    VoxelData d1 = { 100, 0, 50, 0.5 };
+    VoxelData d2 = {  20, 0, 20, 1.0 };
+
+    VoxelReducerMaxRDI reducer;
+    reducer.init(d1);
+    reducer.join(d2);
+    VoxelData& d3 = reducer.value();
+    QCOMPARE(d3.rd, (float)1.0);
+}
+
+void Grid_mergeTest::testMergeMaxTrust()
+{
+    VoxelData d1 = { 100, 0, 50, 0.5 };
+    VoxelData d2 = {  20, 0, 20, 1.0 };
+
+    VoxelReducerMaxTrustRatio reducer;
+    reducer.init(d1);
+    reducer.join(d2);
+    VoxelData& d3 = reducer.value();
+    QCOMPARE(d3.rd, (float)0.5);
+}
+
+void Grid_mergeTest::testMergeMaxTrustRatio()
+{
+    VoxelData d1 = { 100, 50, 50, 0.5 };
+    VoxelData d2 = {  20,  0, 20, 1.0 };
+
+    VoxelReducerMaxTrustRatio reducer;
+    reducer.init(d1);
+    reducer.join(d2);
+    VoxelData& d3 = reducer.value();
+    QCOMPARE(d3.rd, (float)1.0);
+}
+
+void Grid_mergeTest::testMergeMaxNi()
+{
+    VoxelData d1 = { 100, 50, 50, 0.5 };
+    VoxelData d2 = {  20,  0, 20, 1.0 };
+
+    VoxelReducerMaxNi reducer;
+    reducer.init(d1);
+    reducer.join(d2);
+    VoxelData& d3 = reducer.value();
+    QCOMPARE(d3.rd, (float)0.5);
+}
+
+void Grid_mergeTest::testMergeSumRatio()
+{
+    VoxelData d1 = { 100, 50, 50, 0.5 };
+    VoxelData d2 = {  40, 10, 20, 1.0 };
+
+    // (50+20)/((100-50)+(40-10)) = 70/80
+    // sum(ni)/sum(nt-nb)
+
+    VoxelReducerSumRatio reducer;
+    reducer.init(d1);
+    reducer.join(d2);
+    VoxelData& d3 = reducer.value();
+    QCOMPARE(d3.rd, (float)70/80);
+}
 
 void mergeGeneric(GridSet* merged, vector<GridSet*> *gs, VoxelReducer &reducer)
 {
@@ -317,19 +428,7 @@ void mergeGeneric(GridSet* merged, vector<GridSet*> *gs, VoxelReducer &reducer)
     }
 }
 
-void Grid_mergeTest::testCase2()
-{
-    VoxelData d1 = { 40, 20, 0, 0.1 };
-    VoxelData d2 = { 50, 20, 0, 0.2 };
-
-    VoxelReducerMaxTrustRatio reducer;
-    reducer.init(d1);
-    reducer.join(d2);
-    VoxelData& d3 = reducer.value();
-    QCOMPARE(d3.rd, (float)0.2);
-}
-
-void Grid_mergeTest::testCase3()
+void Grid_mergeTest::testGenericGridMerge()
 {
     vector<vector<VecPt>> pts = {
         { VecPt(0, 1, 1, 30),  // 0.5 ratio
@@ -373,6 +472,24 @@ void Grid_mergeTest::testCase3()
         mergeGeneric(merged.get(), gs, reducer);
         GridSet::dumpGrid(merged->rd.get());
         QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)0.5);
+    }
+
+    {
+        printf("VoxelReducerMaxNi\n");
+        VoxelReducerMaxNi reducer;
+        unique_ptr<GridSet> merged(new GridSet(*a));
+        mergeGeneric(merged.get(), gs, reducer);
+        GridSet::dumpGrid(merged->rd.get());
+        QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)0.4);
+    }
+
+    {
+        printf("VoxelReducerSumRatio\n");
+        VoxelReducerSumRatio reducer;
+        unique_ptr<GridSet> merged(new GridSet(*a));
+        mergeGeneric(merged.get(), gs, reducer);
+        GridSet::dumpGrid(merged->rd.get());
+        QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)230/560);
     }
 }
 
