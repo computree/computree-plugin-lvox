@@ -389,7 +389,9 @@ void LVOX_StepCombineDensityGrids::compute()
                         itemOut_hits->addValueAtIndex(index, in_ni->valueAtIndex(index));
                         itemOut_theoretical->addValueAtIndex(index, in_nt->valueAtIndex(index));
                         itemOut_before->addValueAtIndex(index, in_nb->valueAtIndex(index));
-                        itemOut_deltaT->addValueAtIndex(index, in_deltaT->valueAtIndex(index)*(float)in_nt->valueAtIndex(index));
+                        if (itemOut_deltaT) {
+                            itemOut_deltaT->addValueAtIndex(index, in_deltaT->valueAtIndex(index)*(float)in_nt->valueAtIndex(index));
+                        }
 
                         if (i == (InGrids_density.size() - 1))
                         {
