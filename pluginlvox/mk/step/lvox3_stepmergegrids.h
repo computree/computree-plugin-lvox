@@ -3,6 +3,7 @@
 
 #include "ct_step/abstract/ct_abstractstep.h"
 #include "ct_tools/model/ct_autorenamemodels.h"
+#include "mk/tools/lvox3_mergegrids.h"
 
 class LVOX3_StepMergeGrids : public CT_AbstractStep
 {
@@ -23,6 +24,17 @@ public:
 
 
 protected:
+
+    /**
+     * @brief Show the post configuration dialog.
+     *
+     * If you want to show your own configuration dialog your must overload this method and show your dialog when this method is called. Don't forget
+     * to call the method "setSettingsModified(true)" if your settings is modified (if user accept your dialog).
+     *
+     * @return true if the settings was modified.
+     */
+    bool postConfigure();
+
     /**
      * @brief This method defines what kind of input the step can accept
      */
@@ -49,6 +61,8 @@ private slots:
      */
     void workerProgressChanged(int p);
 
+private:
+    VoxelReducerOptions m_reducerOptions;
 };
 
 #endif // LVOX3_STEPMERGEGRIDS_H

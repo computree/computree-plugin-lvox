@@ -1,9 +1,9 @@
 #include <QString>
 #include <QtTest>
+#include <QVector>
 
 #include <Eigen/Dense>
 #include <memory>
-#include <vector>
 
 #include "ct_cloudindex/registered/abstract/ct_abstractnotmodifiablecloudindexregisteredt.h"
 #include "ct_defines.h"
@@ -19,6 +19,7 @@
 #include "mk/tools/lvox3_gridtype.h"
 #include "mk/tools/lvox3_gridtools.h"
 #include "mk/tools/lvox3_errorcode.h"
+#include "mk/tools/lvox3_mergegrids.h"
 
 using namespace std;
 using namespace lvox;
@@ -32,9 +33,9 @@ struct VecPt {
     uint n;
 };
 
-class GridSet {
+class TestGridSet {
 public:
-    GridSet(double min, ulong dim, double res) :
+    TestGridSet(double min, ulong dim, double res) :
             m_min(min), m_dim(dim), m_res(res) {
         ni.reset(makeCubicGrid<Grid3Di>(m_min, m_dim, m_res));
         nt.reset(makeCubicGrid<Grid3Di>(m_min, m_dim, m_res));
@@ -42,27 +43,27 @@ public:
         rd.reset(makeCubicGrid<Grid3Df>(m_min, m_dim, m_res));
     }
 
-    GridSet(const GridSet& other) :
-        GridSet(other.m_min, other.m_dim, other.m_res) {
+    TestGridSet(const TestGridSet& other) :
+        TestGridSet(other.m_min, other.m_dim, other.m_res) {
     }
 
     static Vector3d mid(Vector3d v, double min, double res) {
         return v.array() * res + min + res / 2;
     }
 
-    static vector<GridSet*> *computeGrids(vector<vector<VecPt>> &pts,
+    static QVector<TestGridSet*> *computeGrids(QVector<QVector<VecPt>> &pts,
                                    double m = 0, ulong d = 3, double r = 1)
     {
-        vector<GridSet*> *gs = new vector<GridSet*>();
+        QVector<TestGridSet*> *gs = new QVector<TestGridSet*>();
         for (uint i = 0; i < pts.size(); i++) {
-            GridSet* set = new GridSet(m, d, r);
+            TestGridSet* set = new TestGridSet(m, d, r);
             set->init(pts[i]);
             gs->push_back(set);
         }
         return gs;
     }
 
-    void init(vector<VecPt> &pts) {
+    void init(QVector<VecPt> &pts) {
         CT_AbstractUndefinedSizePointCloud* cloud =
                 PS_REPOSITORY->createNewUndefinedSizePointCloud();
         for (const VecPt& pt: pts) {
@@ -171,31 +172,31 @@ void dumpGridIndexes(Grid3Di* g) {
 void Grid_mergeTest::testCreateGrids()
 {
     Vector3d exp(10.05, 10.15, 10.25);
-    Vector3d act = GridSet::mid(Vector3d(0, 1, 2), 10, 0.1);
+    Vector3d act = TestGridSet::mid(Vector3d(0, 1, 2), 10, 0.1);
     QVERIFY(act == exp);
 
     // make two point clouds
     // GRID_A: ird 1.0
     // GRID_B: ird 0.5
-    vector<vector<VecPt>> pts = {
+    QVector<QVector<VecPt>> pts = {
         { VecPt(0, 1, 1, 10) ,
           VecPt(1, 1, 1, 20) },
         { VecPt(1, 1, 1, 10) }
     };
 
     // compute grids
-    vector<GridSet*> *gs = GridSet::computeGrids(pts);
+    QVector<TestGridSet*> *gs = TestGridSet::computeGrids(pts);
 
     //Grid3Di g;
     //g.valueAtXYZ()
-    GridSet *a = gs->at(GRID_A);
-    GridSet *b = gs->at(GRID_B);
+    TestGridSet *a = gs->at(GRID_A);
+    TestGridSet *b = gs->at(GRID_B);
     printf("indexes\n");
     dumpGridIndexes(a->ni.get());
 
     printf("ni\n");
-    GridSet::dumpGrid(a->ni.get());
-    GridSet::dumpGrid(b->ni.get());
+    TestGridSet::dumpGrid(a->ni.get());
+    TestGridSet::dumpGrid(b->ni.get());
 
     QCOMPARE(a->ni->valueAtXYZ(0, 1, 1), 10);
     QCOMPARE(a->ni->valueAtXYZ(1, 1, 1), 20);
@@ -205,16 +206,16 @@ void Grid_mergeTest::testCreateGrids()
     QCOMPARE(b->ni->valueAtXYZ(1, 2, 1), 0);
 
     printf("nb\n");
-    GridSet::dumpGrid(a->nb.get());
-    GridSet::dumpGrid(b->nb.get());
+    TestGridSet::dumpGrid(a->nb.get());
+    TestGridSet::dumpGrid(b->nb.get());
     QCOMPARE(a->nb->valueAtXYZ(0, 1, 1), 0);
     QCOMPARE(a->nb->valueAtXYZ(1, 1, 1), 10);
     QCOMPARE(a->nb->valueAtXYZ(2, 1, 1), 30);
     QCOMPARE(b->nb->valueAtXYZ(2, 1, 1), 10);
 
     printf("nt\n");
-    GridSet::dumpGrid(a->nt.get());
-    GridSet::dumpGrid(b->nt.get());
+    TestGridSet::dumpGrid(a->nt.get());
+    TestGridSet::dumpGrid(b->nt.get());
     QCOMPARE(a->nt->valueAtXYZ(0, 1, 1), 30);
     QCOMPARE(a->nt->valueAtXYZ(1, 1, 1), 30);
     QCOMPARE(a->nt->valueAtXYZ(2, 1, 1), 30);
@@ -223,126 +224,13 @@ void Grid_mergeTest::testCreateGrids()
     QCOMPARE(b->nt->valueAtXYZ(2, 1, 1), 10);
 
     printf("rd\n");
-    GridSet::dumpGrid(a->rd.get());
-    GridSet::dumpGrid(b->rd.get());
+    TestGridSet::dumpGrid(a->rd.get());
+    TestGridSet::dumpGrid(b->rd.get());
 
     // cleanup
     qDeleteAll(gs->begin(), gs->end());
     delete gs;
 }
-
-struct VoxelData {
-    void load(GridSet *g, size_t idx) {
-        nt = g->nt->valueAtIndex(idx);
-        nb = g->nb->valueAtIndex(idx);
-        ni = g->ni->valueAtIndex(idx);
-        rd = g->rd->valueAtIndex(idx);
-    }
-    void commit(GridSet *g, size_t idx) {
-        g->nt->setValueAtIndex(idx, nt);
-        g->nb->setValueAtIndex(idx, nb);
-        g->ni->setValueAtIndex(idx, ni);
-        g->rd->setValueAtIndex(idx, rd);
-    }
-    int nt;
-    int nb;
-    int ni;
-    float rd;
-};
-
-class VoxelReducerOptions {
-public:
-    VoxelReducerOptions() :
-        ignoreVoxelZeroDensity(true),
-        effectiveRaysThreshold(10) {}
-    bool ignoreVoxelZeroDensity;
-    int effectiveRaysThreshold;
-};
-
-class VoxelReducer {
-public:
-    VoxelReducer() {}
-    VoxelReducer(VoxelReducerOptions& opts) :
-        m_opts(opts) {}
-    virtual ~VoxelReducer() {}
-    virtual void init(VoxelData &data) {
-        m_data = data;
-    }
-    virtual void join(const VoxelData &rhs) = 0;
-    virtual VoxelData& value() { return m_data; }
-    VoxelData m_data;
-    VoxelReducerOptions m_opts;
-};
-
-class VoxelReducerMaxRDI : public VoxelReducer {
-public:
-    VoxelReducerMaxRDI() : VoxelReducer() {}
-    void join(const VoxelData &rhs) {
-        if (rhs.rd > m_data.rd) {
-            m_data = rhs;
-        }
-    }
-};
-
-class VoxelReducerMaxTrust : public VoxelReducer {
-public:
-    VoxelReducerMaxTrust() : VoxelReducer() {}
-    void join(const VoxelData &rhs) {
-        if ((rhs.nt - rhs.nb) > (m_data.nt - m_data.nb)) {
-            m_data = rhs;
-        }
-    }
-};
-
-class VoxelReducerMaxTrustRatio : public VoxelReducer {
-public:
-    VoxelReducerMaxTrustRatio() : VoxelReducer() {}
-    void join(const VoxelData &rhs) {
-        if (m_opts.ignoreVoxelZeroDensity && rhs.rd <= 0) {
-            return;
-        }
-        float ratioSelf = 0;
-        float ratioOther = 0;
-        if (rhs.nt > 0) {
-            ratioOther = (float)(rhs.nt - rhs.nb) / rhs.nt;
-        }
-        if (m_data.nt > 0) {
-            ratioSelf = (float)(m_data.nt - m_data.nb) / m_data.nt;
-        }
-        if (ratioOther > ratioSelf) {
-            m_data = rhs;
-        }
-    }
-};
-
-class VoxelReducerMaxNi : public VoxelReducer {
-public:
-    VoxelReducerMaxNi() : VoxelReducer() {}
-    void join(const VoxelData &rhs) {
-        if (rhs.ni > m_data.ni) {
-            m_data = rhs;
-        }
-    }
-};
-
-class VoxelReducerSumRatio : public VoxelReducer {
-public:
-    VoxelReducerSumRatio() : VoxelReducer() {}
-    void join(const VoxelData &rhs) {
-        if ((m_data.nt - m_data.nb) > m_opts.effectiveRaysThreshold) {
-            m_data.nt += rhs.nt;
-            m_data.ni += rhs.ni;
-            m_data.nb += rhs.nb;
-        }
-    }
-    VoxelData& value() {
-        m_data.rd = 0;
-        if ((m_data.nt - m_data.nb) > 0) {
-            m_data.rd = (float)m_data.ni / (m_data.nt - m_data.nb);
-        }
-        return m_data;
-    }
-};
 
 void Grid_mergeTest::testMergeMaxRDI()
 {
@@ -407,30 +295,23 @@ void Grid_mergeTest::testMergeSumRatio()
     QCOMPARE(d3.rd, (float)70/80);
 }
 
-void mergeGeneric(GridSet* merged, vector<GridSet*> *gs, VoxelReducer &reducer)
+void doMerge(TestGridSet *dst, QVector<TestGridSet*> *gs, VoxelReducer &reducer)
 {
-    if (gs->empty())
-        return;
-
-    GridSet *a = gs->at(0);
-    size_t n = a->rd->nCells();
-    VoxelData item, rhs;
-    for (size_t idx = 0; idx < n; idx++) {
-        // default values
-        item.load(a, idx);
-        reducer.init(item);
-        for (uint gi = 1; gi < gs->size(); gi++) {
-            GridSet *set = gs->at(gi);
-            rhs.load(set, idx);
-            reducer.join(rhs);
-        }
-        reducer.value().commit(merged, idx);
+    // Yuck
+    LVOXGridSet dstSet{dst->ni.get(), dst->nt.get(), dst->nb.get(), dst->rd.get()};
+    QVector<LVOXGridSet*> srcSet;
+    for (const TestGridSet* g: *gs) {
+        LVOXGridSet *set = new LVOXGridSet{g->ni.get(), g->nt.get(), g->nb.get(), g->rd.get()};
+        srcSet.push_back(set);
     }
+
+    LVOX3_MergeGrids::apply(dstSet, srcSet, reducer);
+    qDeleteAll(srcSet);
 }
 
 void Grid_mergeTest::testGenericGridMerge()
 {
-    vector<vector<VecPt>> pts = {
+    QVector<QVector<VecPt>> pts = {
         { VecPt(0, 1, 1, 30),  // 0.5 ratio
           VecPt(1, 1, 1, 30)  },
         { VecPt(0, 1, 1, 200), // 0.4 ratio, but greater confidence
@@ -438,20 +319,20 @@ void Grid_mergeTest::testGenericGridMerge()
     };
 
     // compute grids
-    vector<GridSet*> *gs = GridSet::computeGrids(pts);
+    QVector<TestGridSet*> *gs = TestGridSet::computeGrids(pts);
 
     // merge grids
-    GridSet *a = gs->at(GRID_A);
-    GridSet *b = gs->at(GRID_B);
-    GridSet::dumpGrid(a->rd.get());
-    GridSet::dumpGrid(b->rd.get());
+    TestGridSet *a = gs->at(GRID_A);
+    TestGridSet *b = gs->at(GRID_B);
+    TestGridSet::dumpGrid(a->rd.get());
+    TestGridSet::dumpGrid(b->rd.get());
 
     {
         printf("VoxelReducerMaxRDI\n");
         VoxelReducerMaxRDI reducer;
-        GridSet *merged = new GridSet(*a);
-        mergeGeneric(merged, gs, reducer);
-        GridSet::dumpGrid(merged->rd.get());
+        TestGridSet *merged = new TestGridSet(*a);
+        doMerge(merged, gs, reducer);
+        TestGridSet::dumpGrid(merged->rd.get());
         QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)0.5);
         delete merged;
     }
@@ -459,36 +340,36 @@ void Grid_mergeTest::testGenericGridMerge()
     {
         printf("VoxelReducerMaxTrust\n");
         VoxelReducerMaxTrust reducer;
-        unique_ptr<GridSet> merged(new GridSet(*a));
-        mergeGeneric(merged.get(), gs, reducer);
-        GridSet::dumpGrid(merged->rd.get());
+        unique_ptr<TestGridSet> merged(new TestGridSet(*a));
+        doMerge(merged.get(), gs, reducer);
+        TestGridSet::dumpGrid(merged->rd.get());
         QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)0.4);
     }
 
     {
         printf("VoxelReducerMaxTrustRatio\n");
         VoxelReducerMaxTrustRatio reducer;
-        unique_ptr<GridSet> merged(new GridSet(*a));
-        mergeGeneric(merged.get(), gs, reducer);
-        GridSet::dumpGrid(merged->rd.get());
+        unique_ptr<TestGridSet> merged(new TestGridSet(*a));
+        doMerge(merged.get(), gs, reducer);
+        TestGridSet::dumpGrid(merged->rd.get());
         QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)0.5);
     }
 
     {
         printf("VoxelReducerMaxNi\n");
         VoxelReducerMaxNi reducer;
-        unique_ptr<GridSet> merged(new GridSet(*a));
-        mergeGeneric(merged.get(), gs, reducer);
-        GridSet::dumpGrid(merged->rd.get());
+        unique_ptr<TestGridSet> merged(new TestGridSet(*a));
+        doMerge(merged.get(), gs, reducer);
+        TestGridSet::dumpGrid(merged->rd.get());
         QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)0.4);
     }
 
     {
         printf("VoxelReducerSumRatio\n");
         VoxelReducerSumRatio reducer;
-        unique_ptr<GridSet> merged(new GridSet(*a));
-        mergeGeneric(merged.get(), gs, reducer);
-        GridSet::dumpGrid(merged->rd.get());
+        unique_ptr<TestGridSet> merged(new TestGridSet(*a));
+        doMerge(merged.get(), gs, reducer);
+        TestGridSet::dumpGrid(merged->rd.get());
         QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)230/560);
     }
 }

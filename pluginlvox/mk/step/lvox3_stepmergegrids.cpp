@@ -1,11 +1,15 @@
-#include "lvox3_stepmergegrids.h"
+#include <QDialog>
 
+#include "lvox3_stepmergegrids.h"
+#include "ct_view/tools/ct_configurablewidgettodialog.h"
 #include "ct_result/model/inModel/ct_inresultmodelgrouptocopy.h"
 #include "ct_result/model/outModel/tools/ct_outresultmodelgrouptocopypossibilities.h"
 #include "ct_result/ct_resultgroup.h"
 #include "mk/tools/lvox3_gridtype.h"
 #include "mk/tools/lvox3_gridtools.h"
 #include "mk/tools/lvox3_utils.h"
+#include "mk/tools/lvox3_mergegrids.h"
+#include "mk/view/mergegridsconfiguration.h"
 
 LVOX3_StepMergeGrids::LVOX3_StepMergeGrids(CT_StepInitializeData &dataInit) :
     CT_AbstractStep(dataInit)
@@ -44,33 +48,32 @@ void LVOX3_StepMergeGrids::createInResultModelListProtected()
     LVOX3_Utils::requireGrid(resultModel, Blocked);
     //LVOX3_Utils::requireGrid(resultModel, Density);
 
-
+    // FIXME: attribute required on the grid for matching
     resultModel->addItemModel(DEF_SearchInGroup, DEF_SearchInGrid,
             lvox::Grid3Df::staticGetType(), tr("Density grid"));
-    /*
-    resultModel->addItemModel(DEF_SearchInGroup, DEF_Nt,
-            lvox::Grid3Di::staticGetType(), tr("theoretical"));
-    resultModel->addItemAttributeModel(DEF_Nt, "ntFlagModelName",
-                                       QList<QString>() << "LVOX_GRD_NT",
-                                       CT_AbstractCategory::ANY, tr("isNt"));
+}
 
-    resultModel->addItemModel(DEF_SearchInGroup, DEF_Nb,
-            lvox::Grid3Di::staticGetType(), tr("before"));
-    resultModel->addItemAttributeModel(DEF_Nb, "nbFlagModelName",
-                                       QList<QString>() << "LVOX_GRD_NB",
-                                       CT_AbstractCategory::ANY, tr("isNb"));
+bool LVOX3_StepMergeGrids::postConfigure()
+{
+    MergeGridsConfiguration widget;
+    widget.setOptions(m_reducerOptions);
 
-    resultModel->addItemModel(DEF_SearchInGroup, DEF_Ni,
-            lvox::Grid3Di::staticGetType(), tr("hits"));
-    resultModel->addItemAttributeModel(DEF_Ni, "niFlagModelName",
-                                       QList<QString>() << "LVOX_GRD_NI",
-                                       CT_AbstractCategory::ANY, tr("isNi"));
-    */
+    if(CT_ConfigurableWidgetToDialog::exec(&widget) == QDialog::Rejected)
+        return false;
+
+    m_reducerOptions = widget.getOptions();
+
+    qDebug() << "reducer options:"
+             << m_reducerOptions.reducerType
+             << m_reducerOptions.effectiveRaysThreshold
+             << m_reducerOptions.ignoreVoxelZeroDensity;
+
+    setSettingsModified(true);
+    return true;
 }
 
 void LVOX3_StepMergeGrids::createPostConfigurationDialog()
 {
-
 }
 
 void LVOX3_StepMergeGrids::createOutResultModelListProtected()

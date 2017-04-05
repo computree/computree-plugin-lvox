@@ -90,7 +90,9 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     mk/view/loadfileconfigutil.h \
     mk/tools/lvox3_filterpointcloud.h \
     mk/step/lvox3_stepmergegrids.h \
-    mk/tools/lvox3_utils.h
+    mk/tools/lvox3_utils.h \
+    mk/view/mergegridsconfiguration.h \
+    mk/tools/lvox3_mergegrids.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -156,7 +158,9 @@ SOURCES += \
     mk/view/loadfileconfigutil.cpp \
     mk/tools/lvox3_filterpointcloud.cpp \
     mk/step/lvox3_stepmergegrids.cpp \
-    mk/tools/lvox3_utils.cpp
+    mk/tools/lvox3_utils.cpp \
+    mk/view/mergegridsconfiguration.cpp \
+    mk/tools/lvox3_mergegrids.cpp
 
 include(muParser/muparser.pri)
 
@@ -170,7 +174,8 @@ FORMS += \
     mk/view/loadfileconfiguration.ui \
     mk/view/genericcomputegridsconfiguration.ui \
     mk/view/predefinedmapperconfiguration.ui \
-    mk/view/computeprofilesconfiguration.ui
+    mk/view/computeprofilesconfiguration.ui \
+    mk/view/mergegridsconfiguration.ui
 
 RESOURCES += \
     resources.qrc

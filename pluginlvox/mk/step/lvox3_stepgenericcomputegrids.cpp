@@ -370,7 +370,7 @@ bool LVOX3_StepGenericComputeGrids::postConfigure()
         m_input = config.getInputGridConfiguration();
         m_output = config.getOutputGridConfiguration();
 
-        setSettingsModified(true);
+        setSettingsModified(true);        
 
         return true;
     }

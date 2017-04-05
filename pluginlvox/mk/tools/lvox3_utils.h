@@ -36,6 +36,13 @@ struct LVOXGridDefinitionStruct {
     QString attr_label;
 };
 
+struct LVOXGridSet {
+    lvox::Grid3Di* ni;  // hits
+    lvox::Grid3Di* nt;  // theoretic
+    lvox::Grid3Di* nb;  // before
+    lvox::Grid3Df* rd;  // relative density
+};
+
 class LVOX3_Utils
 {
 public:
