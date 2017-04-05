@@ -61,19 +61,21 @@
 #include "mk/step/lvox3_stepcomputeprofiles.h"
 #include "mk/step/lvox3_stepcomputesky.h"
 #include "mk/step/lvox3_stepinterpolatedistance.h"
+#include "mk/step/lvox3_stepmergegrids.h"
 
 #include "ct_global/ct_context.h"
 #include "ct_categories/ct_stdcategory.h"
+#include "mk/tools/lvox3_utils.h"
 
 #include <QMutex>
 
 LVOX_StepPluginManager::LVOX_StepPluginManager() : CT_AbstractStepPlugin()
 {
-    PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory("LVOX_GRD_NI", QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Ni"));
-    PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory("LVOX_GRD_NB", QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Nb"));
-    PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory("LVOX_GRD_NT", QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Nt"));
-    PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory("LVOX_GRD_NTA", QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Nta"));
-    PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory("LVOX_GRD_DENSITY", QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Density"));
+    PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory(DEF_LVOX_GRD_NI, QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Ni"));
+    PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory(DEF_LVOX_GRD_NB, QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Nb"));
+    PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory(DEF_LVOX_GRD_NT, QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Nt"));
+    PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory(DEF_LVOX_GRD_NTA, QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Nta"));
+    PS_CATEGORY_MANAGER->registerCategory(new CT_StdCategory(DEF_LVOX_GRD_DENSITY, QList<QString>() << CT_AbstractCategory::DATA_VALUE, "Density"));
 }
 
 LVOX_StepPluginManager::~LVOX_StepPluginManager()
@@ -129,6 +131,7 @@ bool LVOX_StepPluginManager::loadGenericsStep()
     addNewVoxelsStep<LVOX3_StepComputeProfiles>(QObject::tr("LVOX3"));
     addNewVoxelsStep<LVOX3_StepComputeSky>(QObject::tr("LVOX3"));
     addNewVoxelsStep<LVOX3_StepInterpolateDistance>(QObject::tr("LVOX3"));
+    addNewVoxelsStep<LVOX3_StepMergeGrids>(QObject::tr("LVOX3"));
 
     return true;
 }

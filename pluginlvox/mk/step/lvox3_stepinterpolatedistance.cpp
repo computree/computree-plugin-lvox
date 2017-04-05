@@ -11,12 +11,7 @@
 #include "mk/tools/lvox3_gridtools.h"
 #include "mk/tools/worker/lvox3_interpolatedistance.h"
 #include "mk/tools/worker/lvox3_interpolatetrustfactor.h"
-
-#define DEF_SearchInResult      "r"
-#define DEF_SearchInGrid        "grid"
-#define DEF_SearchInGroup       "gr"
-#define DEF_Nt "theoretical"
-#define DEF_Nb "before"
+#include "mk/tools/lvox3_utils.h"
 
 using namespace std;
 

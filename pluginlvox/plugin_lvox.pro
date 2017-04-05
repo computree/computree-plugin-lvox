@@ -88,7 +88,9 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     mk/tools/traversal/propagation/visitor/lvox3_trustinterpolationvisitor.h \
     mk/tools/worker/lvox3_interpolatetrustfactor.h \
     mk/view/loadfileconfigutil.h \
-    mk/tools/lvox3_filterpointcloud.h
+    mk/tools/lvox3_filterpointcloud.h \
+    mk/step/lvox3_stepmergegrids.h \
+    mk/tools/lvox3_utils.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -152,7 +154,9 @@ SOURCES += \
     mk/tools/traversal/propagation/visitor/lvox3_trustinterpolationvisitor.cpp \
     mk/tools/worker/lvox3_interpolatetrustfactor.cpp \
     mk/view/loadfileconfigutil.cpp \
-    mk/tools/lvox3_filterpointcloud.cpp
+    mk/tools/lvox3_filterpointcloud.cpp \
+    mk/step/lvox3_stepmergegrids.cpp \
+    mk/tools/lvox3_utils.cpp
 
 include(muParser/muparser.pri)
 
