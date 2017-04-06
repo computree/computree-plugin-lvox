@@ -22,7 +22,7 @@ class CT_InResultModelGroupToCopy;
 enum LVOXGridId {
     Theoretic = 0,
     Hits,
-    Blocked,
+    Before,
     Density
 };
 

@@ -63,6 +63,15 @@ private slots:
 
 private:
     VoxelReducerOptions m_reducerOptions;
+
+    CT_AutoRenameModels m_mergedGridHits;
+    CT_AutoRenameModels m_mergedGridBefore;
+    CT_AutoRenameModels m_mergedGridTheoretic;
+    CT_AutoRenameModels m_mergedGridDensity;
+
+    CT_AutoRenameModels m_mergedNiFlag;
+    CT_AutoRenameModels m_mergedNbFlag;
+    CT_AutoRenameModels m_mergedNtFlag;
 };
 
 #endif // LVOX3_STEPMERGEGRIDS_H

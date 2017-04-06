@@ -5,7 +5,7 @@
 const LVOXGridDefinitionStruct LVOX3_Utils::LVOXGridDefinitions[] = {
    { Theoretic, DEF_Nt,      lvox::Grid3Di::staticGetType(), DEF_Nt, DEF_Nt, DEF_LVOX_GRD_NT, "isNt" },
    { Hits,      DEF_Ni,      lvox::Grid3Di::staticGetType(), DEF_Ni, DEF_Ni, DEF_LVOX_GRD_NI, "isNi"},
-   { Blocked,   DEF_Nb,      lvox::Grid3Di::staticGetType(), DEF_Nb, DEF_Nt, DEF_LVOX_GRD_NB, "isNb" },
+   { Before,    DEF_Nb,      lvox::Grid3Di::staticGetType(), DEF_Nb, DEF_Nt, DEF_LVOX_GRD_NB, "isNb" },
    { Density,   DEF_Density, lvox::Grid3Df::staticGetType(), DEF_Density, DEF_Density, DEF_LVOX_GRD_DENSITY, "isDensity"},
 };
 

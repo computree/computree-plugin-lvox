@@ -35,7 +35,6 @@ LVOX3_StepComputeLvoxGrids::LVOX3_StepComputeLvoxGrids(CT_StepInitializeData &da
 {
     m_resolution = 0.5;
     m_computeDistances = false;
-
     m_gridMode = lvox::BoundingBoxOfTheScene;
     m_coordinates.x() = -20.0;
     m_coordinates.y() = -20.0;

@@ -45,7 +45,7 @@ void LVOX3_StepMergeGrids::createInResultModelListProtected()
             CT_AbstractItemGroup::staticGetType(), tr("Group"));
     LVOX3_Utils::requireGrid(resultModel, Theoretic);
     LVOX3_Utils::requireGrid(resultModel, Hits);
-    LVOX3_Utils::requireGrid(resultModel, Blocked);
+    LVOX3_Utils::requireGrid(resultModel, Before);
     //LVOX3_Utils::requireGrid(resultModel, Density);
 
     // FIXME: attribute required on the grid for matching
@@ -78,12 +78,71 @@ void LVOX3_StepMergeGrids::createPostConfigurationDialog()
 
 void LVOX3_StepMergeGrids::createOutResultModelListProtected()
 {
+    CT_OutResultModelGroupToCopyPossibilities *res = createNewOutResultModelToCopy(DEF_SearchInResult);
+
+    if (!res)
+        return;
+
+    res->addItemModel(DEF_SearchInGroup,
+                      m_mergedGridHits,
+                      new lvox::Grid3Di(),
+                      tr("Hits (merged)"));
+    res->addItemAttributeModel(m_mergedGridHits,
+                               m_mergedNiFlag,
+                               new CT_StdItemAttributeT<bool>(DEF_LVOX_GRD_NI),
+                               tr("isNi"));
+
+    res->addItemModel(DEF_SearchInGroup,
+                      m_mergedGridTheoretic,
+                      new lvox::Grid3Di(),
+                      tr("Theoretic (merged)"));
+    res->addItemAttributeModel(m_mergedGridTheoretic,
+                               m_mergedNtFlag,
+                               new CT_StdItemAttributeT<bool>(DEF_LVOX_GRD_NT),
+                               tr("isNt"));
+
+    res->addItemModel(DEF_SearchInGroup,
+                      m_mergedGridBefore,
+                      new lvox::Grid3Di(),
+                      tr("Before (merged)"));
+    res->addItemAttributeModel(m_mergedGridBefore,
+                               m_mergedNbFlag,
+                               new CT_StdItemAttributeT<bool>(DEF_LVOX_GRD_NB),
+                               tr("isNb"));
+
+    res->addItemModel(DEF_SearchInGroup,
+                      m_mergedGridDensity,
+                      new lvox::Grid3Df(),
+                      tr("Density (merged)"));
 
 }
 
 void LVOX3_StepMergeGrids::compute()
 {
+    CT_ResultGroup* outResult = getOutResultList().first();
 
+    CT_ResultGroupIterator itGrp(outResult, this, DEF_SearchInGroup);
+
+    while(itGrp.hasNext() && !isStopped()) {
+        /*
+         * Two casts are required, the group iterator returns const objects and
+         * because addItemDrawable() is called, it has to be non const.
+         */
+        CT_StandardItemGroup *group = dynamic_cast<CT_StandardItemGroup*>((CT_AbstractItemGroup*)itGrp.next());
+
+        lvox::Grid3Df *grid_density = dynamic_cast<lvox::Grid3Df*>(group->firstItemByINModelName(this, DEF_SearchInGrid));
+        lvox::Grid3Di *grid_nt = dynamic_cast<lvox::Grid3Di*>(group->firstItemByINModelName(this, DEF_Nt));
+        lvox::Grid3Di *grid_nb = dynamic_cast<lvox::Grid3Di*>(group->firstItemByINModelName(this, DEF_Nb));
+        lvox::Grid3Di *grid_ni = dynamic_cast<lvox::Grid3Di*>(group->firstItemByINModelName(this, DEF_Ni));
+
+        if(!(grid_density && grid_nt && grid_nb && grid_ni))
+            continue;
+
+        qDebug() << "density grid info: " << grid_density->getInfo();
+        qDebug() << "theoric grid info: " << grid_nt->getInfo();
+        qDebug() << "blocked grid info: " << grid_nb->getInfo();
+        qDebug() << "hits    grid info: " << grid_ni->getInfo();
+    }
 }
 
 void LVOX3_StepMergeGrids::workerProgressChanged(int p)
