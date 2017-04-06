@@ -97,9 +97,6 @@ void VoxelData::commit(LVOXGridSet *g, size_t idx) {
     g->nt->setValueAtIndex(idx, nt);
     g->nb->setValueAtIndex(idx, nb);
     g->ni->setValueAtIndex(idx, ni);
-    if (rd > 0) {
-        qDebug() << "foo";
-    }
     g->rd->setValueAtIndex(idx, rd);
 }
 
