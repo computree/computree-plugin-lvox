@@ -92,7 +92,8 @@ HEADERS += $${PLUGIN_SHARED_INTERFACE_DIR}/interfaces.h \
     mk/step/lvox3_stepmergegrids.h \
     mk/tools/lvox3_utils.h \
     mk/view/mergegridsconfiguration.h \
-    mk/tools/lvox3_mergegrids.h
+    mk/tools/lvox3_mergegrids.h \
+    mk/tools/worker/lvox3_mergegridsworker.h
 
 SOURCES += \
     lvox_pluginentry.cpp \
@@ -160,7 +161,8 @@ SOURCES += \
     mk/step/lvox3_stepmergegrids.cpp \
     mk/tools/lvox3_utils.cpp \
     mk/view/mergegridsconfiguration.cpp \
-    mk/tools/lvox3_mergegrids.cpp
+    mk/tools/lvox3_mergegrids.cpp \
+    mk/tools/worker/lvox3_mergegridsworker.cpp
 
 include(muParser/muparser.pri)
 

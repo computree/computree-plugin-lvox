@@ -7,6 +7,8 @@
 #define DEF_SearchInResult      "r"
 #define DEF_SearchInGrid        "grid"
 #define DEF_SearchInGroup       "gr"
+#define DEF_groupOut_grids "grids"
+#define DEF_groupOut_gridsMerged "grids merged"
 #define DEF_Nt "theoretical"
 #define DEF_Nb "before"
 #define DEF_Ni "hits"

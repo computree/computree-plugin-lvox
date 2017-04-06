@@ -55,7 +55,7 @@ public:
                                    double m = 0, ulong d = 3, double r = 1)
     {
         QVector<TestGridSet*> *gs = new QVector<TestGridSet*>();
-        for (uint i = 0; i < pts.size(); i++) {
+        for (int i = 0; i < pts.size(); i++) {
             TestGridSet* set = new TestGridSet(m, d, r);
             set->init(pts[i]);
             gs->push_back(set);
@@ -295,7 +295,7 @@ void Grid_mergeTest::testMergeSumRatio()
     QCOMPARE(d3.rd, (float)70/80);
 }
 
-void doMerge(TestGridSet *dst, QVector<TestGridSet*> *gs, VoxelReducer &reducer)
+void doMerge(TestGridSet *dst, QVector<TestGridSet*> *gs, VoxelReducer *reducer)
 {
     // Yuck
     LVOXGridSet dstSet{dst->ni.get(), dst->nt.get(), dst->nb.get(), dst->rd.get()};
@@ -305,7 +305,7 @@ void doMerge(TestGridSet *dst, QVector<TestGridSet*> *gs, VoxelReducer &reducer)
         srcSet.push_back(set);
     }
 
-    LVOX3_MergeGrids::apply(dstSet, srcSet, reducer);
+    LVOX3_MergeGrids::apply(&dstSet, &srcSet, reducer);
     qDeleteAll(srcSet);
 }
 
@@ -331,7 +331,7 @@ void Grid_mergeTest::testGenericGridMerge()
         printf("VoxelReducerMaxRDI\n");
         VoxelReducerMaxRDI reducer;
         TestGridSet *merged = new TestGridSet(*a);
-        doMerge(merged, gs, reducer);
+        doMerge(merged, gs, &reducer);
         TestGridSet::dumpGrid(merged->rd.get());
         QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)0.5);
         delete merged;
@@ -341,7 +341,7 @@ void Grid_mergeTest::testGenericGridMerge()
         printf("VoxelReducerMaxTrust\n");
         VoxelReducerMaxTrust reducer;
         unique_ptr<TestGridSet> merged(new TestGridSet(*a));
-        doMerge(merged.get(), gs, reducer);
+        doMerge(merged.get(), gs, &reducer);
         TestGridSet::dumpGrid(merged->rd.get());
         QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)0.4);
     }
@@ -350,7 +350,7 @@ void Grid_mergeTest::testGenericGridMerge()
         printf("VoxelReducerMaxTrustRatio\n");
         VoxelReducerMaxTrustRatio reducer;
         unique_ptr<TestGridSet> merged(new TestGridSet(*a));
-        doMerge(merged.get(), gs, reducer);
+        doMerge(merged.get(), gs, &reducer);
         TestGridSet::dumpGrid(merged->rd.get());
         QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)0.5);
     }
@@ -359,7 +359,7 @@ void Grid_mergeTest::testGenericGridMerge()
         printf("VoxelReducerMaxNi\n");
         VoxelReducerMaxNi reducer;
         unique_ptr<TestGridSet> merged(new TestGridSet(*a));
-        doMerge(merged.get(), gs, reducer);
+        doMerge(merged.get(), gs, &reducer);
         TestGridSet::dumpGrid(merged->rd.get());
         QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)0.4);
     }
@@ -368,7 +368,7 @@ void Grid_mergeTest::testGenericGridMerge()
         printf("VoxelReducerSumRatio\n");
         VoxelReducerSumRatio reducer;
         unique_ptr<TestGridSet> merged(new TestGridSet(*a));
-        doMerge(merged.get(), gs, reducer);
+        doMerge(merged.get(), gs, &reducer);
         TestGridSet::dumpGrid(merged->rd.get());
         QCOMPARE(merged->rd->valueAtXYZ(0, 1, 1), (float)230/560);
     }

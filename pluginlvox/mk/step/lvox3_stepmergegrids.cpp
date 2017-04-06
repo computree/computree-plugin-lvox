@@ -9,6 +9,7 @@
 #include "mk/tools/lvox3_gridtools.h"
 #include "mk/tools/lvox3_utils.h"
 #include "mk/tools/lvox3_mergegrids.h"
+#include "mk/tools/worker/lvox3_mergegridsworker.h"
 #include "mk/view/mergegridsconfiguration.h"
 
 LVOX3_StepMergeGrids::LVOX3_StepMergeGrids(CT_StepInitializeData &dataInit) :
@@ -119,16 +120,22 @@ void LVOX3_StepMergeGrids::createOutResultModelListProtected()
 
 void LVOX3_StepMergeGrids::compute()
 {
-    CT_ResultGroup* outResult = getOutResultList().first();
+    std::unique_ptr<VoxelReducer> reducer = LVOX3_MergeGrids::makeReducer(m_reducerOptions);
+    if (!reducer) {
+        PS_LOG->addFatalMessage(this, "Cannot find the requested grid reducer");
+        return;
+    }
 
+    CT_ResultGroup* outResult = getOutResultList().first();
     CT_ResultGroupIterator itGrp(outResult, this, DEF_SearchInGroup);
 
+    QVector<LVOXGridSet*> gs;
+    CT_StandardItemGroup *groupOut = NULL;
     while(itGrp.hasNext() && !isStopped()) {
-        /*
-         * Two casts are required, the group iterator returns const objects and
-         * because addItemDrawable() is called, it has to be non const.
-         */
         CT_StandardItemGroup *group = dynamic_cast<CT_StandardItemGroup*>((CT_AbstractItemGroup*)itGrp.next());
+        if (!groupOut) {
+            groupOut = group;
+        }
 
         lvox::Grid3Df *grid_density = dynamic_cast<lvox::Grid3Df*>(group->firstItemByINModelName(this, DEF_SearchInGrid));
         lvox::Grid3Di *grid_nt = dynamic_cast<lvox::Grid3Di*>(group->firstItemByINModelName(this, DEF_Nt));
@@ -142,11 +149,47 @@ void LVOX3_StepMergeGrids::compute()
         qDebug() << "theoric grid info: " << grid_nt->getInfo();
         qDebug() << "blocked grid info: " << grid_nb->getInfo();
         qDebug() << "hits    grid info: " << grid_ni->getInfo();
+
+        gs.append(new LVOXGridSet{grid_ni, grid_nt, grid_nb, grid_density});
+
     }
+
+    if (gs.isEmpty())
+        return;
+
+    LVOXGridSet *a = gs.first();
+    LVOXGridSet merged;
+
+    merged.ni = (lvox::Grid3Di*) a->ni->copy(m_mergedGridHits.completeName(),
+                outResult, CT_ResultCopyModeList());
+    merged.nt = (lvox::Grid3Di*) a->nt->copy(m_mergedGridTheoretic.completeName(),
+                outResult, CT_ResultCopyModeList());
+    merged.nb = (lvox::Grid3Di*) a->nb->copy(m_mergedGridBefore.completeName(),
+                outResult, CT_ResultCopyModeList());
+    merged.rd = (lvox::Grid3Df*) a->rd->copy(m_mergedGridDensity.completeName(),
+                outResult, CT_ResultCopyModeList());
+
+    LVOX3_MergeGridsWorker worker(&merged, &gs, reducer.get());
+
+    connect(&worker, SIGNAL(progressChanged(int)), this, SLOT(workerProgressChanged(int)), Qt::DirectConnection);
+    connect(this, SIGNAL(stopped()), &worker, SLOT(cancel()), Qt::DirectConnection);
+    worker.compute();
+
+    merged.ni->computeMinMax();
+    merged.nt->computeMinMax();
+    merged.nb->computeMinMax();
+    merged.rd->computeMinMax();
+
+    groupOut->addItemDrawable(merged.ni);
+    groupOut->addItemDrawable(merged.nt);
+    groupOut->addItemDrawable(merged.nb);
+    groupOut->addItemDrawable(merged.rd);
+
+    qDeleteAll(gs);
 }
 
 void LVOX3_StepMergeGrids::workerProgressChanged(int p)
 {
-
+    setProgress(p);
 }
 

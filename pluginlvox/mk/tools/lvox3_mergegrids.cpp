@@ -16,41 +16,91 @@ LVOX3_MergeGrids::LVOX3_MergeGrids()
 
 }
 
-void LVOX3_MergeGrids::apply(LVOXGridSet &merged,
-                             QVector<LVOXGridSet*> &gs,
-                             VoxelReducer &reducer)
+void LVOX3_MergeGrids::apply(LVOXGridSet *merged,
+                             QVector<LVOXGridSet*> *gs,
+                             VoxelReducer *reducer)
 {
-    if (gs.empty())
+    apply(merged, gs, reducer,
+        [](const size_t& i) -> bool {
+            Q_UNUSED(i);
+            return true;
+        });
+}
+
+void LVOX3_MergeGrids::apply(LVOXGridSet *merged,
+                             QVector<LVOXGridSet*> *gs,
+                             VoxelReducer *reducer,
+                             ProgressMonitor monitor)
+{
+    if (gs->empty())
         return;
 
-    LVOXGridSet *a = gs.at(0);
+    LVOXGridSet *a = gs->first();
     size_t n = a->rd->nCells();
     VoxelData item, rhs;
     for (size_t idx = 0; idx < n; idx++) {
         // default values
-        item.load(*a, idx);
-        reducer.init(item);
-        for (int gi = 1; gi < gs.size(); gi++) {
-            LVOXGridSet *set = gs.at(gi);
-            rhs.load(*set, idx);
-            reducer.join(rhs);
+        item.load(a, idx);
+        reducer->init(item);
+        for (int gi = 1; gi < gs->size(); gi++) {
+            LVOXGridSet *set = gs->at(gi);
+            rhs.load(set, idx);
+            reducer->join(rhs);
         }
-        reducer.value().commit(merged, idx);
+        reducer->value().commit(merged, idx);
+
+        if ((idx % 100) == 0) { // rate limit the update
+            if (monitor(idx)) {
+                break;
+            }
+        }
     }
 }
 
-void VoxelData::load(LVOXGridSet &g, size_t idx) {
-    nt = g.nt->valueAtIndex(idx);
-    nb = g.nb->valueAtIndex(idx);
-    ni = g.ni->valueAtIndex(idx);
-    rd = g.rd->valueAtIndex(idx);
+std::unique_ptr<VoxelReducer> LVOX3_MergeGrids::makeReducer(VoxelReducerOptions &opts)
+{
+    VoxelReducer *reducer = nullptr;
+
+    switch(opts.reducerType) {
+    case MaxRDI:
+            reducer = new VoxelReducerMaxRDI();
+            break;
+    case MaxTrust:
+            reducer = new VoxelReducerMaxTrust();
+            break;
+    case MaxTrustRatio:
+            reducer = new VoxelReducerMaxTrustRatio();
+            break;
+    case MaxNi:
+            reducer = new VoxelReducerMaxNi();
+            break;
+    case SumRatio:
+            reducer = new VoxelReducerSumRatio();
+            break;
+    default:
+            break;
+    };
+    if (reducer) {
+        reducer->m_opts = opts;
+    }
+    return std::unique_ptr<VoxelReducer>(reducer);
 }
 
-void VoxelData::commit(LVOXGridSet &g, size_t idx) {
-    g.nt->setValueAtIndex(idx, nt);
-    g.nb->setValueAtIndex(idx, nb);
-    g.ni->setValueAtIndex(idx, ni);
-    g.rd->setValueAtIndex(idx, rd);
+void VoxelData::load(LVOXGridSet *g, size_t idx) {
+    nt = g->nt->valueAtIndex(idx);
+    nb = g->nb->valueAtIndex(idx);
+    ni = g->ni->valueAtIndex(idx);
+    rd = g->rd->valueAtIndex(idx);
+}
+
+void VoxelData::commit(LVOXGridSet *g, size_t idx) {
+    g->nt->setValueAtIndex(idx, nt);
+    g->nb->setValueAtIndex(idx, nb);
+    g->ni->setValueAtIndex(idx, ni);
+    if (rd > 0) {
+        qDebug() << "foo";
+    }
+    g->rd->setValueAtIndex(idx, rd);
 }
 
 VoxelReducer::VoxelReducer() {}

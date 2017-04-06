@@ -15,8 +15,8 @@ enum VoxelReducerType {
 };
 
 struct VoxelData {
-    void load(LVOXGridSet &g, size_t idx);
-    void commit(LVOXGridSet &g, size_t idx);
+    void load(LVOXGridSet *g, size_t idx);
+    void commit(LVOXGridSet *g, size_t idx);
     int nt;
     int nb;
     int ni;
@@ -78,13 +78,21 @@ struct VoxelReducerDefinitionStruct {
     QString desc;
 };
 
+#include <functional>
+typedef std::function<bool (const size_t &)> ProgressMonitor;
+
 class LVOX3_MergeGrids
 {
 public:
     LVOX3_MergeGrids();
 
-    static void apply(LVOXGridSet &merged, QVector<LVOXGridSet*> &gs,
-                      VoxelReducer &reducer);
+    static void apply(LVOXGridSet *merged, QVector<LVOXGridSet*> *gs,
+                      VoxelReducer *reducer);
+
+    static void apply(LVOXGridSet *merged, QVector<LVOXGridSet*> *gs,
+                      VoxelReducer *reducer, ProgressMonitor monitor);
+
+    static std::unique_ptr<VoxelReducer> makeReducer(VoxelReducerOptions &opts);
 
     static const VoxelReducerDefinitionStruct VoxelReducerDefinitions[];
 };
