@@ -23,7 +23,7 @@ void LVOX3_MergeGrids::apply(LVOXGridSet *merged,
     apply(merged, gs, reducer,
         [](const size_t& i) -> bool {
             Q_UNUSED(i);
-            return true;
+            return false;
         });
 }
 
