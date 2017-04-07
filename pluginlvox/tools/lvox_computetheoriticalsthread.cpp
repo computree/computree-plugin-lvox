@@ -25,8 +25,8 @@ void LVOX_ComputeTheoriticalsThread::run()
 
     // Creates the ray traversal algorithm
 
-    int nHorizontalRays = _scanner->getNHRays();
-    int nVerticalRays = _scanner->getNVRays();
+    CT_ShootingPattern *pattern = _scanner->getShootingPattern();
+    size_t n = pattern->getNumberOfShots();
 
     // Creates visitors
     QList<CT_AbstractGrid3DBeamVisitor*> list;
@@ -45,27 +45,20 @@ void LVOX_ComputeTheoriticalsThread::run()
 
     CT_Beam beam(NULL, NULL);
 
-    int progressStep = nHorizontalRays / 20;
+    int progressStep = n / 1000;
 
-    qDebug() << "nHorizontalRays=" << nHorizontalRays;
-    qDebug() << "nVerticalRays=" << nVerticalRays;
+    qDebug() << "number of shots=" << n;
     // For all theoritical rays of the scanner
-    for ( int i = 0 ; i < nHorizontalRays ; i++ )
-    {
-        for ( int j = 0 ; j < nVerticalRays ; j++ )
-        {
-            // Get the next ray
-            _scanner->beam(i,j, beam);
+    for (size_t i = 0; i < n; i++) {
+        // Get the next ray
+        _scanner->beam(i, beam);
 
-            if (beam.intersect(bot, top))
-            {
-                algo.compute(beam);
-            }
+        if (beam.intersect(bot, top)) {
+            algo.compute(beam);
         }
 
-        if (i % progressStep == 0)
-        {
-            _progress = 100*i/nHorizontalRays;
+        if (i % progressStep == 0) {
+            _progress = 100*i/n;
             emit progressChanged();
         }
     }
