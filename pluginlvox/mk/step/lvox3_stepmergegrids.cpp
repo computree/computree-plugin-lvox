@@ -12,21 +12,74 @@
 #include "mk/tools/worker/lvox3_mergegridsworker.h"
 #include "mk/view/mergegridsconfiguration.h"
 
-LVOX3_StepMergeGrids::LVOX3_StepMergeGrids(CT_StepInitializeData &dataInit) :
-    CT_AbstractStep(dataInit)
-{
+static const QString settingsRootName("LVOX3_StepMergeGrids");
+static const QString settingsEffectiveRayThreshold("effectiveRayThreshold");
+static const QString settingsIgnoreVoxelZeroDensity("ignoreVoxelZeroDensity");
+static const QString settingsReducerType("reducerType");
 
+LVOX3_StepMergeGrids::LVOX3_StepMergeGrids(CT_StepInitializeData &dataInit) :
+    CT_AbstractStepCanBeAddedFirst(dataInit)
+{
 
 }
 
 QString LVOX3_StepMergeGrids::getStepDescription() const
 {
-return tr("6 - merge grids from multiple scans (LVOX 3)");
+    return tr("6 - merge grids from multiple scans (LVOX 3)");
 }
 
 CT_VirtualAbstractStep *LVOX3_StepMergeGrids::createNewInstance(CT_StepInitializeData &dataInit)
 {
     return new LVOX3_StepMergeGrids(dataInit);
+}
+
+/*
+ * FIXME: should use a label instead of an enum int for the reducer type. If
+ * the list of reducers is modified, then the setting will be invalid, but the
+ * user will not get the configuration dialog.
+ */
+
+SettingsNodeGroup* LVOX3_StepMergeGrids::getAllSettings() const
+{
+    SettingsNodeGroup *root = CT_AbstractStepCanBeAddedFirst::getAllSettings();
+    SettingsNodeGroup *group = new SettingsNodeGroup(settingsRootName);
+    group->addValue(new SettingsNodeValue(settingsEffectiveRayThreshold, m_reducerOptions.effectiveRaysThreshold));
+    group->addValue(new SettingsNodeValue(settingsIgnoreVoxelZeroDensity, m_reducerOptions.ignoreVoxelZeroDensity));
+    group->addValue(new SettingsNodeValue(settingsReducerType, m_reducerOptions.reducerType));
+    root->addGroup(group);
+    return root;
+}
+
+bool LVOX3_StepMergeGrids::setAllSettings(const SettingsNodeGroup* settings)
+{
+    if(!CT_AbstractStepCanBeAddedFirst::setAllSettings(settings))
+        return false;
+
+    QList<SettingsNodeGroup*> groupList = settings->groupsByTagName(settingsRootName);
+
+    if(groupList.isEmpty())
+        return false;
+
+    SettingsNodeValue* s1, *s2, *s3;
+    SettingsNodeGroup* group = groupList.first();
+    s1 = group->firstValueByTagName(settingsEffectiveRayThreshold);
+    s2 = group->firstValueByTagName(settingsIgnoreVoxelZeroDensity);
+    s3 = group->firstValueByTagName(settingsReducerType);
+
+    if (!(s1 && s2 && s3)) {
+        return false;
+    }
+
+    m_reducerOptions.effectiveRaysThreshold = s1->value().toInt();
+    m_reducerOptions.ignoreVoxelZeroDensity = s2->value().toBool();
+    m_reducerOptions.reducerType = (VoxelReducerType) s3->value().toInt();
+
+    if (m_reducerOptions.reducerType >= ReducerTypeLast) {
+        m_reducerOptions.reducerType = MaxRDI;
+        return false;
+    }
+
+    return true;
 }
 
 void LVOX3_StepMergeGrids::createInResultModelListProtected()

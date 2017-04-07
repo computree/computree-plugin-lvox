@@ -1,11 +1,11 @@
 #ifndef LVOX3_STEPMERGEGRIDS_H
 #define LVOX3_STEPMERGEGRIDS_H
 
-#include "ct_step/abstract/ct_abstractstep.h"
+#include "ct_step/abstract/ct_abstractstepcanbeaddedfirst.h"
 #include "ct_tools/model/ct_autorenamemodels.h"
 #include "mk/tools/lvox3_mergegrids.h"
 
-class LVOX3_StepMergeGrids : public CT_AbstractStep
+class LVOX3_StepMergeGrids : public CT_AbstractStepCanBeAddedFirst
 {
     Q_OBJECT
 
@@ -22,6 +22,19 @@ public:
      */
     CT_VirtualAbstractStep* createNewInstance(CT_StepInitializeData &dataInit);
 
+    /**
+     * @brief Backup settings (per example the file path)
+     * @return The SettingsNodeGroup to save
+     * @overload Overloaded from CT_AbstractStepSerializable
+     */
+    SettingsNodeGroup* getAllSettings() const;
+
+    /**
+     * @brief Restore settings (per example the file path)
+     * @return False if it was a problem in settings
+     * @overload Overloaded from CT_AbstractStepSerializable
+     */
+    bool setAllSettings(const SettingsNodeGroup *settings);
 
 protected:
 
