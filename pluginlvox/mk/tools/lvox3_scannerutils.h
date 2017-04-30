@@ -39,6 +39,7 @@ public:
     LVOX3_ScannerUtils();
     static const QVector<ScannerDefinitionStruct> &getScannerDefinitions();
     static const ScannerDefinitionStruct &getScannerDefinition(ScannerTypeEnum id);
+    static const ScannerDefinitionStruct &getScannerDefinition(const QString& label);
 
 private:
     Factory<CT_ShootingPattern> f;

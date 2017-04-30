@@ -11,6 +11,8 @@
 
 #include "mk/view/loadfileconfiguration.h"
 
+class CT_Scanner;
+
 class LVOX3_StepLoadFiles : public CT_AbstractStepCanBeAddedFirst
 {
     Q_OBJECT
@@ -42,6 +44,8 @@ public:
      * @overload Overloaded from CT_AbstractStepSerializable
      */
     bool setAllSettings(const SettingsNodeGroup *settings);
+
+    CT_ShootingPattern *makeShootingPattern(const LoadFileConfiguration::Configuration &conf, CT_PCIR pcir);
 
 protected:
     /**

@@ -10,6 +10,10 @@
 #include "ct_itemdrawable/ct_standarditemgroup.h"
 #include "ct_itemdrawable/ct_scanner.h"
 #include "ct_itemdrawable/ct_scene.h"
+#include "ct_itemdrawable/tools/scanner/ct_shootingpattern.h"
+#include "ct_itemdrawable/tools/scanner/ct_thetaphishootingpattern.h"
+#include "ct_itemdrawable/tools/scanner/ct_shootingpatternfrompointcloud.h"
+#include "ct_itemdrawable/tools/scanner/ct_parallelshootingpatternfrompointcloud.h"
 #include "ct_model/tools/ct_modelsearchhelper.h"
 
 #include "ct_view/tools/ct_configurablewidgettodialog.h"
@@ -80,9 +84,11 @@ SettingsNodeGroup* LVOX3_StepLoadFiles::getAllSettings() const
     for(int i=0; i<n; ++i) {
         const LoadFileConfiguration::Configuration& c = m_configuration.at(i);
 
+        const auto scanDef = LVOX3_ScannerUtils::getScannerDefinition(c.scannerId);
         SettingsNodeGroup *groupFile = new SettingsNodeGroup("File");
         groupFile->addValue(new SettingsNodeValue("version", 1));
         groupFile->addValue(new SettingsNodeValue("filepath", c.filepath));
+        groupFile->addValue(new SettingsNodeValue("scannerType", scanDef.label));
         groupFile->addValue(new SettingsNodeValue("clockWise", c.clockWise));
         groupFile->addValue(new SettingsNodeValue("radians", c.radians));
         groupFile->addValue(new SettingsNodeValue("scannerPositionX", c.scannerPosition.x()));
@@ -94,6 +100,9 @@ SettingsNodeGroup* LVOX3_StepLoadFiles::getAllSettings() const
         groupFile->addValue(new SettingsNodeValue("scannerThetaEnd", c.scannerThetaRange.y()));
         groupFile->addValue(new SettingsNodeValue("scannerPhiStart", c.scannerPhiRange.x()));
         groupFile->addValue(new SettingsNodeValue("scannerPhiEnd", c.scannerPhiRange.y()));
+        groupFile->addValue(new SettingsNodeValue("scannerDirectionX", c.scannerDirection.x()));
+        groupFile->addValue(new SettingsNodeValue("scannerDirectionY", c.scannerDirection.y()));
+        groupFile->addValue(new SettingsNodeValue("scannerDirectionZ", c.scannerDirection.z()));
 
         group->addGroup(groupFile);
     }
@@ -154,7 +163,9 @@ bool LVOX3_StepLoadFiles::setAllSettings(const SettingsNodeGroup* settings)
             groupFile = it.next();
 
             LoadFileConfiguration::Configuration c;
+            QString scannerType;
             SETTING_READ("filepath", c.filepath, toString);
+            SETTING_READ("scannerType", scannerType, toString);
             SETTING_READ("clockWise", c.clockWise, toDouble);
             SETTING_READ("radians", c.radians, toDouble);
             SETTING_READ("scannerPositionX", c.scannerPosition.x(), toDouble);
@@ -166,7 +177,12 @@ bool LVOX3_StepLoadFiles::setAllSettings(const SettingsNodeGroup* settings)
             SETTING_READ("scannerThetaEnd", c.scannerThetaRange.y(), toDouble);
             SETTING_READ("scannerPhiStart", c.scannerPhiRange.x(), toDouble);
             SETTING_READ("scannerPhiEnd", c.scannerPhiRange.y(), toDouble);
+            SETTING_READ("scannerDirectionX", c.scannerDirection.x(), toDouble);
+            SETTING_READ("scannerDirectionY", c.scannerDirection.y(), toDouble);
+            SETTING_READ("scannerDirectionZ", c.scannerDirection.z(), toDouble);
 
+            const auto scanDef = LVOX3_ScannerUtils::getScannerDefinition(scannerType);
+            c.scannerId = scanDef.id;
             confs.append(c);
         }
 
@@ -181,6 +197,47 @@ bool LVOX3_StepLoadFiles::setAllSettings(const SettingsNodeGroup* settings)
     }
 
     return false;
+}
+
+CT_ShootingPattern *LVOX3_StepLoadFiles::makeShootingPattern(
+        const LoadFileConfiguration::Configuration &conf, CT_PCIR pcir)
+{
+    /* TODO: Move this factory to the CT_Scanner class. Requires to move the
+     * Configuration class used by the UI (simplifies passing arguments).
+     */
+    CT_ShootingPattern *pattern = nullptr;
+
+    switch (conf.scannerId) {
+    case ScannerSphericTheoretic:
+    {
+        // TODO : zVector !
+        double hFov = conf.scannerThetaRange.y() - conf.scannerThetaRange.x();
+        double vFov = conf.scannerPhiRange.y() - conf.scannerPhiRange.x();
+        pattern = new CT_ThetaPhiShootingPattern(conf.scannerPosition,
+                                                 hFov, vFov,
+                                                 conf.scannerResolution.x(),
+                                                 conf.scannerResolution.y(),
+                                                 conf.scannerThetaRange.x(),
+                                                 conf.scannerPhiRange.x(),
+                                                 Eigen::Vector3d(0, 0, 1),
+                                                 conf.clockWise,
+                                                 conf.radians);
+        break;
+    }
+    case ScannerSphericPointCloud:
+    {
+        return new CT_ShootingPatternFromPointCloud(conf.scannerPosition, pcir);
+        break;
+    }
+    case ScannerPlanePointCloud:
+        return new CT_ParallelShootingPatternFromPointCloud(conf.scannerPosition,
+                                                            conf.scannerDirection,
+                                                            pcir);
+        break;
+    default:
+        break;
+    }
+    return pattern;
 }
 
 void LVOX3_StepLoadFiles::createInResultModelListProtected()
@@ -266,6 +323,7 @@ void LVOX3_StepLoadFiles::createOutResultModelListProtected()
     addOutResultModel(new CT_OutResultModelGroup(DEF_outResult, root, "Result"));
 }
 
+#include <QDebug>
 void LVOX3_StepLoadFiles::compute()
 {
     CT_ResultGroup *out_res = getOutResultList().first();
@@ -301,6 +359,7 @@ void LVOX3_StepLoadFiles::compute()
             CT_StandardItemGroup *group = new CT_StandardItemGroup(DEF_outGroup, out_res);
 
             QListIterator<CT_OutStdSingularItemModel*> it(m_reader->outItemDrawableModels());
+            CT_Scene *scene = nullptr;
 
             while(it.hasNext())
             {
@@ -312,6 +371,11 @@ void LVOX3_StepLoadFiles::compute()
 
                 while(itI.hasNext()) {
                     CT_AbstractSingularItemDrawable* item = itI.next();
+
+                    if (CT_Scene *scn = dynamic_cast<CT_Scene*>(item)) {
+                        scene = scn;
+                    }
+
                     group->addItemDrawable(item);
                 }
             }
@@ -335,20 +399,13 @@ void LVOX3_StepLoadFiles::compute()
 
             group->addItemDrawable(header);
 
-            if(m_useUserScannerConfiguration) {
-                // TODO : zVector !
-                CT_Scanner *scanner = new CT_Scanner(DEF_outScannerForced, out_res, i,
-                                                     config.scannerPosition,
-                                                     Eigen::Vector3d(0,0,1),
-                                                     config.scannerThetaRange.y()-config.scannerThetaRange.x(),
-                                                     config.scannerPhiRange.y()-config.scannerPhiRange.x(),
-                                                     config.scannerResolution.x(),
-                                                     config.scannerResolution.y(),
-                                                     config.scannerThetaRange.x(),
-                                                     config.scannerPhiRange.x(),
-                                                     config.clockWise,
-                                                     config.radians);
-
+            if (!scene) {
+                PS_LOG->addErrorMessage(this, tr("CT_Scene object not found"));
+            }
+            if(m_useUserScannerConfiguration && scene) {
+                CT_PCIR pcir = scene->getPointCloudIndexRegistered();
+                CT_ShootingPattern *pattern = makeShootingPattern(config, pcir);
+                CT_Scanner *scanner = new CT_Scanner(DEF_outScannerForced, out_res, i, pattern);
                 group->addItemDrawable(scanner);
             }
 

@@ -27,3 +27,15 @@ const ScannerDefinitionStruct &LVOX3_ScannerUtils::getScannerDefinition(ScannerT
 {
     return m_scannerDefinitions[id];
 }
+
+const ScannerDefinitionStruct &LVOX3_ScannerUtils::getScannerDefinition(const QString &label)
+{
+    for (const ScannerDefinitionStruct &def: m_scannerDefinitions) {
+        if (def.label == label) {
+            return def;
+        }
+    }
+
+    // FIXME: is this the proper way to handle the case where the scanner label is not found?
+    return m_scannerDefinitions.at(0);
+}
