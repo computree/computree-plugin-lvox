@@ -166,7 +166,7 @@ bool LVOX3_StepGenericComputeGrids::setAllSettings(const SettingsNodeGroup* sett
 lvox::PredefinedConfiguration LVOX3_StepGenericComputeGrids::createLVOXDensityPredefinedConfiguration()
 {
     lvox::PredefinedConfiguration conf;
-    conf.displayableName = QObject::tr("LVOX Densité");
+    conf.displayableName = QObject::tr("Indice de densité relative (IDR)");
     conf.description = QObject::tr("Calcul d'une grille de densité à partir des grilles \"Nt\", \"Nb\" et \"Ni\"");
 
     lvox::InGridConfiguration in;
@@ -223,7 +223,7 @@ lvox::PredefinedConfiguration LVOX3_StepGenericComputeGrids::createLVOXDensityPr
 lvox::PredefinedConfiguration LVOX3_StepGenericComputeGrids::createLVOXOcclusionRatePredefinedConfiguration()
 {
     lvox::PredefinedConfiguration conf;
-    conf.displayableName = QObject::tr("LVOX Taux d'occlusion");
+    conf.displayableName = QObject::tr("Taux d'occlusion");
     conf.description = QObject::tr("Calcul d'une grille contenant le taux d'occlusion à partir des grilles \"Nt\" et \"Nb\"");
 
     lvox::InGridConfiguration in;
