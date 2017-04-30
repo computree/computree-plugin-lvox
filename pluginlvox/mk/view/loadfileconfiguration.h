@@ -11,6 +11,7 @@
 #include "Eigen/Core"
 
 #include "ct_view/ct_abstractconfigurablewidget.h"
+#include "mk/tools/lvox3_scannerutils.h"
 
 namespace Ui {
 class LoadFileConfiguration;
@@ -26,13 +27,16 @@ class LoadFileConfiguration : public CT_AbstractConfigurableWidget
 public:
     struct Configuration {
         Configuration() :
+            scannerId(ScannerSphericTheoretic),
             clockWise(true),
             radians(false),
             filepath(),
             scannerPosition(0., 0., 0.),
             scannerResolution(0.036, 0.036),
             scannerThetaRange(0., 360.),
-            scannerPhiRange(0, 180.) {}
+            scannerPhiRange(0, 180.),
+            scannerDirection(0., 0., -1.) {}
+        ScannerTypeEnum scannerId;
         bool clockWise;
         bool radians;
         QString filepath;
@@ -40,6 +44,7 @@ public:
         Eigen::Vector2d scannerResolution;
         Eigen::Vector2d scannerThetaRange;
         Eigen::Vector2d scannerPhiRange;
+        Eigen::Vector3d scannerDirection;
     };
 
     explicit LoadFileConfiguration(QWidget *parent = 0);
@@ -64,6 +69,12 @@ public:
      * @brief Set to true to foce scanner configuration
      */
     void setScannerConfigurationForced(bool enable);
+
+    /**
+     * @brief Set the current scanner type
+     * @param scanLabel from scanner definitions
+     */
+    void setCurrentScannerType(ScannerTypeEnum scanId);
 
     /**
      * @brief Returns true if the scanner configuration must be used in configuration object
@@ -209,6 +220,7 @@ private slots:
      * @brief Clear the item list if the reader change (show a message box to user to inform it)
      */
     void on_comboBoxReaderType_currentIndexChanged(int index);
+    void on_comboBoxScannerType_currentIndexChanged(int index);
 };
 
 #endif // LOADFILECONFIGURATION_H

@@ -1,19 +1,22 @@
 #include "lvox3_mergegrids.h"
-
 #include <QVector>
 
-const VoxelReducerDefinitionStruct
-LVOX3_MergeGrids::VoxelReducerDefinitions[] = {
-    { MaxRDI,           "Max density",      "max(rdi)"              },
-    { MaxTrust,         "Max trust",        "max(nt - nb)"          },
-    { MaxTrustRatio,    "Max trust ratio",  "max((nt - nb)/nt)"     },
-    { MaxNi,            "Max hits",         "max(ni)"               },
-    { SumRatio,         "Sum ratio",        "sum(ni)/sum(nt - nb)"  },
+const QVector<VoxelReducerDefinitionStruct>
+LVOX3_MergeGrids::m_voxelReducerDefinitions = {
+    { LVOX_REDUCER_RDI,         "Max density",      "max(rdi)"              },
+    { LVOX_REDUCER_TRUST,       "Max trust",        "max(nt - nb)"          },
+    { LVOX_REDUCER_TRUST_RATIO, "Max trust ratio",  "max((nt - nb)/nt)"     },
+    { LVOX_REDUCER_HITS,        "Max hits",         "max(ni)"               },
+    { LVOX_REDUCER_SUM_RATIO,   "Sum ratio",        "sum(ni)/sum(nt - nb)"  },
 };
 
 LVOX3_MergeGrids::LVOX3_MergeGrids()
 {
-
+    f.registerType<VoxelReducerMaxRDI>(LVOX_REDUCER_RDI);
+    f.registerType<VoxelReducerMaxTrust>(LVOX_REDUCER_TRUST);
+    f.registerType<VoxelReducerMaxTrustRatio>(LVOX_REDUCER_TRUST_RATIO);
+    f.registerType<VoxelReducerMaxNi>(LVOX_REDUCER_HITS);
+    f.registerType<VoxelReducerSumRatio>(LVOX_REDUCER_SUM_RATIO);
 }
 
 void LVOX3_MergeGrids::apply(LVOXGridSet *merged,
@@ -57,33 +60,14 @@ void LVOX3_MergeGrids::apply(LVOXGridSet *merged,
     }
 }
 
-std::unique_ptr<VoxelReducer> LVOX3_MergeGrids::makeReducer(VoxelReducerOptions &opts)
+const QVector<VoxelReducerDefinitionStruct> LVOX3_MergeGrids::getReducerList()
 {
-    VoxelReducer *reducer = nullptr;
+    return m_voxelReducerDefinitions;
+}
 
-    switch(opts.reducerType) {
-    case MaxRDI:
-            reducer = new VoxelReducerMaxRDI();
-            break;
-    case MaxTrust:
-            reducer = new VoxelReducerMaxTrust();
-            break;
-    case MaxTrustRatio:
-            reducer = new VoxelReducerMaxTrustRatio();
-            break;
-    case MaxNi:
-            reducer = new VoxelReducerMaxNi();
-            break;
-    case SumRatio:
-            reducer = new VoxelReducerSumRatio();
-            break;
-    default:
-            break;
-    };
-    if (reducer) {
-        reducer->m_opts = opts;
-    }
-    return std::unique_ptr<VoxelReducer>(reducer);
+std::unique_ptr<VoxelReducer> LVOX3_MergeGrids::makeReducer(QString &label)
+{
+    return std::unique_ptr<VoxelReducer>(f.create(label));
 }
 
 void VoxelData::load(LVOXGridSet *g, size_t idx) {

@@ -6,6 +6,8 @@
 
 #include "ct_reader/abstract/ct_abstractreader.h"
 
+#include "mk/tools/lvox3_scannerutils.h"
+
 LoadFileConfiguration::LoadFileConfiguration(QWidget *parent) :
     CT_AbstractConfigurableWidget(parent),
     ui(new Ui::LoadFileConfiguration)
@@ -14,11 +16,17 @@ LoadFileConfiguration::LoadFileConfiguration(QWidget *parent) :
 
     ui->listWidgetFiles->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    connect(ui->pushButtonAddFile, SIGNAL(clicked(bool)), this, SLOT(addFile()));
     connect(ui->pushButtonModifyFile, SIGNAL(clicked(bool)), this, SLOT(modifySelectedFile()));
     connect(ui->pushButtonImportFile, SIGNAL(clicked(bool)), this, SLOT(importFile()));
     connect(ui->pushButtonDeleteFile, SIGNAL(clicked(bool)), this, SLOT(removeSelectedFile()));
     connect(ui->pushButtonDeleteAllFile, SIGNAL(clicked(bool)), this, SLOT(removeAllFile()));
+    connect(ui->pushButtonAddFile, SIGNAL(clicked(bool)), this, SLOT(addFile()));
+
+    /* load scanner types */
+    /* Assumption: the scanner id matched the combobox widget order */
+    for (const ScannerDefinitionStruct& scanDef: LVOX3_ScannerUtils::getScannerDefinitions()) {
+        ui->comboBoxScannerType->addItem(scanDef.name);
+    }
 
     on_listWidgetFiles_currentRowChanged(-1);
 }
@@ -66,6 +74,7 @@ void LoadFileConfiguration::setConfiguration(const QList<LoadFileConfiguration::
         int last = ui->listWidgetFiles->count() - 1;
         QListWidgetItem* item = ui->listWidgetFiles->item(last);
         ui->listWidgetFiles->setCurrentItem(item);
+        editItem(item);
     }
 }
 
@@ -146,6 +155,7 @@ void LoadFileConfiguration::editItem(QListWidgetItem *item)
 {
     Configuration c = m_filesScannerConfiguration.value(item, Configuration());
 
+    ui->comboBoxScannerType->setCurrentIndex(c.scannerId);
     ui->checkBoxScannerClockwise->setChecked(c.clockWise);
     ui->checkBoxAngleInRadians->setChecked(c.radians);
 
@@ -163,6 +173,12 @@ void LoadFileConfiguration::editItem(QListWidgetItem *item)
 
     ui->doubleSpinBoxStartTheta->setValue(c.scannerThetaRange.x());
     ui->doubleSpinBoxEndTheta->setValue(c.scannerThetaRange.y());
+
+    ui->doubleSpinBoxXDir->setValue(c.scannerDirection.x());
+    ui->doubleSpinBoxYDir->setValue(c.scannerDirection.y());
+    ui->doubleSpinBoxZDir->setValue(c.scannerDirection.z());
+
+    setCurrentScannerType(c.scannerId);
 }
 
 void LoadFileConfiguration::updateConfiguration(QListWidgetItem *item)
@@ -172,6 +188,7 @@ void LoadFileConfiguration::updateConfiguration(QListWidgetItem *item)
 
     Configuration c = m_filesScannerConfiguration.value(item);
 
+    c.scannerId = static_cast<ScannerTypeEnum>(ui->comboBoxScannerType->currentIndex());
     c.clockWise = ui->checkBoxScannerClockwise->isChecked();
     c.radians = ui->checkBoxAngleInRadians->isChecked();
 
@@ -187,6 +204,10 @@ void LoadFileConfiguration::updateConfiguration(QListWidgetItem *item)
 
     c.scannerThetaRange.x() = ui->doubleSpinBoxStartTheta->value();
     c.scannerThetaRange.y() = ui->doubleSpinBoxEndTheta->value();
+
+    c.scannerDirection.x() = ui->doubleSpinBoxXDir->value();
+    c.scannerDirection.y() = ui->doubleSpinBoxYDir->value();
+    c.scannerDirection.z() = ui->doubleSpinBoxZDir->value();
 
     m_filesScannerConfiguration.insert(item, c);
 }
@@ -220,7 +241,10 @@ void LoadFileConfiguration::addFile()
             ui->listWidgetFiles->addItem(item);
         }
 
-        ui->listWidgetFiles->setCurrentItem(ui->listWidgetFiles->item(ui->listWidgetFiles->count()-1));
+        int last = ui->listWidgetFiles->count()-1;
+        QListWidgetItem* item = ui->listWidgetFiles->item(last);
+        ui->listWidgetFiles->setCurrentItem(item);
+        editItem(item);
     }
 }
 
@@ -349,11 +373,14 @@ void LoadFileConfiguration::on_pushButtonApplyConfigurationToNextFile_clicked()
 
     updateConfiguration(item);
 
-    int row = ui->listWidgetFiles->currentRow()+1;
+    int nextRow = ui->listWidgetFiles->currentRow()+1;
 
-    if(row < ui->listWidgetFiles->count()) {
-        m_filesScannerConfiguration.insert(ui->listWidgetFiles->item(row), m_filesScannerConfiguration.value(item));
-        ui->listWidgetFiles->setCurrentRow(row);
+    if(nextRow < ui->listWidgetFiles->count()) {
+        QListWidgetItem* nextItem = ui->listWidgetFiles->item(nextRow);
+        const Configuration& c = m_filesScannerConfiguration.value(nextItem);
+        m_filesScannerConfiguration.insert(nextItem, c);
+        ui->listWidgetFiles->setCurrentRow(nextRow);
+        editItem(nextItem);
     }
 }
 
@@ -385,24 +412,20 @@ void LoadFileConfiguration::on_checkBoxForceScannerInformation_toggled(bool e)
 
 void LoadFileConfiguration::on_listWidgetFiles_currentRowChanged(int currentRow)
 {
-    ui->pushButtonDeleteFile->setEnabled(currentRow != -1);
-    ui->pushButtonModifyFile->setEnabled(currentRow != -1);
+    bool hasRows = currentRow != -1;
+    bool customChecked = ui->checkBoxForceScannerInformation->isChecked();
+    bool hasRowsAndCustom = hasRows && customChecked;
 
-    ui->pushButtonApplyConfigurationToAll->setEnabled(currentRow != -1 && (ui->listWidgetFiles->count() > 1) && ui->checkBoxForceScannerInformation->isChecked());
-    ui->pushButtonApplyConfigurationToNextFile->setEnabled(currentRow != -1 && ((currentRow+1) < ui->listWidgetFiles->count()) && ui->checkBoxForceScannerInformation->isChecked());
+    ui->pushButtonDeleteFile->setEnabled(hasRows);
+    ui->pushButtonModifyFile->setEnabled(hasRows);
 
+    ui->pushButtonApplyConfigurationToAll->setEnabled(hasRowsAndCustom);
+    ui->pushButtonApplyConfigurationToNextFile->setEnabled(hasRowsAndCustom);
 
-    ui->checkBoxAngleInRadians->setEnabled(currentRow != -1 && ui->checkBoxForceScannerInformation->isChecked());
-    ui->checkBoxScannerClockwise->setEnabled(currentRow != -1 && ui->checkBoxForceScannerInformation->isChecked());
-    ui->doubleSpinBoxXPos->setEnabled(currentRow != -1 && ui->checkBoxForceScannerInformation->isChecked());
-    ui->doubleSpinBoxYPos->setEnabled(currentRow != -1 && ui->checkBoxForceScannerInformation->isChecked());
-    ui->doubleSpinBoxZPos->setEnabled(currentRow != -1 && ui->checkBoxForceScannerInformation->isChecked());
-    ui->doubleSpinBoxHRes->setEnabled(currentRow != -1 && ui->checkBoxForceScannerInformation->isChecked());
-    ui->doubleSpinBoxVRes->setEnabled(currentRow != -1 && ui->checkBoxForceScannerInformation->isChecked());
-    ui->doubleSpinBoxStartTheta->setEnabled(currentRow != -1 && ui->checkBoxForceScannerInformation->isChecked());
-    ui->doubleSpinBoxEndTheta->setEnabled(currentRow != -1 && ui->checkBoxForceScannerInformation->isChecked());
-    ui->doubleSpinBoxStartPhi->setEnabled(currentRow != -1 && ui->checkBoxForceScannerInformation->isChecked());
-    ui->doubleSpinBoxEndPhi->setEnabled(currentRow != -1 && ui->checkBoxForceScannerInformation->isChecked());
+    if (customChecked) {
+        int idx = ui->comboBoxScannerType->currentIndex();
+        setCurrentScannerType(static_cast<ScannerTypeEnum>(idx));
+    }
 }
 
 void LoadFileConfiguration::on_listWidgetFiles_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous)
@@ -424,4 +447,32 @@ void LoadFileConfiguration::on_listWidgetFiles_itemDoubleClicked(QListWidgetItem
 void LoadFileConfiguration::on_comboBoxReaderType_currentIndexChanged(int index)
 {
     ui->comboBoxReaderType->setCurrentIndex(index);
+}
+
+void LoadFileConfiguration::setCurrentScannerType(ScannerTypeEnum scannerId)
+{
+    bool angles = false, direction = false;
+
+    switch(scannerId) {
+    case ScannerSphericTheoretic:
+        angles = true;
+        break;
+    case ScannerSphericPointCloud:
+        break;
+    case ScannerPlanePointCloud:
+        direction = true;
+        break;
+    default:
+        break;
+    }
+
+    /* scanner position is always required */
+    ui->groupBoxPosition->setEnabled(true);
+    ui->groupBoxAngles->setEnabled(angles);
+    ui->groupBoxDirection->setEnabled(direction);
+}
+
+void LoadFileConfiguration::on_comboBoxScannerType_currentIndexChanged(int index)
+{
+    setCurrentScannerType(static_cast<ScannerTypeEnum>(index));
 }

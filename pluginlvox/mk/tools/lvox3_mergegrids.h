@@ -4,15 +4,13 @@
 #include <memory>
 #include <QVector>
 #include "mk/tools/lvox3_utils.h"
+#include "mk/tools/lvox3_factory.hpp"
 
-enum VoxelReducerType {
-    MaxRDI,
-    MaxTrust,
-    MaxTrustRatio,
-    MaxNi,
-    SumRatio,
-    ReducerTypeLast
-};
+#define LVOX_REDUCER_RDI "MaxRDI"
+#define LVOX_REDUCER_TRUST "MaxTrust"
+#define LVOX_REDUCER_TRUST_RATIO "MaxTrustRatio"
+#define LVOX_REDUCER_HITS "MaxNi"
+#define LVOX_REDUCER_SUM_RATIO "SumRatio"
 
 struct VoxelData {
     void load(LVOXGridSet *g, size_t idx);
@@ -26,10 +24,10 @@ struct VoxelData {
 class VoxelReducerOptions {
 public:
     VoxelReducerOptions() :
-        reducerType(MaxTrust),
+        reducerLabel(),
         ignoreVoxelZeroDensity(true),
         effectiveRaysThreshold(10) {}
-    VoxelReducerType reducerType;
+    QString reducerLabel;
     bool ignoreVoxelZeroDensity;
     int effectiveRaysThreshold;
 };
@@ -73,13 +71,15 @@ public:
 };
 
 struct VoxelReducerDefinitionStruct {
-    VoxelReducerType type;
+    QString label;
     QString name;
     QString desc;
 };
 
 #include <functional>
 typedef std::function<bool (const size_t &)> ProgressMonitor;
+
+// TODO: LVOX3_MergeGrids should be converted to singleton
 
 class LVOX3_MergeGrids
 {
@@ -92,9 +92,13 @@ public:
     static void apply(LVOXGridSet *merged, QVector<LVOXGridSet*> *gs,
                       VoxelReducer *reducer, ProgressMonitor monitor);
 
-    static std::unique_ptr<VoxelReducer> makeReducer(VoxelReducerOptions &opts);
+    static const QVector<VoxelReducerDefinitionStruct> getReducerList();
 
-    static const VoxelReducerDefinitionStruct VoxelReducerDefinitions[];
+    std::unique_ptr<VoxelReducer> makeReducer(QString &label);
+
+private:
+    Factory<VoxelReducer> f;
+    static const QVector<VoxelReducerDefinitionStruct> m_voxelReducerDefinitions;
 };
 
 #endif // LVOX3_MERGEGRIDS_H

@@ -17,6 +17,11 @@ struct LvoxConfigError {
 
 typedef LoadFileConfiguration::Configuration ConfItem;
 
+/**
+ * @brief The LoadFileConfigUtil class: parses and load .in files for backward
+ * compatibility. Each line has a point file and a spherical scanner
+ * configuration. The fields of a line are separated by spaces.
+ */
 class LoadFileConfigUtil
 {
     Q_DECLARE_TR_FUNCTIONS(LoadFileConfigUtil)

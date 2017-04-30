@@ -15,7 +15,7 @@
 static const QString settingsRootName("LVOX3_StepMergeGrids");
 static const QString settingsEffectiveRayThreshold("effectiveRayThreshold");
 static const QString settingsIgnoreVoxelZeroDensity("ignoreVoxelZeroDensity");
-static const QString settingsReducerType("reducerType");
+static const QString settingsReducerLabel("reducerLabel");
 
 LVOX3_StepMergeGrids::LVOX3_StepMergeGrids(CT_StepInitializeData &dataInit) :
     CT_AbstractStepCanBeAddedFirst(dataInit)
@@ -45,7 +45,7 @@ SettingsNodeGroup* LVOX3_StepMergeGrids::getAllSettings() const
     SettingsNodeGroup *group = new SettingsNodeGroup(settingsRootName);
     group->addValue(new SettingsNodeValue(settingsEffectiveRayThreshold, m_reducerOptions.effectiveRaysThreshold));
     group->addValue(new SettingsNodeValue(settingsIgnoreVoxelZeroDensity, m_reducerOptions.ignoreVoxelZeroDensity));
-    group->addValue(new SettingsNodeValue(settingsReducerType, m_reducerOptions.reducerType));
+    group->addValue(new SettingsNodeValue(settingsReducerLabel, m_reducerOptions.reducerLabel));
     root->addGroup(group);
     return root;
 }
@@ -64,7 +64,7 @@ bool LVOX3_StepMergeGrids::setAllSettings(const SettingsNodeGroup* settings)
     SettingsNodeGroup* group = groupList.first();
     s1 = group->firstValueByTagName(settingsEffectiveRayThreshold);
     s2 = group->firstValueByTagName(settingsIgnoreVoxelZeroDensity);
-    s3 = group->firstValueByTagName(settingsReducerType);
+    s3 = group->firstValueByTagName(settingsReducerLabel);
 
     if (!(s1 && s2 && s3)) {
         return false;
@@ -72,13 +72,13 @@ bool LVOX3_StepMergeGrids::setAllSettings(const SettingsNodeGroup* settings)
 
     m_reducerOptions.effectiveRaysThreshold = s1->value().toInt();
     m_reducerOptions.ignoreVoxelZeroDensity = s2->value().toBool();
-    m_reducerOptions.reducerType = (VoxelReducerType) s3->value().toInt();
+    m_reducerOptions.reducerLabel = s3->value().toString();
 
-    if (m_reducerOptions.reducerType >= ReducerTypeLast) {
-        m_reducerOptions.reducerType = MaxRDI;
+    LVOX3_MergeGrids mg;
+    std::unique_ptr<VoxelReducer> vr = mg.makeReducer(m_reducerOptions.reducerLabel);
+    if (!vr) {
         return false;
     }
-
     return true;
 }
 
@@ -118,7 +118,7 @@ bool LVOX3_StepMergeGrids::postConfigure()
     m_reducerOptions = widget.getOptions();
 
     qDebug() << "reducer options:"
-             << m_reducerOptions.reducerType
+             << m_reducerOptions.reducerLabel
              << m_reducerOptions.effectiveRaysThreshold
              << m_reducerOptions.ignoreVoxelZeroDensity;
 
@@ -173,9 +173,10 @@ void LVOX3_StepMergeGrids::createOutResultModelListProtected()
 
 void LVOX3_StepMergeGrids::compute()
 {
-    std::unique_ptr<VoxelReducer> reducer = LVOX3_MergeGrids::makeReducer(m_reducerOptions);
+    LVOX3_MergeGrids mg;
+    std::unique_ptr<VoxelReducer> reducer = mg.makeReducer(m_reducerOptions.reducerLabel);
     if (!reducer) {
-        PS_LOG->addFatalMessage(this, "Cannot find the requested grid reducer");
+        PS_LOG->addFatalMessage(this, "Cannot find the requested grid reducer " + m_reducerOptions.reducerLabel);
         return;
     }
 
