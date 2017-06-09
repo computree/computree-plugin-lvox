@@ -160,12 +160,12 @@ SOURCES += \
     mk/tools/worker/lvox3_interpolatetrustfactor.cpp \
     mk/view/loadfileconfigutil.cpp \
     mk/tools/lvox3_filterpointcloud.cpp \
+    mk/tools/lvox3_scannerutils.cpp \
     mk/step/lvox3_stepmergegrids.cpp \
     mk/tools/lvox3_utils.cpp \
     mk/view/mergegridsconfiguration.cpp \
     mk/tools/lvox3_mergegrids.cpp \
-    mk/tools/worker/lvox3_mergegridsworker.cpp \
-    mk/tools/lvox3_scannerutils.cpp
+    mk/tools/worker/lvox3_mergegridsworker.cpp
 
 include(muParser/muparser.pri)
 

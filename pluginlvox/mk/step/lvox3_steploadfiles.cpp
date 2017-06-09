@@ -21,6 +21,7 @@
 #include "ct_reader/ct_standardreaderseparator.h"
 #include "ct_abstractstepplugin.h"
 #include "mk/tools/lvox3_filterpointcloud.h"
+#include "mk/tools/lvox3_scannerutils.h"
 
 #define SETTING_READ(NAME, NAMEVAR, TYPE)           \
 do {                                                \
